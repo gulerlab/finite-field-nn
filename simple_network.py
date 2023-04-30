@@ -1,24 +1,31 @@
 # extra utils
 import logging
 from abc import ABC, abstractmethod
+import math
 
 # torch
 import torch
 import torch.nn as nn
+from torchvision.datasets import FashionMNIST
+import torchvision.transforms as transforms
+from torch.utils.data import DataLoader
+
 
 # this project
-from utils import to_real_domain, to_finite_field_domain, finite_field_truncation
+# from utils import to_real_domain, to_finite_field_domain, finite_field_truncation
 
 
 class AbstractVectorizedNet(ABC):
-    def __init__(self, input_vector_size=784, hidden_layer_size=64, num_classes=10, init_fnc=nn.init.kaiming_normal_,
+    def __init__(self, input_vector_size=784, hidden_layer_size=64, num_classes=10,
                  device=None, verbose=True):
-        self.input_vector_size = input_vector_size
-        self.hidden_layer_size = hidden_layer_size
-        self.num_classes = num_classes
-        self.device = device
-        self.verbose = verbose
-        self.init_fnc = init_fnc
+        self.__input_vector_size = input_vector_size
+        self.__hidden_layer_size = hidden_layer_size
+        self.__num_classes = num_classes
+        if device is None:
+            self.__device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        else:
+            self.__device = device
+        self.__verbose = verbose
         self._weight_1 = None
         self._weight_2 = None
 
@@ -26,89 +33,82 @@ class AbstractVectorizedNet(ABC):
         self.__to_device()
 
     def __init_weight(self):
-        self._weight_1 = torch.empty(self.input_vector_size, self.hidden_layer_size)
-        self._weight_2 = torch.empty(self.hidden_layer_size, self.num_classes)
-        self.init_fnc(self._weight_1)
-        self.init_fnc(self._weight_2)
-
-        logging.info('weights are initialized using {} initialization'.format(self.init_fnc.__name__))
-        if self.verbose:
-            print('weights are initialized using {} initialization'.format(self.init_fnc.__name__))
+        range_low, range_high = -1/math.sqrt(self.__input_vector_size), 1/math.sqrt(self.__input_vector_size)
+        self._weight_1 = range_low + torch.rand((self.__input_vector_size, self.__hidden_layer_size)) * (range_high -
+                                                                                                         range_low)
+        range_low, range_high = -1 / math.sqrt(self.__hidden_layer_size), 1 / math.sqrt(self.__hidden_layer_size)
+        self._weight_2 = range_low + torch.rand((self.__hidden_layer_size, self.__num_classes)) * (range_high -
+                                                                                                   range_low)
+        logging.info('weights are initialized')
+        if self.__verbose:
+            print('weights are initialized')
 
     def __to_device(self):
-        self._weight_1 = self._weight_1.to(self.device)
-        self._weight_2 = self._weight_2.to(self.device)
+        self._weight_1 = self._weight_1.to(self.__device)
+        self._weight_2 = self._weight_2.to(self.__device)
 
-        logging.info('weights are sent to {}'.format(self.device))
-        if self.verbose:
-            print('weights are sent to {}'.format(self.device))
+        logging.info('weights are sent to {}'.format(self.__device))
+        if self.__verbose:
+            print('weights are sent to {}'.format(self.__device))
 
     @property
     def input_vector_size(self):
-        return self.input_vector_size
+        return self.__input_vector_size
 
     @input_vector_size.setter
     def input_vector_size(self, value):
-        self.input_vector_size = value
+        self.__input_vector_size = value
 
     @property
     def hidden_layer_size(self):
-        return self.hidden_layer_size
+        return self.__hidden_layer_size
 
     @hidden_layer_size.setter
     def hidden_layer_size(self, value):
-        self.hidden_layer_size = value
+        self.__hidden_layer_size = value
 
     @property
     def num_classes(self):
-        return self.num_classes
+        return self.__num_classes
 
     @num_classes.setter
     def num_classes(self, value):
-        self.num_classes = value
-
-    @property
-    def init_fnc(self):
-        return self.init_fnc
-
-    @init_fnc.setter
-    def init_fnc(self, value):
-        self.init_fnc = value
+        self.__num_classes = value
 
     @property
     def device(self):
-        return self.device
+        return self.__device
 
     @device.setter
     def device(self, value):
-        self.device = value
+        self.__device = value
 
     @property
     def verbose(self):
-        return self.verbose
+        return self.__verbose
 
     @verbose.setter
     def verbose(self, value):
-        self.verbose = value
+        self.__verbose = value
 
     @abstractmethod
-    def criterion(self, label: torch.Tensor, prediction: torch.Tensor) -> torch.Tensor:
+    def _criterion(self, label: torch.Tensor, prediction: torch.Tensor) -> torch.Tensor:
         pass
 
     @abstractmethod
-    def optimizer(self):
+    def _optimizer(self, learning_rate: float):
         pass
 
     @abstractmethod
-    def forward(self, input_vector: torch.Tensor) -> torch.Tensor:
+    def _forward(self, input_vector: torch.Tensor, mode: str = 'train') -> torch.Tensor:
         pass
 
     @abstractmethod
-    def backward(self):
+    def _backward(self):
         pass
 
     @abstractmethod
-    def train(self):
+    def train(self, data_path: str, num_of_epochs: int, learning_rate: float):
         pass
 
 
@@ -118,75 +118,111 @@ class VectorizedNet(AbstractVectorizedNet):
         self.__save_for_backward = None
         self.__gradients = None
 
-    def criterion(self, label: torch.Tensor, prediction: torch.Tensor) -> torch.Tensor:
+    def _criterion(self, label: torch.Tensor, prediction: torch.Tensor) -> torch.Tensor:
         diff = label - prediction
         diff_norm = torch.linalg.norm(diff)
         self.__save_for_backward['label'] = label
         return torch.square(diff_norm)
 
-    def optimizer(self):
-        pass
+    def _optimizer(self, learning_rate: float):
+        self._weight_2 = self._weight_2 - learning_rate * self.__gradients['weight_2_grad']
+        self._weight_1 = self._weight_1 - learning_rate * self.__gradients['weight_1_grad']
 
-    def forward(self, input_vector: torch.Tensor) -> torch.Tensor:
+    def _forward(self, input_vector: torch.Tensor, mode: str = 'train') -> torch.Tensor:
         first_forward = torch.square(torch.matmul(torch.t(self._weight_1), input_vector))
         out = torch.matmul(torch.t(self._weight_2), first_forward)
-        self.__save_for_backward = {
-            'first_forward': first_forward,
-            'out': out
-        }
+        if mode == 'train':
+            self.__save_for_backward = {
+                'input_vector': input_vector,
+                'first_forward': first_forward,
+                'out': out
+            }
+
         return out
 
-    def backward(self):
-        first_forward, out, label = self.__save_for_backward['first_forward'], self.__save_for_backward['out'],\
-            self.__save_for_backward['label']
+    def _backward(self):
+        first_forward, out, label, input_vector = self.__save_for_backward['first_forward'], \
+            self.__save_for_backward['out'], self.__save_for_backward['label'], self.__save_for_backward['input_vector']
+
         # weight_2 gradients
         weight_2_grad = -2 * torch.matmul(torch.t(label - out),
-                                          torch.t(torch.kron(first_forward, torch.eye(first_forward.size(0)))))
+                                          torch.t(torch.kron(first_forward, torch.eye(self._weight_2.size(1)))))
 
         # weight_1 gradients
+        first_chain = torch.t(torch.kron(input_vector, torch.eye(self._weight_1.size(1))))
+        second_chain = 2 * torch.diag(torch.matmul(torch.t(self._weight_1), input_vector).reshape(-1))
+        third_chain = torch.t(self._weight_2)
+        fourth_chain = -2 * torch.t(label - out)
+        weight_1_grad = torch.matmul(second_chain, first_chain)
+        weight_1_grad = torch.matmul(third_chain, weight_1_grad)
+        weight_1_grad = torch.matmul(fourth_chain, weight_1_grad)
 
-        self.__gradients = {}
+        self.__gradients = {
+            'weight_2_grad': weight_2_grad.T.reshape(self._weight_2.size(1), self._weight_2.size(0)).T,
+            'weight_1_grad': weight_1_grad.T.reshape(self._weight_1.size(1), self._weight_1.size(0)).T
+        }
+
+    def train(self, data_path: str, num_of_epochs: int, learning_rate: float):
+        # transformations
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.5,), (0.5,))
+        ])
+
+        target_transform = transforms.Lambda(lambda y: torch.zeros(10, dtype=torch.float)
+                                             .scatter_(0, torch.tensor(y), 1))
+        # load data
+        train_dataset = FashionMNIST(data_path, train=True, transform=transform, target_transform=target_transform,
+                                     download=True)
+        train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
+
+        test_dataset = FashionMNIST(data_path, train=False, transform=transform, download=True)
+        test_loader = DataLoader(test_dataset, batch_size=1, shuffle=True)
+
+        running_loss = []
+        running_acc = []
+        curr_loss = torch.zeros(1).to(self.device)
+        curr_acc = 0
+        for epoch in range(num_of_epochs):
+            for idx, (data, label) in enumerate(train_loader):
+                data, label = data.to(self.device), label.to(self.device)
+                data, label = data.squeeze().T.reshape(-1, 1), label.reshape(-1, 1)
+
+                out = self._forward(data)
+                loss = self._criterion(label, out)
+                self._backward()
+                self._optimizer(learning_rate)
+                curr_loss += loss
+
+                if idx == 0 or (idx + 1) % 100 == 0:
+                    if idx == 0:
+                        running_loss.append(curr_loss.item())
+                    else:
+                        running_loss.append((curr_loss / 100).item())
+                    test_idx = 1
+                    for test_data, test_label in test_loader:
+                        test_data, test_label = test_data.to(self.device), test_label.to(self.device)
+                        test_data = test_data.squeeze().T.reshape(-1, 1)
+                        test_out = self._forward(test_data, mode='eval')
+                        pred_label = torch.argmax(test_out)
+                        if pred_label == test_label:
+                            curr_acc = curr_acc + 1
+                        test_idx = test_idx + 1
+                    running_acc.append(curr_acc / (test_idx + 1))
+                    print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                    curr_loss = torch.zeros(1).to(self.device)
+                    curr_acc = 0
 
 
-    def train(self):
-        pass
+class SimpleNetwork(nn.Module):
+    def __init__(self, num_class=10):
+        super().__init__()
+        self.hidden_layer = nn.Linear(784, 64, bias=False)
+        self.output_layer = nn.Linear(64, num_class, bias=False)
 
-# class VectorizedScaledNet:
-#     def __init__(self, scale_x, scale_w, input_vector_size=784, hidden_layer_size=64, num_classes=10, device=None,
-#                  verbose=True) -> None:
-#         self.input_vector_size = input_vector_size
-#         self.hidden_layer_size = hidden_layer_size
-#         self.num_classes = num_classes
-#         self.device = device
-#         self.verbose = verbose
-#
-#         self.__to_device()
-#         self.__init_weight()
-#
-#     def __init_weight(self):
-#         self.weight_1 = torch.empty(self.input_vector_size, self.hidden_layer_size)
-#         self.weight_2 = torch.empty(self.hidden_layer_size, self.num_classes)
-#         nn.init.kaiming_normal_(self.weight_1)
-#         nn.init.kaiming_normal_(self.weight_2)
-#
-#     def __to_device(self):
-#         self.weight_1 = self.weight_1.to(self.device)
-#         self.weight_2 = self.weight_2.to(self.device)
-#
-#     def __init_scale(self):
-#         pass
-#
-#     def __criterion(self):
-#         pass
-#
-#     def __optimizer(self):
-#         pass
-#
-#     def __scaled_forward(self):
-#         pass
-#
-#     def __scaled_backward(self):
-#         pass
-#
-#     def train(self):
-#         pass
+    def forward(self, data):
+        data = data.squeeze().T.reshape(-1)
+        data = self.hidden_layer(data)
+        data = torch.square(data)
+        data = self.output_layer(data)
+        return data
