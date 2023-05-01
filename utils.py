@@ -1,6 +1,7 @@
 import torch
 from torch import Tensor
 import numpy as np
+import math
 
 
 def to_finite_field_domain(real: Tensor, quantization_bit: int, prime: int) -> Tensor:
@@ -31,6 +32,32 @@ def finite_field_truncation(finite_field: Tensor, scale_down: int) -> Tensor:
     zero_distributions = zero_distributions.to(finite_field.device)
 
     finite_field_domain = (real_domain_floor + zero_distributions).type(torch.long)
+    return finite_field_domain
+
+
+def to_finite_field_domain_int(real: float, quantization_bit: int, prime: int) -> int:
+    scaled_real = real * (2 ** quantization_bit)
+    finite_field_domain = round(scaled_real)
+    if finite_field_domain < 0:
+        finite_field_domain = finite_field_domain + prime
+    return int(finite_field_domain)
+
+
+def to_real_domain_int(finite_field: int, quantization_bit: int, prime: int) -> Tensor:
+    threshold = (prime - 1) / 2
+    real_domain = finite_field
+    if real_domain > threshold:
+        real_domain = real_domain - prime
+    real_domain = real_domain / (2 ** quantization_bit)
+    return real_domain
+
+
+def finite_field_truncation_int(finite_field: int, scale_down: int) -> int:
+    real_domain = finite_field / (2 ** scale_down)
+    real_domain_floor = math.floor(real_domain)
+    remainder = real_domain - real_domain_floor
+    random_bit = np.random.choice([0, 1], 1, p=[1 - remainder, remainder])[0]
+    finite_field_domain = int(real_domain_floor + random_bit)
     return finite_field_domain
 
 

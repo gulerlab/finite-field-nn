@@ -11,7 +11,8 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
 # this project
-from utils import to_real_domain, to_finite_field_domain, finite_field_truncation, ToFiniteFieldDomain
+from utils import to_real_domain, to_finite_field_domain, finite_field_truncation, ToFiniteFieldDomain, \
+    to_finite_field_domain_int
 
 
 class AbstractVectorizedNet(ABC):
@@ -169,6 +170,7 @@ class VectorizedNet(AbstractVectorizedNet):
             'weight_1_grad': weight_1_grad
         }
 
+    # noinspection DuplicatedCode
     def train(self, data_path: str, num_of_epochs: int, learning_rate: float):
         # transformations
         transform = transforms.Compose([
@@ -347,6 +349,7 @@ class ScaledVectorizedNet(AbstractVectorizedNet):
         self.__gradients['weight_1_grad_out'] = weight_1_grad_out
         self.__gradients['weight_1_grad_label'] = weight_1_grad_label
 
+    # noinspection DuplicatedCode
     def train(self, data_path: str, num_of_epochs: int, learning_rate: float):
         # transformations
         transform = transforms.Compose([
@@ -355,46 +358,52 @@ class ScaledVectorizedNet(AbstractVectorizedNet):
             ToFiniteFieldDomain(self.__scale_input_parameter, self.__prime)
         ])
 
-        # target_transform = transforms.Lambda(lambda y: torch.zeros(10, dtype=torch.float)
-        #                                      .scatter_(0, torch.tensor(y), 1))
-        # # load data
-        # train_dataset = FashionMNIST(data_path, train=True, transform=transform, target_transform=target_transform,
-        #                              download=True)
-        # train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
-        #
-        # test_dataset = FashionMNIST(data_path, train=False, transform=transform, download=True)
-        # test_loader = DataLoader(test_dataset, batch_size=1, shuffle=True)
-        #
-        # running_loss = []
-        # running_acc = []
-        # curr_loss = torch.zeros(1).to(self.device)
-        # curr_acc = 0
-        # for epoch in range(num_of_epochs):
-        #     for idx, (data, label) in enumerate(train_loader):
-        #         data, label = data.to(self.device), label.to(self.device)
-        #         data, label = data.squeeze().T.reshape(-1, 1), label.reshape(-1, 1)
-        #
-        #         out = self._forward(data)
-        #         loss = self._criterion(label, out)
-        #         self._backward()
-        #         self._optimizer(learning_rate)
-        #         curr_loss += loss
-        #
-        #         if idx == 0 or (idx + 1) % 10000 == 0:
-        #             if idx == 0:
-        #                 running_loss.append(curr_loss.item())
-        #             else:
-        #                 running_loss.append((curr_loss / 10000).item())
-        #             test_idx = 1
-        #             for test_data, test_label in test_loader:
-        #                 test_data, test_label = test_data.to(self.device), test_label.to(self.device)
-        #                 test_data = test_data.squeeze().T.reshape(-1, 1)
-        #                 test_out = self._forward(test_data, mode='eval')
-        #                 pred_label = torch.argmax(test_out)
-        #                 if pred_label == test_label:
-        #                     curr_acc = curr_acc + 1
-        #                 test_idx = test_idx + 1
-        #             running_acc.append(curr_acc / (test_idx + 1))
-        #             print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
-        #             curr_loss = torch.zeros(1).to(self.device)
-        #             curr_acc = 0
+        target_transform = transforms.Compose([
+            transforms.Lambda(lambda y: torch.zeros(10, dtype=torch.float).scatter_(0, torch.tensor(y), 1)),
+            ToFiniteFieldDomain(self.__scale_weight_parameter, self.__prime)
+        ])
+
+        # load data
+        train_dataset = FashionMNIST(data_path, train=True, transform=transform, target_transform=target_transform,
+                                     download=True)
+        train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
+
+        test_dataset = FashionMNIST(data_path, train=False, transform=transform, download=True)
+        test_loader = DataLoader(test_dataset, batch_size=1, shuffle=True)
+
+        learning_rate = to_finite_field_domain_int(learning_rate, self.__scale_learning_rate_parameter, self.__prime)
+
+        running_loss = []
+        running_acc = []
+        curr_loss = torch.zeros(1).to(self.device)
+        curr_acc = 0
+        for epoch in range(num_of_epochs):
+            for idx, (data, label) in enumerate(train_loader):
+                data, label = data.to(self.device), label.to(self.device)
+                data, label = data.squeeze().T.reshape(-1, 1), label.reshape(-1, 1)
+
+                out = self._forward(data)
+                loss = self._criterion(label, out)
+                self._backward()
+                self._optimizer(learning_rate)
+                curr_loss += loss
+
+                if idx == 0 or (idx + 1) % 10000 == 0:
+                    if idx == 0:
+                        running_loss.append(curr_loss.item())
+                    else:
+                        running_loss.append((curr_loss / 10000).item())
+                    test_idx = 1
+                    for test_data, test_label in test_loader:
+                        test_data, test_label = test_data.to(self.device), test_label.to(self.device)
+                        test_data = test_data.squeeze().T.reshape(-1, 1)
+                        test_out = self._forward(test_data, mode='eval')
+                        test_out = to_real_domain(test_out, self.__scale_weight_parameter, self.__prime)
+                        pred_label = torch.argmax(test_out)
+                        if pred_label == test_label:
+                            curr_acc = curr_acc + 1
+                        test_idx = test_idx + 1
+                    running_acc.append(curr_acc / (test_idx + 1))
+                    print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                    curr_loss = torch.zeros(1).to(self.device)
+                    curr_acc = 0
