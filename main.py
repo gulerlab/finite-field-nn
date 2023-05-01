@@ -1,12 +1,12 @@
-from simple_network import VectorizedNet, SimpleNetwork
+from simple_network import VectorizedNet, SimpleNetwork, ScaledVectorizedNet
 import torch
 from torchvision.datasets import FashionMNIST
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
 if __name__ == '__main__':
-    net = VectorizedNet(device='cpu')
-    net.train('./data', 5, 0.001)
+    # net = VectorizedNet(device='cpu')
+    # net.train('./data', 5, 0.001)
     # transform = transforms.Compose([
     #     transforms.ToTensor(),
     #     transforms.Normalize((0.5,), (0.5,))
@@ -62,3 +62,5 @@ if __name__ == '__main__':
     #                 curr_loss = torch.zeros(1).to('cpu')
     #                 curr_acc = 0
     #                 model.train()
+    scaled_net = ScaledVectorizedNet(8, 8, 10, (2 ** 26) - 5, device='cpu')
+    scaled_net.train('./data', 5, 0.001)

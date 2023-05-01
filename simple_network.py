@@ -285,69 +285,64 @@ class ScaledVectorizedNet(AbstractVectorizedNet):
         self.__scale_learning_rate_parameter = value
 
     def _criterion(self, label: torch.Tensor, prediction: torch.Tensor) -> torch.Tensor:
-        diff = label - prediction
-        diff_norm = torch.linalg.norm(diff)
         self.__save_for_backward['label'] = label
+        label, prediction = label.type(torch.float), prediction.type(torch.float)
+        real_label = to_real_domain(label, self.__scale_weight_parameter, self.__prime)
+        real_prediction = to_real_domain(prediction, self.__scale_weight_parameter, self.__prime)
+        diff = real_label - real_prediction
+        diff_norm = torch.linalg.norm(diff)
         return torch.square(diff_norm)
 
     def _optimizer(self, learning_rate: int):
-        weight_1_grad_out, weight_1_grad_label = self.__gradients['weight_1_grad_out'], \
-            self.__gradients['weight_1_grad_label']
-        weight_2_grad_out, weight_2_grad_label = self.__gradients['weight_2_grad_out'], \
-            self.__gradients['weight_2_grad_label']
-
-        out_scale = 4 * (self.__scale_input_parameter +
-                         self.__scale_weight_parameter) + self.__scale_learning_rate_parameter
-        label_scale = 2 * (self.__scale_input_parameter +
-                           self.__scale_weight_parameter) + self.__scale_learning_rate_parameter
-        weight_1_grad_out = finite_field_truncation(learning_rate * weight_1_grad_out, out_scale)
-        weight_1_grad_label = finite_field_truncation(learning_rate * weight_1_grad_label, label_scale)
-        weight_2_grad_out = finite_field_truncation(learning_rate * weight_2_grad_out, out_scale)
-        weight_2_grad_label = finite_field_truncation(learning_rate * weight_2_grad_label, label_scale)
-
-        weight_1_grad = weight_1_grad_label + weight_1_grad_out
-        weight_2_grad = weight_2_grad_label + weight_2_grad_out
-
-        self._weight_1 = self._weight_1 - weight_1_grad
-        self._weight_2 = self._weight_2 - weight_2_grad
+        weight_1_grad, weight_2_grad = self.__gradients['weight_1_grad'], self.__gradients['weight_2_grad']
+        weight_1_grad = (learning_rate * weight_1_grad) % self.__prime
+        weight_1_grad = finite_field_truncation(weight_1_grad, self.__scale_learning_rate_parameter)
+        weight_2_grad = (learning_rate * weight_2_grad) % self.__prime
+        weight_2_grad = finite_field_truncation(weight_2_grad, self.__scale_learning_rate_parameter)
+        self._weight_1 = (self._weight_1 - weight_1_grad) % self.__prime
+        self._weight_2 = (self._weight_2 - weight_2_grad) % self.__prime
 
     def _forward(self, input_vector: torch.Tensor, mode: str = 'train') -> torch.Tensor:
-        first_forward = torch.square(torch.matmul(torch.t(self._weight_1), input_vector))
-        out = torch.matmul(torch.t(self._weight_2), first_forward)
+        input_vector = input_vector.type(torch.float)
+        first_forward_before_activation = finite_field_truncation(torch.matmul(torch.t(self._weight_1),
+                                                                               input_vector) % self.__prime,
+                                                                  self.__scale_input_parameter).type(torch.float)
+        first_forward = finite_field_truncation(torch.square(first_forward_before_activation) % self.__prime,
+                                                self.__scale_weight_parameter).type(torch.float)
+        out = finite_field_truncation(torch.matmul(torch.t(self._weight_2), first_forward) % self.__prime,
+                                      self.__scale_weight_parameter)
 
         if mode == 'train':
-            self.__save_for_backward['input_vector'] = input_vector
-            self.__save_for_backward['first_forward'] = first_forward
+            self.__save_for_backward['input_vector'] = input_vector.type(torch.long)
+            self.__save_for_backward['first_forward'] = first_forward.type(torch.long)
             self.__save_for_backward['out'] = out
 
-        return finite_field_truncation(out, 2 * (self.__scale_weight_parameter + self.__scale_input_parameter))
+        return out
 
     def _backward(self):
         first_forward, out, label, input_vector = self.__save_for_backward['first_forward'], \
             self.__save_for_backward['out'], self.__save_for_backward['label'], self.__save_for_backward['input_vector']
+        first_forward, out, label, input_vector = first_forward.type(torch.float), out.type(
+            torch.float), label.type(torch.float), input_vector.type(torch.float)
 
-        weight_2_grad_out = 2 * torch.matmul(first_forward, torch.t(out))
-        weight_2_grad_label = -2 * torch.matmul(first_forward, torch.t(label))
-        self.__gradients['weight_2_grad_out'] = weight_2_grad_out
-        self.__gradients['weight_2_grad_label'] = weight_2_grad_label
+        w2_first_chain = -2 * torch.t(label - out) % self.__prime
+        weight_2_grad = finite_field_truncation(torch.matmul(first_forward, w2_first_chain) % self.__prime,
+                                                self.__scale_weight_parameter)
+        self.__gradients['weight_2_grad'] = weight_2_grad
 
-        second_chain = 2 * torch.diag(torch.matmul(torch.t(self._weight_1), input_vector).reshape(-1))
-        third_chain = torch.t(self._weight_2)
-        fourth_chain_out = 2 * torch.t(out)
-        fourth_chain_label = -2 * torch.t(label)
+        w1_second_chain = 2 * torch.diag(torch.matmul(torch.t(self._weight_1), input_vector).reshape(-1)) % self.__prime
+        w1_second_chain = finite_field_truncation(w1_second_chain, self.__scale_input_parameter).type(torch.float)
+        w1_third_chain = torch.t(self._weight_2).type(torch.float)
+        w1_fourth_chain = (-2 * torch.t(label - out) % self.__prime).type(torch.float)
 
-        weight_1_grad_out = second_chain
-        weight_1_grad_out = torch.matmul(third_chain, weight_1_grad_out)
-        weight_1_grad_out = torch.matmul(fourth_chain_out, weight_1_grad_out)
-        weight_1_grad_out = torch.matmul(input_vector, weight_1_grad_out)
+        weight_1_grad = torch.matmul(w1_third_chain, w1_second_chain) % self.__prime
+        weight_1_grad = finite_field_truncation(weight_1_grad, self.__scale_weight_parameter).type(torch.float)
+        weight_1_grad = torch.matmul(w1_fourth_chain, weight_1_grad) % self.__prime
+        weight_1_grad = finite_field_truncation(weight_1_grad, self.__scale_weight_parameter).type(torch.float)
+        weight_1_grad = torch.matmul(input_vector, weight_1_grad) % self.__prime
+        weight_1_grad = finite_field_truncation(weight_1_grad, self.__scale_input_parameter)
 
-        weight_1_grad_label = second_chain
-        weight_1_grad_label = torch.matmul(third_chain, weight_1_grad_label)
-        weight_1_grad_label = torch.matmul(fourth_chain_label, weight_1_grad_label)
-        weight_1_grad_label = torch.matmul(input_vector, weight_1_grad_label)
-
-        self.__gradients['weight_1_grad_out'] = weight_1_grad_out
-        self.__gradients['weight_1_grad_label'] = weight_1_grad_label
+        self.__gradients['weight_1_grad'] = weight_1_grad
 
     # noinspection DuplicatedCode
     def train(self, data_path: str, num_of_epochs: int, learning_rate: float):
@@ -388,22 +383,24 @@ class ScaledVectorizedNet(AbstractVectorizedNet):
                 self._optimizer(learning_rate)
                 curr_loss += loss
 
-                if idx == 0 or (idx + 1) % 10000 == 0:
-                    if idx == 0:
-                        running_loss.append(curr_loss.item())
-                    else:
-                        running_loss.append((curr_loss / 10000).item())
-                    test_idx = 1
-                    for test_data, test_label in test_loader:
-                        test_data, test_label = test_data.to(self.device), test_label.to(self.device)
-                        test_data = test_data.squeeze().T.reshape(-1, 1)
-                        test_out = self._forward(test_data, mode='eval')
-                        test_out = to_real_domain(test_out, self.__scale_weight_parameter, self.__prime)
-                        pred_label = torch.argmax(test_out)
-                        if pred_label == test_label:
-                            curr_acc = curr_acc + 1
-                        test_idx = test_idx + 1
-                    running_acc.append(curr_acc / (test_idx + 1))
-                    print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
-                    curr_loss = torch.zeros(1).to(self.device)
-                    curr_acc = 0
+                if (idx + 1) % 5 == 0:
+                    print('loss: {}'.format(curr_loss / 5))
+                # if idx == 0 or (idx + 1) % 100 == 0:
+                #     if idx == 0:
+                #         running_loss.append(curr_loss.item())
+                #     else:
+                #         running_loss.append((curr_loss / 100).item())
+                #     test_idx = 1
+                #     for test_data, test_label in test_loader:
+                #         test_data, test_label = test_data.to(self.device), test_label.to(self.device)
+                #         test_data = test_data.squeeze().T.reshape(-1, 1)
+                #         test_out = self._forward(test_data, mode='eval')
+                #         test_out = to_real_domain(test_out, self.__scale_weight_parameter, self.__prime)
+                #         pred_label = torch.argmax(test_out)
+                #         if pred_label == test_label:
+                #             curr_acc = curr_acc + 1
+                #         test_idx = test_idx + 1
+                #     running_acc.append(curr_acc / (test_idx + 1))
+                #     print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                #     curr_loss = torch.zeros(1).to(self.device)
+                #     curr_acc = 0

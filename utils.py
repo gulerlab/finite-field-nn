@@ -24,7 +24,11 @@ def to_real_domain(finite_field: Tensor, quantization_bit: int, prime: int) -> T
 
 def finite_field_truncation(finite_field: Tensor, scale_down: int) -> Tensor:
     real_domain = finite_field.type(torch.float)
-    real_domain = real_domain / (2 ** scale_down)
+    loop = int(scale_down / 60)
+    remainder = scale_down % 60
+    for idx in range(loop):
+        real_domain = real_domain / (2 ** 60)
+    real_domain = real_domain / (2 ** remainder)
     real_domain_floor = torch.floor(real_domain)
 
     zero_distributions = (real_domain - real_domain_floor).to('cpu')
