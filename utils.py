@@ -32,3 +32,28 @@ def finite_field_truncation(finite_field: Tensor, scale_down: int) -> Tensor:
 
     finite_field_domain = (real_domain_floor + zero_distributions).type(torch.long)
     return finite_field_domain
+
+
+class ToFiniteFieldDomain(object):
+    def __init__(self, scale_input_parameter, prime):
+        self.__scale_input_parameter = scale_input_parameter
+        self.__prime = prime
+
+    @property
+    def scale_input_parameter(self):
+        return self.__scale_input_parameter
+
+    @scale_input_parameter.setter
+    def scale_input_parameter(self, value):
+        self.__scale_input_parameter = value
+
+    @property
+    def prime(self):
+        return self.__prime
+
+    @prime.setter
+    def prime(self, value):
+        self.__prime = value
+
+    def __call__(self, sample):
+        return to_finite_field_domain(sample, self.__scale_input_parameter, self.__prime)
