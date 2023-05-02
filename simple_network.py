@@ -118,6 +118,25 @@ class VectorizedNet(AbstractVectorizedNet):
         self.__save_for_backward = None
         self.__gradients = None
 
+        self.__running_loss = None
+        self.__running_acc = None
+
+    @property
+    def running_loss(self):
+        return self.__running_loss
+
+    @running_loss.setter
+    def running_loss(self, value):
+        self.__running_loss = value
+
+    @property
+    def running_acc(self):
+        return self.__running_acc
+
+    @running_acc.setter
+    def running_acc(self, value):
+        self.__running_acc = value
+
     def _criterion(self, label: torch.Tensor, prediction: torch.Tensor) -> torch.Tensor:
         diff = label - prediction
         diff_norm = torch.linalg.norm(diff)
@@ -203,11 +222,11 @@ class VectorizedNet(AbstractVectorizedNet):
                 self._optimizer(learning_rate)
                 curr_loss += loss
 
-                if idx == 0 or (idx + 1) % 10000 == 0:
+                if idx == 0 or (idx + 1) % 100 == 0:
                     if idx == 0:
                         running_loss.append(curr_loss.item())
                     else:
-                        running_loss.append((curr_loss / 10000).item())
+                        running_loss.append((curr_loss / 100).item())
                     test_idx = 1
                     for test_data, test_label in test_loader:
                         test_data, test_label = test_data.to(self.device), test_label.to(self.device)
@@ -218,9 +237,12 @@ class VectorizedNet(AbstractVectorizedNet):
                             curr_acc = curr_acc + 1
                         test_idx = test_idx + 1
                     running_acc.append(curr_acc / (test_idx + 1))
-                    print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                    if idx == 0 or (idx + 1) % 10000 == 0:
+                        print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
                     curr_loss = torch.zeros(1).to(self.device)
                     curr_acc = 0
+        self.__running_loss = running_loss
+        self.__running_acc = running_acc
 
 
 class SimpleNetwork(nn.Module):
@@ -383,24 +405,22 @@ class ScaledVectorizedNet(AbstractVectorizedNet):
                 self._optimizer(learning_rate)
                 curr_loss += loss
 
-                if (idx + 1) % 5 == 0:
-                    print('loss: {}'.format(curr_loss / 5))
-                # if idx == 0 or (idx + 1) % 100 == 0:
-                #     if idx == 0:
-                #         running_loss.append(curr_loss.item())
-                #     else:
-                #         running_loss.append((curr_loss / 100).item())
-                #     test_idx = 1
-                #     for test_data, test_label in test_loader:
-                #         test_data, test_label = test_data.to(self.device), test_label.to(self.device)
-                #         test_data = test_data.squeeze().T.reshape(-1, 1)
-                #         test_out = self._forward(test_data, mode='eval')
-                #         test_out = to_real_domain(test_out, self.__scale_weight_parameter, self.__prime)
-                #         pred_label = torch.argmax(test_out)
-                #         if pred_label == test_label:
-                #             curr_acc = curr_acc + 1
-                #         test_idx = test_idx + 1
-                #     running_acc.append(curr_acc / (test_idx + 1))
-                #     print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
-                #     curr_loss = torch.zeros(1).to(self.device)
-                #     curr_acc = 0
+                if idx == 0 or (idx + 1) % 100 == 0:
+                    if idx == 0:
+                        running_loss.append(curr_loss.item())
+                    else:
+                        running_loss.append((curr_loss / 100).item())
+                    test_idx = 1
+                    for test_data, test_label in test_loader:
+                        test_data, test_label = test_data.to(self.device), test_label.to(self.device)
+                        test_data = test_data.squeeze().T.reshape(-1, 1)
+                        test_out = self._forward(test_data, mode='eval')
+                        test_out = to_real_domain(test_out, self.__scale_weight_parameter, self.__prime)
+                        pred_label = torch.argmax(test_out)
+                        if pred_label == test_label:
+                            curr_acc = curr_acc + 1
+                        test_idx = test_idx + 1
+                    running_acc.append(curr_acc / (test_idx + 1))
+                    print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                    curr_loss = torch.zeros(1).to(self.device)
+                    curr_acc = 0
