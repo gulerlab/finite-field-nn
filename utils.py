@@ -13,11 +13,23 @@ def to_finite_field_domain(real: Tensor, quantization_bit: int, prime: int) -> T
     return finite_field_domain
 
 
+def to_int_domain(real: Tensor, quantization_bit: int) -> Tensor:
+    scaled_real = real * (2 ** quantization_bit)
+    int_domain = torch.round(scaled_real)
+    return int_domain.type(torch.long)
+
+
 def to_real_domain(finite_field: Tensor, quantization_bit: int, prime: int) -> Tensor:
     threshold = (prime - 1) / 2
     negative_mask = finite_field > threshold
     finite_field[negative_mask] = finite_field[negative_mask] - prime
     real_domain = finite_field.type(torch.float)
+    real_domain = real_domain / (2 ** quantization_bit)
+    return real_domain
+
+
+def from_int_to_real_domain(int_domain: Tensor, quantization_bit: int) -> Tensor:
+    real_domain = int_domain.type(torch.float)
     real_domain = real_domain / (2 ** quantization_bit)
     return real_domain
 
@@ -47,12 +59,23 @@ def to_finite_field_domain_int(real: float, quantization_bit: int, prime: int) -
     return int(finite_field_domain)
 
 
+def to_int_domain_int(real: float, quantization_bit: int) -> int:
+    scaled_real = real * (2 ** quantization_bit)
+    int_domain = round(scaled_real)
+    return int(int_domain)
+
+
 def to_real_domain_int(finite_field: int, quantization_bit: int, prime: int) -> Tensor:
     threshold = (prime - 1) / 2
     real_domain = finite_field
     if real_domain > threshold:
         real_domain = real_domain - prime
     real_domain = real_domain / (2 ** quantization_bit)
+    return real_domain
+
+
+def from_int_to_real_domain_int(int_domain: int, quantization_bit: int):
+    real_domain = int_domain / (2 ** quantization_bit)
     return real_domain
 
 
@@ -88,3 +111,19 @@ class ToFiniteFieldDomain(object):
 
     def __call__(self, sample):
         return to_finite_field_domain(sample, self.__scale_input_parameter, self.__prime)
+
+
+class ToIntDomain(object):
+    def __init__(self, scale_input_parameter):
+        self.__scale_input_parameter = scale_input_parameter
+
+    @property
+    def scale_input_parameter(self):
+        return self.__scale_input_parameter
+
+    @scale_input_parameter.setter
+    def scale_input_parameter(self, value):
+        self.__scale_input_parameter = value
+
+    def __call__(self, sample):
+        return to_int_domain(sample, self.__scale_input_parameter)
