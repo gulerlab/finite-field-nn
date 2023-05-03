@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 
 # this project
 from utils import to_real_domain, to_finite_field_domain, finite_field_truncation, ToFiniteFieldDomain, \
-    to_finite_field_domain_int, to_int_domain, ToIntDomain
+    to_finite_field_domain_int, to_int_domain, ToIntDomain, from_int_to_real_domain, to_int_domain_int
 
 
 class SimpleNetwork(nn.Module):
@@ -416,7 +416,7 @@ class ScaledVectorizedNet(AbstractVectorizedNet):
 
 # noinspection DuplicatedCode
 class ScaledVectorizedIntegerNet(AbstractVectorizedNet):
-    def __init__(self, scale_input_parameter, scale_weight_parameter, **kwargs):
+    def __init__(self, scale_input_parameter, scale_weight_parameter, scale_learning_rate_parameter, **kwargs):
         super().__init__(**kwargs)
         self.__save_for_backward = None
         self.__gradients = None
@@ -426,6 +426,7 @@ class ScaledVectorizedIntegerNet(AbstractVectorizedNet):
 
         self.__scale_input_parameter = scale_input_parameter
         self.__scale_weight_parameter = scale_weight_parameter
+        self.__scale_learning_rate_parameter = scale_learning_rate_parameter
 
         self.__scale_init_weight()
 
@@ -465,16 +466,30 @@ class ScaledVectorizedIntegerNet(AbstractVectorizedNet):
     def scale_weight_parameter(self, value):
         self.__scale_weight_parameter = value
 
+    @property
+    def scale_learning_rate_parameter(self):
+        return self.__scale_learning_rate_parameter
+
+    @scale_learning_rate_parameter.setter
+    def scale_learning_rate_parameter(self, value):
+        self.__scale_learning_rate_parameter = value
+
     def _criterion(self, label: torch.Tensor, prediction: torch.Tensor) -> torch.Tensor:
         self.__save_for_backward['label'] = label
-        # label, prediction = label / self.__scale_weight_parameter, prediction / self.__scale_weight_parameter
-        diff = label - prediction
+        real_label = from_int_to_real_domain(label, self.__scale_weight_parameter)
+        real_prediction = from_int_to_real_domain(prediction, self.__scale_weight_parameter)
+        diff = real_label - real_prediction
         diff_norm = torch.linalg.norm(diff)
         return torch.square(diff_norm)
 
     def _optimizer(self, learning_rate: float):
-        self._weight_2 = self._weight_2 - learning_rate * self.__gradients['weight_2_grad']
-        self._weight_1 = self._weight_1 - learning_rate * self.__gradients['weight_1_grad']
+        learning_rate = to_int_domain_int(learning_rate, self.__scale_learning_rate_parameter)
+        weight_2_grad = finite_field_truncation(learning_rate * self.__gradients['weight_2_grad'],
+                                                self.__scale_learning_rate_parameter)
+        weight_1_grad = finite_field_truncation(learning_rate * self.__gradients['weight_1_grad'],
+                                                self.__scale_learning_rate_parameter)
+        self._weight_2 = self._weight_2 - weight_2_grad
+        self._weight_1 = self._weight_1 - weight_1_grad
 
     def _forward(self, input_vector: torch.Tensor, mode: str = 'train') -> torch.Tensor:
 
@@ -498,17 +513,26 @@ class ScaledVectorizedIntegerNet(AbstractVectorizedNet):
         first_forward, out, label, input_vector = self.__save_for_backward['first_forward'], \
             self.__save_for_backward['out'], self.__save_for_backward['label'], self.__save_for_backward['input_vector']
 
-        weight_2_grad = -2 * torch.matmul(first_forward, torch.t(label - out)) / self.__scale_weight_parameter
+        weight_2_grad = -2 * finite_field_truncation(torch.matmul(first_forward.type(torch.float),
+                                                                  torch.t(label - out).type(torch.float)),
+                                                     self.__scale_weight_parameter)
 
         # weight_1 gradients
-        second_chain = 2 * torch.diag(torch.matmul(torch.t(self._weight_1), input_vector)
-                                      .reshape(-1)) / self.__scale_input_parameter
+        second_chain = 2 * finite_field_truncation(torch.diag(torch.matmul(torch.t(self._weight_1).type(torch.float),
+                                                                           input_vector.type(torch.float)).reshape(-1)),
+                                                   self.__scale_input_parameter)
         third_chain = torch.t(self._weight_2)
         fourth_chain = -2 * torch.t(label - out)
         weight_1_grad = second_chain
-        weight_1_grad = torch.matmul(third_chain, weight_1_grad) / self.__scale_weight_parameter
-        weight_1_grad = torch.matmul(fourth_chain, weight_1_grad) / self.__scale_weight_parameter
-        weight_1_grad = torch.matmul(input_vector, weight_1_grad) / self.__scale_input_parameter
+        weight_1_grad = finite_field_truncation(torch.matmul(third_chain.type(torch.float),
+                                                             weight_1_grad.type(torch.float)),
+                                                self.__scale_weight_parameter)
+        weight_1_grad = finite_field_truncation(torch.matmul(fourth_chain.type(torch.float),
+                                                             weight_1_grad.type(torch.float)),
+                                                self.__scale_weight_parameter)
+        weight_1_grad = finite_field_truncation(torch.matmul(input_vector.type(torch.float),
+                                                             weight_1_grad.type(torch.float)),
+                                                self.__scale_input_parameter)
 
         self.__gradients = {
             'weight_2_grad': weight_2_grad,
@@ -561,8 +585,8 @@ class ScaledVectorizedIntegerNet(AbstractVectorizedNet):
                     test_idx = 1
                     for test_data, test_label in test_loader:
                         test_data, test_label = test_data.to(self.device), test_label.to(self.device)
-                        test_data = test_data.squeeze().T.reshape(-1, 1) * self.__scale_input_parameter
-                        test_out = self._forward(test_data, mode='eval') / self.__scale_weight_parameter
+                        test_data = test_data.squeeze().T.reshape(-1, 1)
+                        test_out = self._forward(test_data, mode='eval')
                         pred_label = torch.argmax(test_out)
                         if pred_label == test_label:
                             curr_acc = curr_acc + 1

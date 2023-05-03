@@ -1,4 +1,5 @@
-from simple_network import VectorizedNet, SimpleNetwork, ScaledVectorizedFiniteFieldNet, ScaledVectorizedNet
+from simple_network import VectorizedNet, SimpleNetwork, ScaledVectorizedFiniteFieldNet, ScaledVectorizedNet, \
+    ScaledVectorizedIntegerNet
 import torch
 from torchvision.datasets import FashionMNIST
 import torchvision.transforms as transforms
@@ -119,6 +120,25 @@ if __name__ == '__main__':
         plt.xlabel('iteration')
         plt.ylabel('acc')
         plt.savefig('acc_vectorized_scaled.jpeg', dpi=300)
+        plt.show()
+    elif args.mode == 'scaled-vectorized-int':
+        scaled_net = ScaledVectorizedIntegerNet(8, 8, 10, device='cpu')
+        scaled_net.train('./data', 1, 0.001)
+        running_acc = scaled_net.running_acc
+        running_loss = scaled_net.running_loss
+        plt.figure()
+        plt.plot(range(len(running_loss)), running_loss)
+        plt.title('loss vs. iteration - vectorized scaled integer net')
+        plt.xlabel('iteration')
+        plt.ylabel('loss')
+        plt.savefig('loss_vectorized_scaled_integer.jpeg', dpi=300)
+        plt.show()
+        plt.figure()
+        plt.plot(range(len(running_acc)), running_acc)
+        plt.title('acc vs. iteration - vectorized scaled integer net')
+        plt.xlabel('iteration')
+        plt.ylabel('acc')
+        plt.savefig('acc_vectorized_scaled_integer.jpeg', dpi=300)
         plt.show()
     elif args.mode == 'scaled-vectorized-ff':
         scaled_net = ScaledVectorizedFiniteFieldNet(8, 8, 10, (2 ** 26) - 5, device='cpu')
