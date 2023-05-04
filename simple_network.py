@@ -656,7 +656,7 @@ class ScaledVectorizedIntegerNet(AbstractVectorizedNet):
             'max_input': self.__max_input_value,
             'running_loss': self.__running_loss,
             'running_acc': self.__running_loss
-        }, 'scaled_vectorized_int_nn_params.tar.gz')
+        }, 'params/scaled_vectorized_int_nn_params.tar.gz')
 
 
 # noinspection DuplicatedCode
@@ -768,19 +768,20 @@ class ScaledVectorizedFiniteFieldNet(AbstractVectorizedNet):
         first_forward, out, label, input_vector = self.__save_for_backward['first_forward'], \
             self.__save_for_backward['out'], self.__save_for_backward['label'], self.__save_for_backward['input_vector']
 
-        weight_2_grad = -2 * finite_field_truncation_ext(torch.matmul(first_forward.type(torch.float),
-                                                                      torch.t((label - out)
-                                                                              % self.__prime).type(torch.float))
-                                                         % self.__prime, self.__scale_weight_parameter, self.__prime)
+        weight_2_grad = (-2 * finite_field_truncation_ext(torch.matmul(first_forward.type(torch.float),
+                                                                       torch.t((label - out)
+                                                                               % self.__prime).type(torch.float))
+                                                          % self.__prime,
+                                                          self.__scale_weight_parameter, self.__prime)) % self.__prime
 
         # weight_1 gradients
-        second_chain = 2 * finite_field_truncation_ext(torch.diag(torch.matmul(torch.t(self._weight_1)
-                                                                               .type(torch.float),
-                                                                               input_vector.type(torch.float))
-                                                                  .reshape(-1)) % self.__prime,
-                                                       self.__scale_input_parameter, self.__prime)
+        second_chain = (2 * finite_field_truncation_ext(torch.diag(torch.matmul(torch.t(self._weight_1)
+                                                                                .type(torch.float),
+                                                                                input_vector.type(torch.float))
+                                                                   .reshape(-1)) % self.__prime,
+                                                        self.__scale_input_parameter, self.__prime)) % self.__prime
         third_chain = torch.t(self._weight_2)
-        fourth_chain = -2 * torch.t((label - out) % self.__prime)
+        fourth_chain = (-2 * torch.t((label - out) % self.__prime)) % self.__prime
         weight_1_grad = second_chain
         weight_1_grad = finite_field_truncation_ext(torch.matmul(third_chain.type(torch.float),
                                                                  weight_1_grad.type(torch.float)) % self.__prime,
@@ -835,22 +836,23 @@ class ScaledVectorizedFiniteFieldNet(AbstractVectorizedNet):
                 self._optimizer(learning_rate)
                 curr_loss += loss
 
-                if idx == 0 or (idx + 1) % 1000 == 0:
+                if idx == 0 or (idx + 1) % 100 == 0:
                     if idx == 0:
                         running_loss.append(curr_loss.item())
                     else:
-                        running_loss.append((curr_loss / 1000).item())
+                        running_loss.append((curr_loss / 100).item())
                     test_idx = 1
                     for test_data, test_label in test_loader:
                         test_data, test_label = test_data.to(self.device), test_label.to(self.device)
                         test_data = test_data.squeeze().T.reshape(-1, 1)
                         test_out = self._forward(test_data, mode='eval')
+                        test_out = to_real_domain(test_out, self.__scale_weight_parameter, self.__prime)
                         pred_label = torch.argmax(test_out)
                         if pred_label == test_label:
                             curr_acc = curr_acc + 1
                         test_idx = test_idx + 1
                     running_acc.append(curr_acc / (test_idx + 1))
-                    if idx == 0 or (idx + 1) % 1000 == 0:
+                    if idx == 0 or (idx + 1) % 100 == 0:
                         print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
                     curr_loss = torch.zeros(1).to(self.device)
                     curr_acc = 0

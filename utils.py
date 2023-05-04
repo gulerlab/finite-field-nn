@@ -20,10 +20,10 @@ def to_int_domain(real: Tensor, quantization_bit: int) -> Tensor:
 
 
 def to_real_domain(finite_field: Tensor, quantization_bit: int, prime: int) -> Tensor:
-    threshold = (prime - 1) / 2
-    negative_mask = finite_field > threshold
-    finite_field[negative_mask] = finite_field[negative_mask] - prime
     real_domain = finite_field.type(torch.float)
+    threshold = (prime - 1) / 2
+    negative_mask = real_domain > threshold
+    real_domain[negative_mask] = real_domain[negative_mask] - prime
     real_domain = real_domain / (2 ** quantization_bit)
     return real_domain
 
@@ -52,16 +52,18 @@ def finite_field_truncation(finite_field: Tensor, scale_down: int) -> Tensor:
 
 
 def from_finite_field_to_int_domain(finite_field: Tensor, prime: int) -> Tensor:
+    int_domain = finite_field.type(torch.long)
     threshold = (prime - 1) / 2
-    negative_mask = finite_field > threshold
-    finite_field[negative_mask] = finite_field[negative_mask] - prime
-    return finite_field
+    negative_mask = int_domain > threshold
+    int_domain[negative_mask] = int_domain[negative_mask] - prime
+    return int_domain
 
 
 def from_int_to_finite_field_domain(int_domain: Tensor, prime: int) -> Tensor:
-    negative_mask = int_domain < 0
-    int_domain[negative_mask] = int_domain[negative_mask] + prime
-    return int_domain
+    finite_field = int_domain.type(torch.long)
+    negative_mask = finite_field < 0
+    finite_field[negative_mask] = finite_field[negative_mask] + prime
+    return finite_field
 
 
 def finite_field_truncation_ext(finite_field: Tensor, scale_down: int, prime: int) -> Tensor:
