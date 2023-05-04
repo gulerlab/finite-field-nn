@@ -141,5 +141,5 @@ if __name__ == '__main__':
         plt.savefig('acc_vectorized_scaled_integer.jpeg', dpi=300)
         plt.show()
     elif args.mode == 'scaled-vectorized-ff':
-        scaled_net = ScaledVectorizedFiniteFieldNet(8, 8, 10, (2 ** 26) - 5, device='cpu')
+        scaled_net = ScaledVectorizedFiniteFieldNet(4, 4, 10, (2 ** 26) - 5, device='cpu')
         scaled_net.train('./data', 1, 0.001)

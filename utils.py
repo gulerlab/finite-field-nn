@@ -51,6 +51,38 @@ def finite_field_truncation(finite_field: Tensor, scale_down: int) -> Tensor:
     return finite_field_domain
 
 
+def from_finite_field_to_int_domain(finite_field: Tensor, prime: int) -> Tensor:
+    threshold = (prime - 1) / 2
+    negative_mask = finite_field > threshold
+    finite_field[negative_mask] = finite_field[negative_mask] - prime
+    return finite_field
+
+
+def from_int_to_finite_field_domain(int_domain: Tensor, prime: int) -> Tensor:
+    negative_mask = int_domain < 0
+    int_domain[negative_mask] = int_domain[negative_mask] + prime
+    return int_domain
+
+
+def finite_field_truncation_ext(finite_field: Tensor, scale_down: int, prime: int) -> Tensor:
+    int_domain = from_finite_field_to_int_domain(finite_field, prime)
+    real_domain = int_domain.type(torch.float)
+    loop = int(scale_down / 60)
+    remainder = scale_down % 60
+    for idx in range(loop):
+        real_domain = real_domain / (2 ** 60)
+    real_domain = real_domain / (2 ** remainder)
+    real_domain_floor = torch.floor(real_domain)
+
+    zero_distributions = (real_domain - real_domain_floor).to('cpu')
+    zero_distributions.apply_(lambda x: np.random.choice([0, 1], 1, p=[1 - x, x])[0])
+    zero_distributions = zero_distributions.to(finite_field.device)
+
+    int_domain = (real_domain_floor + zero_distributions).type(torch.long)
+    finite_field_domain = from_int_to_finite_field_domain(int_domain, prime)
+    return finite_field_domain
+
+
 def to_finite_field_domain_int(real: float, quantization_bit: int, prime: int) -> int:
     scaled_real = real * (2 ** quantization_bit)
     finite_field_domain = round(scaled_real)
