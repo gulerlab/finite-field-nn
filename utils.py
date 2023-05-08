@@ -6,11 +6,10 @@ import math
 
 def to_finite_field_domain(real: Tensor, quantization_bit: int, prime: int) -> Tensor:
     scaled_real = real * (2 ** quantization_bit)
-    int_domain = torch.round(scaled_real)
+    int_domain = torch.round(scaled_real).type(torch.long)
     negative_mask = int_domain < 0
     int_domain[negative_mask] = int_domain[negative_mask] + prime
-    finite_field_domain = int_domain.type(torch.long)
-    return finite_field_domain
+    return int_domain
 
 
 def to_int_domain(real: Tensor, quantization_bit: int) -> Tensor:
