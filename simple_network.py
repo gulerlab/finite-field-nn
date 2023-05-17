@@ -622,11 +622,11 @@ class ScaledVectorizedIntegerNet(AbstractVectorizedNet):
                 self._optimizer(learning_rate)
                 curr_loss += loss
 
-                if idx == 0 or (idx + 1) % 1000 == 0:
+                if idx == 0 or (idx + 1) % 100 == 0:
                     if idx == 0:
                         running_loss.append(curr_loss.item())
                     else:
-                        running_loss.append((curr_loss / 1000).item())
+                        running_loss.append((curr_loss / 100).item())
                     test_idx = 1
                     for test_data, test_label in test_loader:
                         test_data, test_label = test_data.to(self.device), test_label.to(self.device)
@@ -637,7 +637,7 @@ class ScaledVectorizedIntegerNet(AbstractVectorizedNet):
                             curr_acc = curr_acc + 1
                         test_idx = test_idx + 1
                     running_acc.append(curr_acc / (test_idx + 1))
-                    if idx == 0 or (idx + 1) % 1000 == 0:
+                    if idx == 0 or (idx + 1) % 100 == 0:
                         print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
                     curr_loss = torch.zeros(1).to(self.device)
                     curr_acc = 0
@@ -768,11 +768,13 @@ class ScaledVectorizedFiniteFieldNet(AbstractVectorizedNet):
         first_forward, out, label, input_vector = self.__save_for_backward['first_forward'], \
             self.__save_for_backward['out'], self.__save_for_backward['label'], self.__save_for_backward['input_vector']
 
-        weight_2_grad = (-2 * finite_field_truncation_ext(torch.matmul(first_forward.type(torch.float),
-                                                                       torch.t((label - out)
-                                                                               % self.__prime).type(torch.float))
-                                                          % self.__prime,
-                                                          self.__scale_weight_parameter, self.__prime)) % self.__prime
+        weight_2_grad = ((self.__prime - 2) * finite_field_truncation_ext(torch.matmul(first_forward.type(torch.float),
+                                                                                       torch.t((label - out) %
+                                                                                               self.__prime)
+                                                                                       .type(torch.float))
+                                                                          % self.__prime,
+                                                                          self.__scale_weight_parameter,
+                                                                          self.__prime)) % self.__prime
 
         # weight_1 gradients
         second_chain = (2 * finite_field_truncation_ext(torch.diag(torch.matmul(torch.t(self._weight_1)
@@ -781,7 +783,7 @@ class ScaledVectorizedFiniteFieldNet(AbstractVectorizedNet):
                                                                    .reshape(-1)) % self.__prime,
                                                         self.__scale_input_parameter, self.__prime)) % self.__prime
         third_chain = torch.t(self._weight_2)
-        fourth_chain = (-2 * torch.t((label - out) % self.__prime)) % self.__prime
+        fourth_chain = ((self.__prime - 2) * torch.t((label - out) % self.__prime)) % self.__prime
         weight_1_grad = second_chain
         weight_1_grad = finite_field_truncation_ext(torch.matmul(third_chain.type(torch.float),
                                                                  weight_1_grad.type(torch.float)) % self.__prime,

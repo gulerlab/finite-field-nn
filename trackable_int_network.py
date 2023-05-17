@@ -5,19 +5,29 @@ import numpy as np
 import torch
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
+import torch.nn as nn
 
 # this project
 from utils import from_int_to_real_domain, to_int_domain, to_int_domain_int, finite_field_truncation, ToIntDomain
 from simple_network import AbstractVectorizedNet
 
+import matplotlib.pyplot as plt
+
 
 class GaussianRandomDataset(Dataset):
-    def __init__(self, feature_size, label_range, transform=None, target_transform=None, num_of_samples=100):
+    def __init__(self, feature_size, transform=None, target_transform=None, num_of_samples=100):
         super(GaussianRandomDataset, self).__init__()
         self.__num_of_samples = num_of_samples
 
-        self.__data = torch.normal(0, 1, size=(num_of_samples, feature_size))
-        self.__label = np.random.choice(label_range, num_of_samples)
+        self.__data = torch.zeros((num_of_samples, feature_size))
+        self.__data[0:int(num_of_samples / 2), :] = torch.normal(-1, 0.5, size=(int(num_of_samples / 2), feature_size))
+        self.__data[int(num_of_samples / 2):num_of_samples, :] = torch.normal(1, 0.5,
+                                                                              size=(int(num_of_samples / 2),
+                                                                                    feature_size))
+        label_indicator = self.__data[:, 0] > 0
+        self.__label = torch.zeros(num_of_samples)
+        self.__label[label_indicator] = 1
+        self.__label = self.__label.numpy().astype(int)
 
         self.__transform = transform
         self.__target_transform = target_transform
@@ -43,6 +53,15 @@ class GaussianRandomDataset(Dataset):
             return_label = self.__target_transform(return_label)
 
         return return_data, return_label
+
+    def plot_data(self):
+        plt.figure()
+        color_arr = np.zeros(self.__data.size(0), dtype=str)
+        color_map = self.__label == 0
+        color_arr[color_map] = 'green'
+        color_arr[np.invert(color_map)] = 'red'
+        plt.scatter(self.__data[:, 0], self.__data[:, 1], c=color_arr)
+        plt.show()
 
 
 # noinspection DuplicatedCode
@@ -216,8 +235,10 @@ class TrackableIntNet(AbstractVectorizedNet):
         ])
 
         # load data
-        train_dataset = GaussianRandomDataset(self.input_vector_size, self.num_classes, transform=transform,
+        train_dataset = GaussianRandomDataset(self.input_vector_size, transform=transform,
                                               target_transform=target_transform, num_of_samples=1000)
+
+        # train_dataset.plot_data()
         train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
 
         test_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
@@ -265,10 +286,11 @@ class TrackableIntNet(AbstractVectorizedNet):
                             curr_acc = curr_acc + 1
                         test_idx = test_idx + 1
                     running_acc.append(curr_acc / (test_idx + 1))
-                    if idx == 0 or (idx + 1) % 100 == 0:
-                        print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                    # if idx == 0 or (idx + 1) % 100 == 0:
+                    #     print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
                     curr_loss = torch.zeros(1).to(self.device)
                     curr_acc = 0
+            print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
         self.__running_loss = running_loss
         self.__running_acc = running_acc
         # torch.save({
@@ -287,5 +309,73 @@ class TrackableIntNet(AbstractVectorizedNet):
         # }, 'params/trackable_int_nn_params.tar.gz')
 
 
-trackable_net = TrackableIntNet(8, 8, 10, input_vector_size=2, num_classes=2, hidden_layer_size=2, device='cpu')
-trackable_net.train('', 1, 0.001)
+class SimpleNetwork(nn.Module):
+    def __init__(self, num_class=2):
+        super().__init__()
+        self.hidden_layer = nn.Linear(2, 2, bias=False)
+        self.output_layer = nn.Linear(2, num_class, bias=False)
+
+    def forward(self, data):
+        data = self.hidden_layer(data)
+        data = torch.square(data)
+        data = self.output_layer(data)
+        return data
+
+
+net = SimpleNetwork()
+
+target_transform = transforms.Lambda(lambda y: torch.zeros(2, dtype=torch.float)
+                                     .scatter_(0, torch.tensor(y), 1))
+# load data
+train_dataset = GaussianRandomDataset(2, target_transform=target_transform, num_of_samples=1000)
+train_dataset.plot_data()
+
+train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
+
+test_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
+
+model = SimpleNetwork()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.00000000001)
+criterion = torch.nn.MSELoss(reduction='sum')
+
+running_loss = []
+running_acc = []
+curr_loss = torch.zeros(1).to('cpu')
+curr_acc = 0
+for epoch in range(10):
+    for idx, (data, label) in enumerate(train_loader):
+        data, label = data.to('cpu'), label.to('cpu').squeeze()
+        optimizer.zero_grad()
+
+        out = model(data)
+        loss = criterion(label, out.reshape(-1))
+        loss.backward()
+        optimizer.step()
+
+        curr_loss += loss
+
+        with torch.no_grad():
+            if idx == 0 or (idx + 1) % 100 == 0:
+                if idx == 0:
+                    running_loss.append(curr_loss.item())
+                else:
+                    running_loss.append((curr_loss / 100).item())
+                model.eval()
+                test_idx = 1
+                for test_data, test_label in test_loader:
+                    test_data, test_label = test_data.to('cpu'), test_label.to('cpu')
+                    test_out = model(test_data)
+                    pred_label = torch.argmax(test_out)
+                    test_label = torch.argmax(test_label)
+                    if pred_label == test_label:
+                        curr_acc = curr_acc + 1
+                    test_idx = test_idx + 1
+                running_acc.append(curr_acc / (test_idx + 1))
+                if idx == 0 or (idx + 1) % 100 == 0:
+                    print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                curr_loss = torch.zeros(1).to('cpu')
+                curr_acc = 0
+                model.train()
+
+# trackable_net = TrackableIntNet(8, 8, 17, input_vector_size=2, num_classes=2, hidden_layer_size=2, device='cpu')
+# trackable_net.train('', 10, 0.00001)

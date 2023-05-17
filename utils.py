@@ -1,3 +1,5 @@
+import copy
+
 import torch
 from torch import Tensor
 import numpy as np
@@ -5,7 +7,8 @@ import math
 
 
 def to_finite_field_domain(real: Tensor, quantization_bit: int, prime: int) -> Tensor:
-    scaled_real = real * (2 ** quantization_bit)
+    double_real = real.type(torch.double)
+    scaled_real = double_real * (2 ** quantization_bit)
     int_domain = torch.round(scaled_real).type(torch.long)
     negative_mask = int_domain < 0
     int_domain[negative_mask] = int_domain[negative_mask] + prime
@@ -13,13 +16,14 @@ def to_finite_field_domain(real: Tensor, quantization_bit: int, prime: int) -> T
 
 
 def to_int_domain(real: Tensor, quantization_bit: int) -> Tensor:
-    scaled_real = real * (2 ** quantization_bit)
+    double_real = real.type(torch.double)
+    scaled_real = double_real * (2 ** quantization_bit)
     int_domain = torch.round(scaled_real)
     return int_domain.type(torch.long)
 
 
 def to_real_domain(finite_field: Tensor, quantization_bit: int, prime: int) -> Tensor:
-    real_domain = finite_field.type(torch.float)
+    real_domain = finite_field.type(torch.double)
     threshold = (prime - 1) / 2
     negative_mask = real_domain > threshold
     real_domain[negative_mask] = real_domain[negative_mask] - prime
@@ -28,13 +32,13 @@ def to_real_domain(finite_field: Tensor, quantization_bit: int, prime: int) -> T
 
 
 def from_int_to_real_domain(int_domain: Tensor, quantization_bit: int) -> Tensor:
-    real_domain = int_domain.type(torch.float)
+    real_domain = int_domain.type(torch.double)
     real_domain = real_domain / (2 ** quantization_bit)
     return real_domain
 
 
 def finite_field_truncation(finite_field: Tensor, scale_down: int) -> Tensor:
-    real_domain = finite_field.type(torch.float)
+    real_domain = finite_field.type(torch.double)
     loop = int(scale_down / 60)
     remainder = scale_down % 60
     for idx in range(loop):
@@ -51,11 +55,11 @@ def finite_field_truncation(finite_field: Tensor, scale_down: int) -> Tensor:
 
 
 def from_finite_field_to_int_domain(finite_field: Tensor, prime: int) -> Tensor:
-    int_domain = finite_field.type(torch.long)
+    int_domain = copy.deepcopy(finite_field)
     threshold = (prime - 1) / 2
     negative_mask = int_domain > threshold
     int_domain[negative_mask] = int_domain[negative_mask] - prime
-    return int_domain
+    return int_domain.type(torch.long)
 
 
 def from_int_to_finite_field_domain(int_domain: Tensor, prime: int) -> Tensor:
@@ -67,7 +71,7 @@ def from_int_to_finite_field_domain(int_domain: Tensor, prime: int) -> Tensor:
 
 def finite_field_truncation_ext(finite_field: Tensor, scale_down: int, prime: int) -> Tensor:
     int_domain = from_finite_field_to_int_domain(finite_field, prime)
-    real_domain = int_domain.type(torch.float)
+    real_domain = int_domain.type(torch.double)
     loop = int(scale_down / 60)
     remainder = scale_down % 60
     for idx in range(loop):
