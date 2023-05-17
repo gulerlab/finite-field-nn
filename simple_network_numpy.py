@@ -16,8 +16,8 @@ from torch.utils.data import DataLoader
 from utils_numpy import to_int_domain, ToIntDomain, from_int_to_real_domain, int_truncation, ToNumpy
 
 ## ff training
-from utils_numpy import to_real_domain, to_finite_field_domain, finite_field_truncation, ToFiniteFieldDomain, \
-    load_all_data
+from utils_numpy import to_real_domain, to_finite_field_domain, finite_field_truncation, load_all_data,\
+    from_finite_field_to_int_domain
 
 ## logging
 from utils_numpy import info
@@ -354,8 +354,23 @@ class ScaledVectorizedFiniteFieldNetNumpy(AbstractVectorizedNetNumpy):
                                                 self.__prime)
         weight_1_grad = finite_field_truncation(self.__gradients['weight_1_grad'], self.__scale_learning_rate_parameter,
                                                 self.__prime)
-        self._weight_2 = (self._weight_2 - weight_2_grad) % self.__prime
-        self._weight_1 = (self._weight_1 - weight_1_grad) % self.__prime
+
+        weight_2_mask = self._weight_2 < weight_2_grad
+        weight_2_diff_weight_2_grad = np.zeros(self._weight_2.shape, dtype=np.uint64)
+        weight_2_diff_weight_2_grad[weight_2_mask] = (-1 * (weight_2_grad[weight_2_mask] -
+                                                            self._weight_2[weight_2_mask])
+                                                      .astype(np.int64)) % self.__prime
+        weight_2_diff_weight_2_grad[~weight_2_mask] = self._weight_2[~weight_2_mask] - weight_2_grad[~weight_2_mask]
+
+        weight_1_mask = self._weight_1 < weight_1_grad
+        weight_1_diff_weight_1_grad = np.zeros(self._weight_1.shape, dtype=np.uint64)
+        weight_1_diff_weight_1_grad[weight_1_mask] = (-1 * (weight_1_grad[weight_1_mask] -
+                                                            self._weight_1[weight_1_mask])
+                                                      .astype(np.int64)) % self.__prime
+        weight_1_diff_weight_1_grad[~weight_1_mask] = self._weight_1[~weight_1_mask] - weight_1_grad[~weight_1_mask]
+
+        self._weight_2 = weight_2_diff_weight_2_grad
+        self._weight_1 = weight_1_diff_weight_1_grad
 
     def _forward(self, input_vector: np.ndarray, mode: str = 'train') -> np.ndarray:
         first_forward = finite_field_truncation((self._weight_1.T @ input_vector) % self.__prime,
@@ -380,21 +395,26 @@ class ScaledVectorizedFiniteFieldNetNumpy(AbstractVectorizedNetNumpy):
         first_forward, out, label, input_vector = self.__save_for_backward['first_forward'], \
             self.__save_for_backward['out'], self.__save_for_backward['label'], self.__save_for_backward['input_vector']
 
-        weight_2_grad = ((-2 % self.__prime) * finite_field_truncation((first_forward @ ((label - out).T %
-                                                                                         self.__prime)) %
+        label_mask = label < out
+        label_diff_out = np.zeros(label.shape, dtype=np.uint64)
+        label_diff_out[label_mask] = (-1 * (out[label_mask] - label[label_mask]).astype(np.int64)) % self.__prime
+        label_diff_out[~label_mask] = label[~label_mask] - out[~label_mask]
+
+        weight_2_grad = ((-2 % self.__prime) * finite_field_truncation((first_forward @ label_diff_out.T) %
                                                                        self.__prime, self.__scale_weight_parameter,
                                                                        self.__prime)) % self.__prime
-        assert weight_2_grad.dtype == np.uint64, 'gradient for second weight matrix is not defined in int domain'
+        assert weight_2_grad.dtype == np.uint64, 'gradient for second weight matrix is not defined in finite' \
+                                                 ' field domain'
 
         # weight_1 gradients
         second_chain = (2 * finite_field_truncation(np.diag((self._weight_1.T @ input_vector).reshape(-1)) %
                                                     self.__prime, self.__scale_input_parameter,
                                                     self.__prime)) % self.__prime
-        assert second_chain.dtype == np.uint64, 'second chain is not defined in int domain'
+        assert second_chain.dtype == np.uint64, 'second chain is not defined in finite field domain'
         third_chain = self._weight_2.T
-        assert third_chain.dtype == np.uint64, 'third chain is not defined in int domain'
-        fourth_chain = ((-2 % self.__prime) * ((label - out).T % self.__prime)) % self.__prime
-        assert fourth_chain.dtype == np.uint64, 'fourth chain is not defined in int domain'
+        assert third_chain.dtype == np.uint64, 'third chain is not defined in finite field domain'
+        fourth_chain = ((-2 % self.__prime) * label_diff_out.T) % self.__prime
+        assert fourth_chain.dtype == np.uint64, 'fourth chain is not defined in finite field domain'
         weight_1_grad = second_chain
         weight_1_grad = finite_field_truncation((third_chain @ weight_1_grad) % self.__prime,
                                                 self.__scale_weight_parameter, self.__prime)
@@ -439,6 +459,7 @@ class ScaledVectorizedFiniteFieldNetNumpy(AbstractVectorizedNetNumpy):
                     for test_data, test_label in zip(test_data_all, test_label_all):
                         test_data = test_data.T.reshape((-1, 1))
                         test_out = self._forward(test_data, mode='eval')
+                        test_out = from_finite_field_to_int_domain(test_out, self.__prime)
                         pred_label = np.argmax(test_out)
                         if pred_label == test_label:
                             curr_acc = curr_acc + 1

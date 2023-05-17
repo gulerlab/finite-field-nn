@@ -41,5 +41,5 @@ if __name__ == '__main__':
         plt.savefig('acc_int_net_np.jpeg', dpi=300)
         plt.show()
     elif args.mode == 'scaled-vectorized-ff-numpy':
-        model = ScaledVectorizedFiniteFieldNetNumpy(4, 4, 4, 2**26 - 5)
+        model = ScaledVectorizedFiniteFieldNetNumpy(8, 8, 10, 2**26 - 5)
         model.train('./data', 1, 0.001)
