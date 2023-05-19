@@ -103,7 +103,7 @@ if __name__ == '__main__':
         plt.show()
     elif args.mode == 'scaled-ff-numpy-cifar10':
         model = ScaledFiniteFieldNetNumpy(8, 8, 10, 2**26 - 5, input_vector_size=3072, hidden_layer_size=256)
-        model.train_cifar10('./data', 1, 0.001, 128)
+        model.train_cifar10(1, 0.001, 128)
         running_acc = model.running_acc
         running_loss = model.running_loss
         plt.figure()
