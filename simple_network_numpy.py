@@ -7,7 +7,7 @@ import numpy as np
 
 # torch
 import torch
-from torchvision.datasets import FashionMNIST
+from torchvision.datasets import FashionMNIST, CIFAR10
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
@@ -16,7 +16,7 @@ from torch.utils.data import DataLoader
 from utils_numpy import to_int_domain, ToIntDomain, from_int_to_real_domain, int_truncation, ToNumpy
 
 ## ff training
-from utils_numpy import to_real_domain, to_finite_field_domain, finite_field_truncation, load_all_data,\
+from utils_numpy import to_real_domain, to_finite_field_domain, finite_field_truncation, load_all_data, \
     from_finite_field_to_int_domain, create_batch_data
 
 ## logging
@@ -659,7 +659,7 @@ class ScaledIntegerNetNumpy(AbstractNetNumpy):
 
     def _backward(self):
         first_forward, out, label, input_matrix, before_activation = self.__save_for_backward['first_forward'], \
-            self.__save_for_backward['out'], self.__save_for_backward['label'],\
+            self.__save_for_backward['out'], self.__save_for_backward['label'], \
             self.__save_for_backward['input_matrix'], self.__save_for_backward['before_activation']
 
         weight_2_grad = -2 * int_truncation(first_forward.T @ (label - out), self.__scale_weight_parameter)
@@ -703,6 +703,76 @@ class ScaledIntegerNetNumpy(AbstractNetNumpy):
         train_loader = DataLoader(train_dataset, batch_size=self.__batch_size, shuffle=True)
 
         test_dataset = FashionMNIST(data_path, train=False, transform=transform, download=True)
+        test_loader = DataLoader(test_dataset, batch_size=self.__batch_size, shuffle=True)
+        info('datasets and loaders are initialized')
+
+        running_loss = []
+        running_acc = []
+        for epoch in range(num_of_epochs):
+            curr_loss = 0
+            curr_acc = 0
+            for idx, (data, label) in enumerate(train_loader):
+                data, label = data.squeeze().reshape((data.size(0), -1)).numpy(), label.reshape((label.size(0),
+                                                                                                 -1)).numpy()
+
+                out = self._forward(data)
+                loss = self._criterion(label, out)
+                self._backward()
+                self._optimizer(learning_rate)
+                curr_loss += loss
+                info('epoch: {}, iter: {}, loss: {}'.format(epoch + 1, idx + 1, loss), verbose=False)
+
+                if idx == 0 or (idx + 1) % 10 == 0:
+                    if idx == 0:
+                        running_loss.append(curr_loss)
+                    else:
+                        running_loss.append((curr_loss / 10))
+                    test_total = 0
+                    for test_data, test_label in test_loader:
+                        test_data = test_data.squeeze().reshape((test_data.size(0), -1)).numpy()
+                        test_label = test_label.numpy()
+                        test_out = self._forward(test_data, mode='eval')
+                        pred_label = np.argmax(test_out, axis=1)
+                        curr_acc = curr_acc + np.count_nonzero(pred_label == test_label)
+                        test_total = test_total + test_data.shape[0]
+                    running_acc.append(curr_acc / test_total)
+                    if idx == 0 or (idx + 1) % 10 == 0:
+                        print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                        info('#############epoch: {}, avg loss: {}, acc: {}#############'.format(epoch,
+                                                                                                 running_loss[-1],
+                                                                                                 running_acc[-1]),
+                             verbose=False)
+                    curr_loss = 0
+                    curr_acc = 0
+        self.__running_loss = running_loss
+        self.__running_acc = running_acc
+
+    # noinspection DuplicatedCode
+    def train_cifar10(self, data_path: str, num_of_epochs: int, learning_rate: float, batch_size: int):
+        self.__batch_size = batch_size
+        self.__batch_size_param = int(np.log2(self.__batch_size))
+
+        # transformations
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261)),
+            ToNumpy(),
+            ToIntDomain(self.__scale_input_parameter)
+        ])
+
+        target_transform = transforms.Compose([
+            transforms.Lambda(lambda y: torch.zeros(10, dtype=torch.float)
+                              .scatter_(0, torch.tensor(y), 1)),
+            ToNumpy(),
+            ToIntDomain(self.__scale_weight_parameter)
+        ])
+
+        # load data
+        train_dataset = CIFAR10(data_path, train=True, transform=transform, target_transform=target_transform,
+                                download=True)
+        train_loader = DataLoader(train_dataset, batch_size=self.__batch_size, shuffle=True)
+
+        test_dataset = CIFAR10(data_path, train=False, transform=transform, download=True)
         test_loader = DataLoader(test_dataset, batch_size=self.__batch_size, shuffle=True)
         info('datasets and loaders are initialized')
 
@@ -889,8 +959,8 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
         return out
 
     def _backward(self):
-        first_forward, out, label, input_matrix, before_activation = self.__save_for_backward['first_forward'],\
-            self.__save_for_backward['out'], self.__save_for_backward['label'],\
+        first_forward, out, label, input_matrix, before_activation = self.__save_for_backward['first_forward'], \
+            self.__save_for_backward['out'], self.__save_for_backward['label'], \
             self.__save_for_backward['input_matrix'], self.__save_for_backward['before_activation']
 
         label_mask = label < out
