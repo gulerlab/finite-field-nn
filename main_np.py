@@ -101,3 +101,22 @@ if __name__ == '__main__':
         plt.ylabel('acc')
         plt.savefig('acc_int_net_minibatch_np_cifar10.jpeg', dpi=300)
         plt.show()
+    elif args.mode == 'scaled-ff-numpy-cifar10':
+        model = ScaledFiniteFieldNetNumpy(8, 8, 10, 2**26 - 5, input_vector_size=3072, hidden_layer_size=256)
+        model.train_cifar10('./data', 1, 0.001, 128)
+        running_acc = model.running_acc
+        running_loss = model.running_loss
+        plt.figure()
+        plt.plot(range(len(running_loss)), running_loss)
+        plt.title('loss vs. iteration - finite field net (minibatch) - NumPy - CIFAR10')
+        plt.xlabel('iteration')
+        plt.ylabel('loss')
+        plt.savefig('loss_ff_net_minibatch_np_cifar10.jpeg', dpi=300)
+        plt.show()
+        plt.figure()
+        plt.plot(range(len(running_acc)), running_acc)
+        plt.title('acc vs. iteration - finite field net (minibatch) - NumPy - CIFAR10')
+        plt.xlabel('iteration')
+        plt.ylabel('acc')
+        plt.savefig('acc_ff_net_minibatch_np_cifar10.jpeg', dpi=300)
+        plt.show()
