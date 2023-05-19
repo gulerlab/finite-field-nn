@@ -17,7 +17,7 @@ from utils_numpy import to_int_domain, ToIntDomain, from_int_to_real_domain, int
 
 ## ff training
 from utils_numpy import to_real_domain, to_finite_field_domain, finite_field_truncation, load_all_data,\
-    from_finite_field_to_int_domain
+    from_finite_field_to_int_domain, create_batch_data
 
 ## logging
 from utils_numpy import info
@@ -272,6 +272,7 @@ class ScaledVectorizedIntegerNetNumpy(AbstractVectorizedNetNumpy):
         self.__running_acc = running_acc
 
 
+# noinspection DuplicatedCode
 class ScaledVectorizedFiniteFieldNetNumpy(AbstractVectorizedNetNumpy):
     def __init__(self, scale_input_parameter, scale_weight_parameter, scale_learning_rate_parameter, prime, **kwargs):
         super().__init__(**kwargs)
@@ -735,6 +736,230 @@ class ScaledIntegerNetNumpy(AbstractNetNumpy):
                         curr_acc = curr_acc + np.count_nonzero(pred_label == test_label)
                         test_total = test_total + test_data.shape[0]
                     running_acc.append(curr_acc / test_total)
+                    if idx == 0 or (idx + 1) % 10 == 0:
+                        print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                        info('#############epoch: {}, avg loss: {}, acc: {}#############'.format(epoch,
+                                                                                                 running_loss[-1],
+                                                                                                 running_acc[-1]),
+                             verbose=False)
+                    curr_loss = 0
+                    curr_acc = 0
+        self.__running_loss = running_loss
+        self.__running_acc = running_acc
+
+
+# noinspection DuplicatedCode
+class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
+    def __init__(self, scale_input_parameter, scale_weight_parameter, scale_learning_rate_parameter, prime, **kwargs):
+        super().__init__(**kwargs)
+        self.__save_for_backward = None
+        self.__gradients = None
+
+        self.__running_loss = None
+        self.__running_acc = None
+        self.batch_size = None
+        self.batch_size_param = None
+
+        self.__scale_input_parameter = scale_input_parameter
+        self.__scale_weight_parameter = scale_weight_parameter
+        self.__scale_learning_rate_parameter = scale_learning_rate_parameter
+        self.__prime = prime
+
+        self.__scale_init_weight()
+
+    def __scale_init_weight(self):
+        self._weight_1 = to_finite_field_domain(self._weight_1, self.__scale_weight_parameter, self.__prime)
+        self._weight_2 = to_finite_field_domain(self._weight_2, self.__scale_weight_parameter, self.__prime)
+
+    @property
+    def running_loss(self):
+        return self.__running_loss
+
+    @running_loss.setter
+    def running_loss(self, value):
+        self.__running_loss = value
+
+    @property
+    def running_acc(self):
+        return self.__running_acc
+
+    @running_acc.setter
+    def running_acc(self, value):
+        self.__running_acc = value
+
+    @property
+    def batch_size(self):
+        return self.__batch_size
+
+    @batch_size.setter
+    def batch_size(self, value):
+        self.__batch_size = value
+
+    @property
+    def batch_size_param(self):
+        return self.__batch_size_param
+
+    @batch_size_param.setter
+    def batch_size_param(self, value):
+        self.__batch_size_param = value
+
+    @property
+    def scale_input_parameter(self):
+        return self.__scale_input_parameter
+
+    @scale_input_parameter.setter
+    def scale_input_parameter(self, value):
+        self.__scale_input_parameter = value
+
+    @property
+    def scale_weight_parameter(self):
+        return self.__scale_weight_parameter
+
+    @scale_weight_parameter.setter
+    def scale_weight_parameter(self, value):
+        self.__scale_weight_parameter = value
+
+    @property
+    def scale_learning_rate_parameter(self):
+        return self.__scale_learning_rate_parameter
+
+    @scale_learning_rate_parameter.setter
+    def scale_learning_rate_parameter(self, value):
+        self.__scale_learning_rate_parameter = value
+
+    @property
+    def prime(self):
+        return self.__prime
+
+    @prime.setter
+    def prime(self, value):
+        self.__prime = value
+
+    def _criterion(self, label: np.ndarray, prediction: np.ndarray) -> np.float64:
+        self.__save_for_backward['label'] = label
+        real_label = to_real_domain(label, self.__scale_weight_parameter, self.__prime)
+        assert real_label.dtype == np.float64, 'ground truth labels are not in real domain in loss'
+        real_prediction = to_real_domain(prediction, self.__scale_weight_parameter, self.__prime)
+        assert real_label.dtype == np.float64, 'predictions are not in real domain in loss'
+        diff = real_label - real_prediction
+        diff_norm = np.linalg.norm(diff)
+        return np.square(diff_norm) / self.__batch_size
+
+    def _optimizer(self, learning_rate: float):
+        weight_2_grad = finite_field_truncation(self.__gradients['weight_2_grad'], self.__scale_learning_rate_parameter
+                                                + self.__batch_size_param, self.__prime)
+        weight_1_grad = finite_field_truncation(self.__gradients['weight_1_grad'], self.__scale_learning_rate_parameter
+                                                + self.__batch_size_param, self.__prime)
+
+        weight_2_mask = self._weight_2 < weight_2_grad
+        weight_2_diff_weight_2_grad = np.zeros(self._weight_2.shape, dtype=np.uint64)
+        weight_2_diff_weight_2_grad[weight_2_mask] = (-1 * (weight_2_grad[weight_2_mask] -
+                                                            self._weight_2[weight_2_mask])
+                                                      .astype(np.int64)) % self.__prime
+        weight_2_diff_weight_2_grad[~weight_2_mask] = self._weight_2[~weight_2_mask] - weight_2_grad[~weight_2_mask]
+
+        weight_1_mask = self._weight_1 < weight_1_grad
+        weight_1_diff_weight_1_grad = np.zeros(self._weight_1.shape, dtype=np.uint64)
+        weight_1_diff_weight_1_grad[weight_1_mask] = (-1 * (weight_1_grad[weight_1_mask] -
+                                                            self._weight_1[weight_1_mask])
+                                                      .astype(np.int64)) % self.__prime
+        weight_1_diff_weight_1_grad[~weight_1_mask] = self._weight_1[~weight_1_mask] - weight_1_grad[~weight_1_mask]
+
+        self._weight_2 = weight_2_diff_weight_2_grad
+        self._weight_1 = weight_1_diff_weight_1_grad
+
+    def _forward(self, input_matrix: np.ndarray, mode: str = 'train') -> np.ndarray:
+        before_activation = finite_field_truncation((input_matrix @ self._weight_1) % self.__prime,
+                                                    self.__scale_input_parameter, self.__prime)
+        assert before_activation.dtype == np.uint64, 'before activation is not defined in finite field domain'
+        first_forward = finite_field_truncation(np.square(before_activation) % self.__prime,
+                                                self.__scale_weight_parameter, self.__prime)
+        assert first_forward.dtype == np.uint64, 'first forward after activation is not defined in finite field domain'
+        out = finite_field_truncation((first_forward @ self._weight_2) % self.__prime, self.__scale_weight_parameter,
+                                      self.__prime)
+        assert out.dtype == np.uint64, 'out is not defined in finite field domain'
+
+        if mode == 'train':
+            self.__save_for_backward = {
+                'input_matrix': input_matrix,
+                'before_activation': before_activation,
+                'first_forward': first_forward,
+                'out': out
+            }
+        return out
+
+    def _backward(self):
+        first_forward, out, label, input_matrix, before_activation = self.__save_for_backward['first_forward'],\
+            self.__save_for_backward['out'], self.__save_for_backward['label'],\
+            self.__save_for_backward['input_matrix'], self.__save_for_backward['before_activation']
+
+        label_mask = label < out
+        label_diff_out = np.zeros(label.shape, dtype=np.uint64)
+        label_diff_out[label_mask] = (-1 * (out[label_mask] - label[label_mask]).astype(np.int64)) % self.__prime
+        label_diff_out[~label_mask] = label[~label_mask] - out[~label_mask]
+
+        weight_2_grad = ((-2 % self.__prime) * finite_field_truncation((first_forward.T @ label_diff_out) %
+                                                                       self.__prime, self.__scale_weight_parameter,
+                                                                       self.__prime)) % self.__prime
+        assert weight_2_grad.dtype == np.uint64, 'gradient for second weight matrix is not defined in finite' \
+                                                 ' field domain'
+
+        # weight_1 gradients
+        middle_term = ((-2 % self.__prime) * finite_field_truncation((label_diff_out @ self._weight_2.T) % self.__prime,
+                                                                     self.__scale_weight_parameter,
+                                                                     self.__prime)) % self.__prime
+        assert middle_term.dtype == np.uint64, 'middle term is not defined in finite field domain'
+        last_term = (2 * finite_field_truncation((middle_term * before_activation) % self.__prime,
+                                                 self.__scale_weight_parameter, self.__prime)) % self.__prime
+        assert last_term.dtype == np.uint64, 'last term is not defined in finite field domain'
+        weight_1_grad = finite_field_truncation((input_matrix.T @ last_term) % self.__prime,
+                                                self.__scale_input_parameter, self.__prime)
+        assert weight_1_grad.dtype == np.uint64, 'gradient for first weight matrix is not defined in finite' \
+                                                 ' field domain'
+
+        self.__gradients = {
+            'weight_2_grad': weight_2_grad,
+            'weight_1_grad': weight_1_grad
+        }
+
+    # noinspection DuplicatedCode
+    def train(self, data_path: str, num_of_epochs: int, learning_rate: float, batch_size: int):
+        self.__batch_size = batch_size
+        self.__batch_size_param = int(np.log2(self.__batch_size))
+        train_data, train_label, test_data_all, test_label_all = load_all_data(self.__scale_input_parameter,
+                                                                               self.__scale_weight_parameter,
+                                                                               self.__prime)
+        train_data, train_label, test_data_all, test_label_all = create_batch_data(train_data, train_label,
+                                                                                   test_data_all, test_label_all,
+                                                                                   self.__batch_size)
+        info('datasets and loaders are initialized')
+
+        running_loss = []
+        running_acc = []
+        for epoch in range(num_of_epochs):
+            curr_loss = 0
+            curr_acc = 0
+            for idx, (data, label) in enumerate(zip(train_data, train_label)):
+                out = self._forward(data)
+                loss = self._criterion(label, out)
+                self._backward()
+                self._optimizer(learning_rate)
+                curr_loss += loss
+                info('epoch: {}, iter: {}, loss: {}'.format(epoch + 1, idx + 1, loss), verbose=False)
+
+                if idx == 0 or (idx + 1) % 10 == 0:
+                    if idx == 0:
+                        running_loss.append(curr_loss)
+                    else:
+                        running_loss.append((curr_loss / 10))
+                    test_total = 0
+                    for test_data, test_label in zip(test_data_all, test_label_all):
+                        test_out = self._forward(test_data, mode='eval')
+                        test_out = from_finite_field_to_int_domain(test_out, self.__prime)
+                        pred_label = np.argmax(test_out, axis=1)
+                        curr_acc = curr_acc + np.count_nonzero(pred_label == test_label)
+                        test_total = test_total + test_data.shape[0]
+                    running_acc.append(curr_acc / (test_total + 1))
                     if idx == 0 or (idx + 1) % 10 == 0:
                         print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
                         info('#############epoch: {}, avg loss: {}, acc: {}#############'.format(epoch,

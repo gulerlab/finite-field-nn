@@ -5,7 +5,7 @@ import os
 import matplotlib.pyplot as plt
 
 from simple_network_numpy import ScaledVectorizedIntegerNetNumpy, ScaledVectorizedFiniteFieldNetNumpy,\
-    ScaledIntegerNetNumpy
+    ScaledIntegerNetNumpy, ScaledFiniteFieldNetNumpy
 
 
 if __name__ == '__main__':
@@ -62,4 +62,23 @@ if __name__ == '__main__':
         plt.xlabel('iteration')
         plt.ylabel('acc')
         plt.savefig('acc_int_net_minibatch_np.jpeg', dpi=300)
+        plt.show()
+    elif args.mode == 'scaled-ff-numpy':
+        model = ScaledFiniteFieldNetNumpy(8, 8, 7, 2**26 - 5)
+        model.train('./data', 1, 0.01, 128)
+        running_acc = model.running_acc
+        running_loss = model.running_loss
+        plt.figure()
+        plt.plot(range(len(running_loss)), running_loss)
+        plt.title('loss vs. iteration - finite field net (minibatch) - NumPy')
+        plt.xlabel('iteration')
+        plt.ylabel('loss')
+        plt.savefig('loss_ff_net_minibatch_np.jpeg', dpi=300)
+        plt.show()
+        plt.figure()
+        plt.plot(range(len(running_acc)), running_acc)
+        plt.title('acc vs. iteration - finite field net (minibatch) - NumPy')
+        plt.xlabel('iteration')
+        plt.ylabel('acc')
+        plt.savefig('acc_ff_net_minibatch_np.jpeg', dpi=300)
         plt.show()
