@@ -30,6 +30,7 @@ class SimpleNetwork(nn.Module):
         return data
 
 
+# noinspection DuplicatedCode
 class AbstractVectorizedNet(ABC):
     def __init__(self, input_vector_size=784, hidden_layer_size=64, num_classes=10,
                  device=None, verbose=True):
@@ -855,6 +856,237 @@ class ScaledVectorizedFiniteFieldNet(AbstractVectorizedNet):
                         test_idx = test_idx + 1
                     running_acc.append(curr_acc / (test_idx + 1))
                     if idx == 0 or (idx + 1) % 100 == 0:
+                        print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                    curr_loss = torch.zeros(1).to(self.device)
+                    curr_acc = 0
+        self.__running_loss = running_loss
+        self.__running_acc = running_acc
+
+
+# noinspection DuplicatedCode
+class AbstractNet(ABC):
+    def __init__(self, feature_size=784, hidden_layer_size=64, num_classes=10,
+                 device=None, verbose=True):
+        self.__feature_size = feature_size
+        self.__hidden_layer_size = hidden_layer_size
+        self.__num_classes = num_classes
+        if device is None:
+            self.__device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        else:
+            self.__device = device
+        self.__verbose = verbose
+        self._weight_1 = None
+        self._weight_2 = None
+
+        self.__init_weight()
+        self.__to_device()
+
+    def __init_weight(self):
+        range_low, range_high = -1 / math.sqrt(self.__feature_size), 1 / math.sqrt(self.__feature_size)
+        self._weight_1 = range_low + torch.rand((self.__feature_size, self.__hidden_layer_size)) * (range_high -
+                                                                                                    range_low)
+        range_low, range_high = -1 / math.sqrt(self.__hidden_layer_size), 1 / math.sqrt(self.__hidden_layer_size)
+        self._weight_2 = range_low + torch.rand((self.__hidden_layer_size, self.__num_classes)) * (range_high -
+                                                                                                   range_low)
+        logging.info('weights are initialized')
+        if self.__verbose:
+            print('weights are initialized')
+
+    def __to_device(self):
+        self._weight_1 = self._weight_1.to(self.__device)
+        self._weight_2 = self._weight_2.to(self.__device)
+
+        logging.info('weights are sent to {}'.format(self.__device))
+        if self.__verbose:
+            print('weights are sent to {}'.format(self.__device))
+
+    @property
+    def feature_size(self):
+        return self.__feature_size
+
+    @feature_size.setter
+    def feature_size(self, value):
+        self.__feature_size = value
+
+    @property
+    def hidden_layer_size(self):
+        return self.__hidden_layer_size
+
+    @hidden_layer_size.setter
+    def hidden_layer_size(self, value):
+        self.__hidden_layer_size = value
+
+    @property
+    def num_classes(self):
+        return self.__num_classes
+
+    @num_classes.setter
+    def num_classes(self, value):
+        self.__num_classes = value
+
+    @property
+    def device(self):
+        return self.__device
+
+    @device.setter
+    def device(self, value):
+        self.__device = value
+
+    @property
+    def verbose(self):
+        return self.__verbose
+
+    @verbose.setter
+    def verbose(self, value):
+        self.__verbose = value
+
+    @abstractmethod
+    def _criterion(self, label: torch.Tensor, prediction: torch.Tensor) -> torch.Tensor:
+        pass
+
+    @abstractmethod
+    def _optimizer(self, learning_rate):
+        pass
+
+    @abstractmethod
+    def _forward(self, input_vector: torch.Tensor, mode: str = 'train') -> torch.Tensor:
+        pass
+
+    @abstractmethod
+    def _backward(self):
+        pass
+
+    @abstractmethod
+    def train(self, data_path: str, num_of_epochs: int, learning_rate, batch_size: int):
+        pass
+
+
+# noinspection DuplicatedCode
+class Net(AbstractNet):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.__save_for_backward = None
+        self.__gradients = None
+
+        self.__running_loss = None
+        self.__running_acc = None
+        self.__batch_size = None
+
+    @property
+    def running_loss(self):
+        return self.__running_loss
+
+    @running_loss.setter
+    def running_loss(self, value):
+        self.__running_loss = value
+
+    @property
+    def running_acc(self):
+        return self.__running_acc
+
+    @running_acc.setter
+    def running_acc(self, value):
+        self.__running_acc = value
+
+    @property
+    def batch_size(self):
+        return self.__batch_size
+
+    @batch_size.setter
+    def batch_size(self, value):
+        self.__batch_size = value
+
+    def _criterion(self, label: torch.Tensor, prediction: torch.Tensor) -> torch.Tensor:
+        diff = label - prediction
+        diff_norm = torch.linalg.norm(diff)
+        self.__save_for_backward['label'] = label
+        return torch.square(diff_norm) / self.__batch_size
+
+    def _optimizer(self, learning_rate: float):
+        self._weight_2 = self._weight_2 - learning_rate * (self.__gradients['weight_2_grad'] / self.__batch_size)
+        self._weight_1 = self._weight_1 - learning_rate * (self.__gradients['weight_1_grad'] / self.__batch_size)
+
+    def _forward(self, input_matrix: torch.Tensor, mode: str = 'train') -> torch.Tensor:
+        before_activation = torch.matmul(input_matrix, self._weight_1)
+        first_forward = torch.square(before_activation)
+        out = torch.matmul(first_forward, self._weight_2)
+        if mode == 'train':
+            self.__save_for_backward = {
+                'input_matrix': input_matrix,
+                'before_activation': before_activation,
+                'first_forward': first_forward,
+                'out': out
+            }
+
+        return out
+
+    def _backward(self):
+        first_forward, out, label, input_matrix, before_activation = self.__save_for_backward['first_forward'], \
+            self.__save_for_backward['out'], self.__save_for_backward['label'],\
+            self.__save_for_backward['input_matrix'], self.__save_for_backward['before_activation']
+
+        # weight_2 gradients
+        weight_2_grad = -2 * torch.matmul(torch.t(first_forward), label - out)
+
+        # weight_1 gradients
+        middle_term = -2 * torch.matmul(label - out, torch.t(self._weight_2))
+        last_term = 2 * middle_term * before_activation
+        weight_1_grad = torch.matmul(torch.t(input_matrix), last_term)
+
+        self.__gradients = {
+            'weight_2_grad': weight_2_grad,
+            'weight_1_grad': weight_1_grad
+        }
+
+    def train(self, data_path: str, num_of_epochs: int, learning_rate: float, batch_size: int):
+        self.__batch_size = batch_size
+
+        # transformations
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.5,), (0.5,))
+        ])
+
+        target_transform = transforms.Lambda(lambda y: torch.zeros(10, dtype=torch.float)
+                                             .scatter_(0, torch.tensor(y), 1))
+        # load data
+        train_dataset = FashionMNIST(data_path, train=True, transform=transform, target_transform=target_transform,
+                                     download=True)
+        train_loader = DataLoader(train_dataset, batch_size=self.__batch_size, shuffle=True)
+
+        test_dataset = FashionMNIST(data_path, train=False, transform=transform, download=True)
+        test_loader = DataLoader(test_dataset, batch_size=self.__batch_size, shuffle=True)
+
+        running_loss = []
+        running_acc = []
+        for epoch in range(num_of_epochs):
+            curr_loss = torch.zeros(1).to(self.device)
+            curr_acc = 0
+            for idx, (data, label) in enumerate(train_loader):
+                data, label = data.to(self.device), label.to(self.device)
+                data, label = data.squeeze().reshape(data.size(0), -1), label.reshape(label.size(0), -1)
+
+                out = self._forward(data)
+                loss = self._criterion(label, out)
+                self._backward()
+                self._optimizer(learning_rate)
+                curr_loss += loss
+
+                if idx == 0 or (idx + 1) % 10 == 0:
+                    if idx == 0:
+                        running_loss.append(curr_loss.item())
+                    else:
+                        running_loss.append((curr_loss / 10).item())
+                    test_total = 0
+                    for test_data, test_label in test_loader:
+                        test_data, test_label = test_data.to(self.device), test_label.to(self.device)
+                        test_data = test_data.squeeze().reshape(test_data.size(0), -1)
+                        test_out = self._forward(test_data, mode='eval')
+                        pred_label = torch.argmax(test_out, dim=1)
+                        curr_acc = curr_acc + torch.count_nonzero(pred_label == test_label)
+                        test_total = test_total + self.__batch_size
+                    running_acc.append(curr_acc / test_total)
+                    if idx == 0 or (idx + 1) % 10 == 0:
                         print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
                     curr_loss = torch.zeros(1).to(self.device)
                     curr_acc = 0

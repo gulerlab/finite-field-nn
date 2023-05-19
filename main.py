@@ -1,5 +1,5 @@
 from simple_network import VectorizedNet, SimpleNetwork, ScaledVectorizedFiniteFieldNet, ScaledVectorizedNet, \
-    ScaledVectorizedIntegerNet
+    ScaledVectorizedIntegerNet, Net
 import torch
 from torchvision.datasets import FashionMNIST
 import torchvision.transforms as transforms
@@ -143,3 +143,23 @@ if __name__ == '__main__':
     elif args.mode == 'scaled-vectorized-ff':
         scaled_net = ScaledVectorizedFiniteFieldNet(8, 8, 10, 2 ** 26 - 5, device='cpu')
         scaled_net.train('./data', 1, 0.001)
+    elif args.mode == 'net':
+        net = Net(device='cpu')
+        net.train('./data', 5, 0.01, 128)
+        running_acc = net.running_acc
+        running_loss = net.running_loss
+        plt.figure()
+        plt.plot(range(len(running_loss)), running_loss)
+        plt.title('loss vs. iteration - net with batch size: 128')
+        plt.xlabel('iteration')
+        plt.ylabel('loss')
+        plt.savefig('loss_batch_128.jpeg', dpi=300)
+        plt.show()
+        plt.figure()
+        plt.plot(range(len(running_acc)), running_acc)
+        plt.title('acc vs. iteration - net with batch size: 128')
+        plt.xlabel('iteration')
+        plt.ylabel('acc')
+        plt.savefig('acc_batch_128.jpeg', dpi=300)
+        plt.show()
+
