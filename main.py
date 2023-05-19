@@ -162,4 +162,24 @@ if __name__ == '__main__':
         plt.ylabel('acc')
         plt.savefig('acc_batch_128.jpeg', dpi=300)
         plt.show()
+    elif args.mode == 'net-cifar10':
+        net = Net(device='cpu', feature_size=3072, hidden_layer_size=256)
+        net.train_cifar10('./data', 5, 0.001, 128)
+        running_acc = net.running_acc
+        running_loss = net.running_loss
+        plt.figure()
+        plt.plot(range(len(running_loss)), running_loss)
+        plt.title('loss vs. iteration - net with batch size: 128 - CIFAR10')
+        plt.xlabel('iteration')
+        plt.ylabel('loss')
+        plt.savefig('loss_batch_128_cifar10.jpeg', dpi=300)
+        plt.show()
+        plt.figure()
+        plt.plot(range(len(running_acc)), running_acc)
+        plt.title('acc vs. iteration - net with batch size: 128 - CIFAR10')
+        plt.xlabel('iteration')
+        plt.ylabel('acc')
+        plt.savefig('acc_batch_128_cifar10.jpeg', dpi=300)
+        plt.show()
+
 
