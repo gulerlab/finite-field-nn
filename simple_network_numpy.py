@@ -1042,7 +1042,7 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
         self.__running_acc = running_acc
     
     # noinspection DuplicatedCode
-    def train_cifar10(self, data_path: str, num_of_epochs: int, learning_rate: float, batch_size: int):
+    def train_cifar10(self, num_of_epochs: int, learning_rate: float, batch_size: int):
         self.__batch_size = batch_size
         self.__batch_size_param = int(np.log2(self.__batch_size))
         train_data, train_label, test_data_all, test_label_all = load_all_data_cifar10(self.__scale_input_parameter, 
