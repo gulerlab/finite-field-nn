@@ -4,7 +4,8 @@ from datetime import datetime
 import os
 import matplotlib.pyplot as plt
 
-from simple_network_numpy import ScaledVectorizedIntegerNetNumpy, ScaledVectorizedFiniteFieldNetNumpy
+from simple_network_numpy import ScaledVectorizedIntegerNetNumpy, ScaledVectorizedFiniteFieldNetNumpy,\
+    ScaledIntegerNetNumpy
 
 
 if __name__ == '__main__':
@@ -43,3 +44,22 @@ if __name__ == '__main__':
     elif args.mode == 'scaled-vectorized-ff-numpy':
         model = ScaledVectorizedFiniteFieldNetNumpy(8, 8, 10, 2**26 - 5)
         model.train('./data', 1, 0.001)
+    elif args.mode == 'scaled-int-numpy':
+        model = ScaledIntegerNetNumpy(8, 8, 7)
+        model.train('./data', 1, 0.01, 128)
+        running_acc = model.running_acc
+        running_loss = model.running_loss
+        plt.figure()
+        plt.plot(range(len(running_loss)), running_loss)
+        plt.title('loss vs. iteration - integer net (minibatch) - NumPy')
+        plt.xlabel('iteration')
+        plt.ylabel('loss')
+        plt.savefig('loss_int_net_minibatch_np.jpeg', dpi=300)
+        plt.show()
+        plt.figure()
+        plt.plot(range(len(running_acc)), running_acc)
+        plt.title('acc vs. iteration - integer net (minibatch) - NumPy')
+        plt.xlabel('iteration')
+        plt.ylabel('acc')
+        plt.savefig('acc_int_net_minibatch_np.jpeg', dpi=300)
+        plt.show()

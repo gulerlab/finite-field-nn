@@ -1084,7 +1084,7 @@ class Net(AbstractNet):
                         test_out = self._forward(test_data, mode='eval')
                         pred_label = torch.argmax(test_out, dim=1)
                         curr_acc = curr_acc + torch.count_nonzero(pred_label == test_label)
-                        test_total = test_total + self.__batch_size
+                        test_total = test_total + test_data.size(0)
                     running_acc.append(curr_acc / test_total)
                     if idx == 0 or (idx + 1) % 10 == 0:
                         print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
