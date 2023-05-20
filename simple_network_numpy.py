@@ -554,6 +554,7 @@ class ScaledIntegerNetNumpy(AbstractNetNumpy):
 
         self.__running_loss = None
         self.__running_acc = None
+        self.__running_curr_loss = None
         self.__batch_size = None
         self.__batch_size_param = None
 
@@ -574,6 +575,14 @@ class ScaledIntegerNetNumpy(AbstractNetNumpy):
     @running_loss.setter
     def running_loss(self, value):
         self.__running_loss = value
+
+    @property
+    def running_curr_loss(self):
+        return self.__running_curr_loss
+
+    @running_curr_loss.setter
+    def running_curr_loss(self, value):
+        self.__running_curr_loss = value
 
     @property
     def running_acc(self):
@@ -622,6 +631,14 @@ class ScaledIntegerNetNumpy(AbstractNetNumpy):
     @scale_learning_rate_parameter.setter
     def scale_learning_rate_parameter(self, value):
         self.__scale_learning_rate_parameter = value
+
+    @property
+    def weight_1(self):
+        return self._weight_1
+
+    @property
+    def weight_2(self):
+        return self._weight_2
 
     def _criterion(self, label: np.ndarray, prediction: np.ndarray) -> np.float64:
         self.__save_for_backward['label'] = label
@@ -873,8 +890,11 @@ class ScaledIntegerNetNumpy(AbstractNetNumpy):
                     info('epoch: {}, iter: {}, loss: {}'.format(epoch, idx + 1, loss))
                     running_curr_loss.append(loss)
 
-                    if (idx + 1) % 100 == 0 or (idx + 1) == last_batch_idx:
-                        running_loss.append((curr_loss / 100))
+                    if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == last_batch_idx:
+                        if idx == 0:
+                            running_loss.append(curr_loss)
+                        else:
+                            running_loss.append((curr_loss / 10))
                         test_total = 0
                         for test_data, test_label in test_loader:
                             test_data = test_data.to(device)
@@ -886,7 +906,7 @@ class ScaledIntegerNetNumpy(AbstractNetNumpy):
                             curr_acc = curr_acc + np.count_nonzero(pred_label == test_label)
                             test_total = test_total + test_data.shape[0]
                         running_acc.append(curr_acc / test_total)
-                        if (idx + 1) % 100 == 0 or (idx + 1) == last_batch_idx:
+                        if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == last_batch_idx:
                             print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
                             info('#############epoch: {}, avg loss: {}, acc: {}#############'.format(epoch,
                                                                                                      running_loss[-1],
@@ -896,6 +916,7 @@ class ScaledIntegerNetNumpy(AbstractNetNumpy):
                         curr_acc = 0
             self.__running_loss = running_loss
             self.__running_acc = running_acc
+            self.__running_curr_loss = running_curr_loss
 
 
 # noinspection DuplicatedCode
