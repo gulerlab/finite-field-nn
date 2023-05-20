@@ -893,6 +893,8 @@ class ScaledIntegerNetNumpy(AbstractNetNumpy):
                     if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == last_batch_idx:
                         if idx == 0:
                             running_loss.append(curr_loss)
+                        elif (idx + 1) == last_batch_idx:
+                            running_loss.append(curr_loss / ((idx + 1) % 10))
                         else:
                             running_loss.append((curr_loss / 10))
                         test_total = 0
@@ -1212,9 +1214,11 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
     def train_vgg_cifar10(self, num_of_epochs: int, learning_rate: float, batch_size: int):
         self.__batch_size = batch_size
         self.__batch_size_param = int(np.log2(self.__batch_size))
-        train_data, train_label, test_data_all, test_label_all = load_all_data_apply_vgg_cifar10(self.__scale_input_parameter, 
-                                                                                                 self.__scale_weight_parameter,
-                                                                                                 self.__prime)
+        train_data, train_label, test_data_all, test_label_all = load_all_data_apply_vgg_cifar10(
+            self.__scale_input_parameter,
+            self.__scale_weight_parameter,
+            self.__prime
+        )
         train_data, train_label, test_data_all, test_label_all = create_batch_data(train_data, train_label,
                                                                                    test_data_all, test_label_all,
                                                                                    self.__batch_size)
@@ -1238,6 +1242,8 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
                 if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == len(train_data):
                     if idx == 0:
                         running_loss.append(curr_loss)
+                    elif (idx + 1) == len(train_data):
+                        running_loss.append(curr_loss / ((idx + 1) % 10))
                     else:
                         running_loss.append((curr_loss / 10))
                     test_total = 0
@@ -1259,4 +1265,3 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
         self.__running_loss = running_loss
         self.__running_acc = running_acc
         self.__running_curr_loss = running_curr_loss
-

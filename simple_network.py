@@ -999,6 +999,14 @@ class Net(AbstractNet):
         self.__running_acc = value
 
     @property
+    def weight_1(self):
+        return self._weight_1
+
+    @property
+    def weight_2(self):
+        return self._weight_2
+
+    @property
     def batch_size(self):
         return self.__batch_size
 
@@ -1122,8 +1130,13 @@ class Net(AbstractNet):
         test_dataset = CIFAR10(data_path, train=False, transform=transform, download=True)
         test_loader = DataLoader(test_dataset, batch_size=self.__batch_size, shuffle=True)
 
+        last_batch_idx = int(len(train_dataset) / self.__batch_size)
+        if len(train_dataset) % self.__batch_size != 0:
+            last_batch_idx = last_batch_idx + 1
+
         running_loss = []
         running_acc = []
+        running_curr_loss = []
         for epoch in range(num_of_epochs):
             curr_loss = torch.zeros(1).to(self.device)
             curr_acc = 0
@@ -1136,10 +1149,13 @@ class Net(AbstractNet):
                 self._backward()
                 self._optimizer(learning_rate)
                 curr_loss += loss
+                running_curr_loss.append(loss.item())
 
-                if idx == 0 or (idx + 1) % 10 == 0:
+                if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == last_batch_idx:
                     if idx == 0:
                         running_loss.append(curr_loss.item())
+                    elif (idx + 1) == last_batch_idx:
+                        running_loss.append((curr_loss / ((idx + 1) % 10)).item())
                     else:
                         running_loss.append((curr_loss / 10).item())
                     test_total = 0
@@ -1151,12 +1167,13 @@ class Net(AbstractNet):
                         curr_acc = curr_acc + torch.count_nonzero(pred_label == test_label)
                         test_total = test_total + test_data.size(0)
                     running_acc.append(curr_acc / test_total)
-                    if idx == 0 or (idx + 1) % 10 == 0:
+                    if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == last_batch_idx:
                         print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
                     curr_loss = torch.zeros(1).to(self.device)
                     curr_acc = 0
         self.__running_loss = running_loss
         self.__running_acc = running_acc
+        self.__running_curr_loss = running_curr_loss
 
     def train_vgg_cifar10(self, data_path: str, num_of_epochs: int, learning_rate: float, batch_size: int):
         self.__batch_size = batch_size
