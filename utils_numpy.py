@@ -7,7 +7,7 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision.datasets import FashionMNIST, CIFAR10
 from torchvision.transforms import Compose, ToTensor, Normalize, Lambda
-from torchvision.models import vgg16_bn, VGG16_BN_Weights 
+from torchvision.models import vgg16_bn, VGG16_BN_Weights
 
 
 ############
@@ -84,6 +84,7 @@ def finite_field_truncation(finite_field: ndarray, scale_down: int, prime: int) 
     return finite_field_domain
 
 
+# noinspection DuplicatedCode
 def to_finite_field_domain_int(real: float, quantization_bit: int, prime: int) -> int:
     scaled_real = real * (2 ** quantization_bit)
     finite_field_domain = round(scaled_real)
@@ -222,7 +223,7 @@ def load_all_data_cifar10(quantization_bit_data: int, quantization_bit_label: in
 
     # load data
     train_dataset = CIFAR10('./data', train=True, transform=transform, target_transform=target_transform,
-                                 download=True)
+                            download=True)
     train_loader = DataLoader(train_dataset, batch_size=len(train_dataset), shuffle=False)
 
     test_dataset = CIFAR10('./data', train=False, transform=transform, download=True)
@@ -239,6 +240,7 @@ def load_all_data_cifar10(quantization_bit_data: int, quantization_bit_label: in
     train_data, test_data = train_data.reshape((train_data.shape[0], -1)), test_data.reshape((test_data.shape[0], -1))
     return train_data, train_label, test_data, test_label
 
+
 def load_all_data_apply_vgg_cifar10(quantization_bit_data: int, quantization_bit_label: int, prime: int):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     transform = Compose([
@@ -252,7 +254,7 @@ def load_all_data_apply_vgg_cifar10(quantization_bit_data: int, quantization_bit
 
     # load data
     train_dataset = CIFAR10('./data', train=True, transform=transform, target_transform=target_transform,
-                                 download=True)
+                            download=True)
     train_loader = DataLoader(train_dataset, batch_size=256, shuffle=False)
 
     test_dataset = CIFAR10('./data', train=False, transform=transform, download=True)
@@ -262,7 +264,7 @@ def load_all_data_apply_vgg_cifar10(quantization_bit_data: int, quantization_bit
     vgg_backbone = torch.nn.Sequential(*(list(vgg_backbone.children())[:-1])).to(device)
 
     with torch.no_grad():
-        train_data_all, train_label_all, test_data_all, test_label_all = [], [], [], [] 
+        train_data_all, train_label_all, test_data_all, test_label_all = [], [], [], []
         for train_data, train_label in train_loader:
             train_data = train_data.to(device)
             train_data = vgg_backbone(train_data).reshape(train_data.size(0), -1).to('cpu').numpy()
@@ -284,9 +286,10 @@ def load_all_data_apply_vgg_cifar10(quantization_bit_data: int, quantization_bit
 
         info('test data is handled')
 
-    train_data_all, train_label_all = np.concatenate(train_data_all, axis=0), np.concatenate(train_label_all, axis=0) 
+    train_data_all, train_label_all = np.concatenate(train_data_all, axis=0), np.concatenate(train_label_all, axis=0)
     test_data_all, test_label_all = np.concatenate(test_data_all, axis=0), np.concatenate(test_label_all, axis=0)
     return train_data_all, train_label_all, test_data_all, test_label_all
+
 
 def create_batch_data(train_data, train_label, test_data, test_label, batch_size):
     train_num_samples, test_num_samples = train_data.shape[0], test_data.shape[0]

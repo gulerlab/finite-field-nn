@@ -149,6 +149,7 @@ if __name__ == '__main__':
         plt.savefig('acc_int_net_minibatch_np_vgg_cifar10.jpeg', dpi=300)
         plt.show()
 
+        # noinspection DuplicatedCode
         save_path = os.path.join('./params', '{}{}{}-{}{}{}-{}'.format(experiment_now.year, experiment_now.month,
                                                                        experiment_now.day, experiment_now.hour,
                                                                        experiment_now.minute,
@@ -203,6 +204,7 @@ if __name__ == '__main__':
         plt.show()
         plt.figure()
 
+        # noinspection DuplicatedCode
         save_path = os.path.join('./params', '{}{}{}-{}{}{}-{}'.format(experiment_now.year, experiment_now.month,
                                                                        experiment_now.day, experiment_now.hour,
                                                                        experiment_now.minute,
@@ -228,6 +230,3 @@ if __name__ == '__main__':
         with open(os.path.join(save_path, 'weight_2.npy'), 'wb') as fp:
             # noinspection PyTypeChecker
             np.save(fp, model.weight_2)
-
-
-
