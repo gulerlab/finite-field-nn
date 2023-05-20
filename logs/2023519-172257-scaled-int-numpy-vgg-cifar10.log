@@ -1,0 +1,33 @@
+INFO:root:weights are initialized
+INFO:root:datasets and loaders are initialized
+INFO:root:vgg backbone is loaded
+INFO:root:epoch: 0, iter: 1, loss: 1.0805116891860962
+INFO:root:epoch: 0, iter: 2, loss: 1.0745618343353274
+INFO:root:epoch: 0, iter: 3, loss: 1.002094030380249
+INFO:root:epoch: 0, iter: 4, loss: 1.0095303058624268
+INFO:root:epoch: 0, iter: 5, loss: 0.9784475564956664
+INFO:root:epoch: 0, iter: 6, loss: 0.9706121683120728
+INFO:root:epoch: 0, iter: 7, loss: 0.9409806728363036
+INFO:root:epoch: 0, iter: 8, loss: 0.9370634555816649
+INFO:root:epoch: 0, iter: 9, loss: 0.9301433563232423
+INFO:root:epoch: 0, iter: 10, loss: 0.9177440404891969
+INFO:root:epoch: 0, iter: 11, loss: 0.9220513105392457
+INFO:root:epoch: 0, iter: 12, loss: 0.8812984228134156
+INFO:root:epoch: 0, iter: 13, loss: 0.8839778900146484
+INFO:root:epoch: 0, iter: 14, loss: 0.8598450422286988
+INFO:root:epoch: 0, iter: 15, loss: 0.848401427268982
+INFO:root:epoch: 0, iter: 16, loss: 0.8962393999099731
+INFO:root:epoch: 0, iter: 17, loss: 0.9753586053848267
+INFO:root:epoch: 0, iter: 18, loss: 0.8640968799591064
+INFO:root:epoch: 0, iter: 19, loss: 0.8480709791183471
+INFO:root:epoch: 0, iter: 20, loss: 0.8193081617355347
+INFO:root:epoch: 0, iter: 21, loss: 0.8748914003372191
+INFO:root:epoch: 0, iter: 22, loss: 0.841886878013611
+INFO:root:epoch: 0, iter: 23, loss: 0.8173874616622925
+INFO:root:epoch: 0, iter: 24, loss: 0.8478660583496095
+INFO:root:epoch: 0, iter: 25, loss: 0.8374234437942506
+INFO:root:epoch: 0, iter: 26, loss: 0.8145217895507814
+INFO:root:epoch: 0, iter: 27, loss: 0.8117420673370362
+INFO:root:epoch: 0, iter: 28, loss: 0.847323179244995
+INFO:root:epoch: 0, iter: 29, loss: 0.7857068777084351
+INFO:root:epoch: 0, iter: 30, loss: 0.8048529624938964

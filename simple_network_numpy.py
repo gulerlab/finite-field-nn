@@ -10,6 +10,7 @@ import torch
 from torchvision.datasets import FashionMNIST, CIFAR10
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
+from torchvision.models import vgg16_bn, VGG16_BN_Weights
 
 # this project
 ## int training
@@ -816,6 +817,85 @@ class ScaledIntegerNetNumpy(AbstractNetNumpy):
                     curr_acc = 0
         self.__running_loss = running_loss
         self.__running_acc = running_acc
+
+    # noinspection DuplicatedCode
+    def train_vgg_cifar10(self, data_path: str, num_of_epochs: int, learning_rate: float, batch_size: int):
+        self.__batch_size = batch_size
+        self.__batch_size_param = int(np.log2(self.__batch_size))
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+        # transformations
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261)),
+        ])
+
+        target_transform = transforms.Compose([
+            transforms.Lambda(lambda y: torch.zeros(10, dtype=torch.float)
+                              .scatter_(0, torch.tensor(y), 1))
+        ])
+
+        # load data
+        train_dataset = CIFAR10(data_path, train=True, transform=transform, target_transform=target_transform,
+                                download=True)
+        train_loader = DataLoader(train_dataset, batch_size=self.__batch_size, shuffle=True)
+
+        test_dataset = CIFAR10(data_path, train=False, transform=transform, download=True)
+        test_loader = DataLoader(test_dataset, batch_size=self.__batch_size, shuffle=True)
+        last_batch_idx = int(len(train_dataset) / self.__batch_size)
+        if len(train_dataset) % self.__batch_size != 0:
+            last_batch_idx = last_batch_idx + 1
+
+        info('datasets and loaders are initialized')
+
+        vgg_backbone = vgg16_bn(weights=VGG16_BN_Weights.DEFAULT).eval()
+        vgg_backbone = torch.nn.Sequential(*(list(vgg_backbone.children())[:-1])).to(device)
+        info('vgg backbone is loaded')
+
+        with torch.no_grad():
+            running_loss = []
+            running_acc = []
+            running_curr_loss = []
+            for epoch in range(num_of_epochs):
+                curr_loss = 0
+                curr_acc = 0
+                for idx, (data, label) in enumerate(train_loader):
+                    data = data.to(device)
+                    data = vgg_backbone(data).reshape(data.size(0), -1).to('cpu')
+                    data = to_int_domain(data.numpy(), self.__scale_input_parameter)
+                    label = to_int_domain(label.numpy(), self.__scale_weight_parameter)
+
+                    out = self._forward(data)
+                    loss = self._criterion(label, out)
+                    self._backward()
+                    self._optimizer(learning_rate)
+                    curr_loss += loss
+                    info('epoch: {}, iter: {}, loss: {}'.format(epoch, idx + 1, loss))
+                    running_curr_loss.append(loss)
+
+                    if (idx + 1) % 100 == 0 or (idx + 1) == last_batch_idx:
+                        running_loss.append((curr_loss / 100))
+                        test_total = 0
+                        for test_data, test_label in test_loader:
+                            test_data = test_data.to(device)
+                            test_data = vgg_backbone(test_data).reshape(test_data.size(0), -1).to('cpu')
+                            test_data = to_int_domain(test_data.numpy(), self.__scale_input_parameter)
+                            test_out = self._forward(test_data, mode='eval')
+                            pred_label = np.argmax(test_out, axis=1)
+                            test_label = test_label.numpy()
+                            curr_acc = curr_acc + np.count_nonzero(pred_label == test_label)
+                            test_total = test_total + test_data.shape[0]
+                        running_acc.append(curr_acc / test_total)
+                        if (idx + 1) % 100 == 0 or (idx + 1) == last_batch_idx:
+                            print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                            info('#############epoch: {}, avg loss: {}, acc: {}#############'.format(epoch,
+                                                                                                     running_loss[-1],
+                                                                                                     running_acc[-1]),
+                                 verbose=False)
+                        curr_loss = 0
+                        curr_acc = 0
+            self.__running_loss = running_loss
+            self.__running_acc = running_acc
 
 
 # noinspection DuplicatedCode

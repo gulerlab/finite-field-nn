@@ -9,6 +9,7 @@ import torch.nn as nn
 from torchvision.datasets import FashionMNIST, CIFAR10
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
+from torchvision.models import vgg16_bn, VGG16_BN_Weights
 
 # this project
 from utils import to_real_domain, to_finite_field_domain, finite_field_truncation, ToFiniteFieldDomain, \
@@ -969,6 +970,7 @@ class Net(AbstractNet):
         self.__gradients = None
 
         self.__running_loss = None
+        self.__running_curr_loss = None
         self.__running_acc = None
         self.__batch_size = None
 
@@ -979,6 +981,14 @@ class Net(AbstractNet):
     @running_loss.setter
     def running_loss(self, value):
         self.__running_loss = value
+
+    @property
+    def running_curr_loss(self):
+        return self.__running_curr_loss
+
+    @running_curr_loss.setter
+    def running_curr_loss(self, value):
+        self.__running_curr_loss = value
 
     @property
     def running_acc(self):
@@ -1022,7 +1032,7 @@ class Net(AbstractNet):
 
     def _backward(self):
         first_forward, out, label, input_matrix, before_activation = self.__save_for_backward['first_forward'], \
-            self.__save_for_backward['out'], self.__save_for_backward['label'],\
+            self.__save_for_backward['out'], self.__save_for_backward['label'], \
             self.__save_for_backward['input_matrix'], self.__save_for_backward['before_activation']
 
         # weight_2 gradients
@@ -1147,3 +1157,140 @@ class Net(AbstractNet):
                     curr_acc = 0
         self.__running_loss = running_loss
         self.__running_acc = running_acc
+
+    def train_vgg_cifar10(self, data_path: str, num_of_epochs: int, learning_rate: float, batch_size: int):
+        self.__batch_size = batch_size
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+        # transformations
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
+        ])
+
+        target_transform = transforms.Lambda(lambda y: torch.zeros(10, dtype=torch.float)
+                                             .scatter_(0, torch.tensor(y), 1))
+        # load data
+        train_dataset = CIFAR10(data_path, train=True, transform=transform, target_transform=target_transform,
+                                download=True)
+        train_loader = DataLoader(train_dataset, batch_size=self.__batch_size, shuffle=True)
+
+        test_dataset = CIFAR10(data_path, train=False, transform=transform, download=True)
+        test_loader = DataLoader(test_dataset, batch_size=self.__batch_size, shuffle=True)
+
+        vgg_backbone = vgg16_bn(weights=VGG16_BN_Weights.DEFAULT).eval()
+        vgg_backbone = torch.nn.Sequential(*(list(vgg_backbone.children())[:-1])).to(device)
+
+        with torch.no_grad():
+            running_loss = []
+            running_acc = []
+            for epoch in range(num_of_epochs):
+                curr_loss = torch.zeros(1).to(self.device)
+                curr_acc = 0
+                for idx, (data, label) in enumerate(train_loader):
+                    data = data.to(device)
+                    data = vgg_backbone(data).reshape(data.size(0), -1).to(self.device)
+                    label = label.to(self.device)
+
+                    out = self._forward(data)
+                    loss = self._criterion(label, out)
+                    self._backward()
+                    self._optimizer(learning_rate)
+                    curr_loss += loss
+
+                    del data
+                    del label
+
+                    if idx == 0 or (idx + 1) % 10 == 0:
+                        if idx == 0:
+                            running_loss.append(curr_loss.item())
+                        else:
+                            running_loss.append((curr_loss / 10).item())
+                        test_total = 0
+                        for test_data, test_label in test_loader:
+                            test_data = test_data.to(device)
+                            test_data = vgg_backbone(test_data).reshape(test_data.size(0), -1).to(self.device)
+                            test_label = test_label.to(self.device)
+                            test_out = self._forward(test_data, mode='eval')
+                            pred_label = torch.argmax(test_out, dim=1)
+                            curr_acc = curr_acc + torch.count_nonzero(pred_label == test_label)
+                            test_total = test_total + test_data.size(0)
+                            del test_data
+                            del test_label
+                        running_acc.append(curr_acc / test_total)
+                        if idx == 0 or (idx + 1) % 10 == 0:
+                            print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                        curr_loss = torch.zeros(1).to(self.device)
+                        curr_acc = 0
+            self.__running_loss = running_loss
+            self.__running_acc = running_acc
+
+    # NOT WORKING
+    def train_vgg_cifar10_v2(self, data_path: str, num_of_epochs: int, learning_rate: float, batch_size: int):
+        self.__batch_size = batch_size
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+        # transformations
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
+        ])
+
+        target_transform = transforms.Lambda(lambda y: torch.zeros(10, dtype=torch.float)
+                                             .scatter_(0, torch.tensor(y), 1))
+        # load data
+        train_dataset = CIFAR10(data_path, train=True, transform=transform, target_transform=target_transform,
+                                download=True)
+        train_loader = DataLoader(train_dataset, batch_size=self.__batch_size, shuffle=True)
+
+        test_dataset = CIFAR10(data_path, train=False, transform=transform, download=True)
+        test_loader = DataLoader(test_dataset, batch_size=self.__batch_size, shuffle=True)
+
+        vgg_backbone = vgg16_bn(weights=VGG16_BN_Weights.DEFAULT)
+        vgg_backbone_without_classifier = torch.nn.Sequential(*(list(vgg_backbone.children())[:-1])).to(device)
+        first_classifier_layer = torch.nn.Sequential(*list(list(vgg_backbone.children())[-1]
+                                                           .children())[:-4]).to(device)
+
+        with torch.no_grad():
+            running_loss = []
+            running_acc = []
+            running_curr_loss = []
+            for epoch in range(num_of_epochs):
+                curr_loss = torch.zeros(1).to(self.device)
+                curr_acc = 0
+                for idx, (data, label) in enumerate(train_loader):
+                    data = data.to(device)
+                    data = vgg_backbone_without_classifier(data).reshape(data.size(0), -1)
+                    data = first_classifier_layer(data).to(self.device)
+                    label = label.to(self.device)
+
+                    out = self._forward(data)
+                    loss = self._criterion(label, out)
+                    self._backward()
+                    self._optimizer(learning_rate)
+                    curr_loss += loss
+                    running_curr_loss.append(loss.item())
+
+                    if idx == 0 or (idx + 1) % 10 == 0:
+                        if idx == 0:
+                            running_loss.append(curr_loss.item())
+                        else:
+                            running_loss.append((curr_loss / 10).item())
+                        test_total = 0
+                        for test_data, test_label in test_loader:
+                            test_data = test_data.to(device)
+                            test_data = vgg_backbone_without_classifier(test_data).reshape(test_data.size(0), -1)
+                            test_data = first_classifier_layer(test_data).to(self.device)
+                            test_label = test_label.to(self.device)
+                            test_out = self._forward(test_data, mode='eval')
+                            pred_label = torch.argmax(test_out, dim=1)
+                            curr_acc = curr_acc + torch.count_nonzero(pred_label == test_label)
+                            test_total = test_total + test_data.size(0)
+                        running_acc.append(curr_acc / test_total)
+                        if idx == 0 or (idx + 1) % 10 == 0:
+                            print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                        curr_loss = torch.zeros(1).to(self.device)
+                        curr_acc = 0
+            self.__running_loss = running_loss
+            self.__running_acc = running_acc
+            self.__running_curr_loss = running_curr_loss

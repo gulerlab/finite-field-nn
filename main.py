@@ -181,5 +181,50 @@ if __name__ == '__main__':
         plt.ylabel('acc')
         plt.savefig('acc_batch_128_cifar10.jpeg', dpi=300)
         plt.show()
-
+    elif args.mode == 'net-vgg-cifar10':
+        net = Net(device='cpu', feature_size=25088, hidden_layer_size=4096)
+        net.train_vgg_cifar10('./data', 1, 0.001, 128)
+        running_acc = net.running_acc
+        running_loss = net.running_loss
+        plt.figure()
+        plt.plot(range(len(running_loss)), running_loss)
+        plt.title('loss vs. iteration - net with batch size: 128 - VGG - CIFAR10')
+        plt.xlabel('iteration')
+        plt.ylabel('loss')
+        plt.savefig('loss_batch_128_vgg_cifar10.jpeg', dpi=300)
+        plt.show()
+        plt.figure()
+        plt.plot(range(len(running_acc)), running_acc)
+        plt.title('acc vs. iteration - net with batch size: 128 - VGG - CIFAR10')
+        plt.xlabel('iteration')
+        plt.ylabel('acc')
+        plt.savefig('acc_batch_128_vgg_cifar10.jpeg', dpi=300)
+        plt.show()
+    elif args.mode == 'net-vgg-cifar10-v2': # NOT WORKING
+        net = Net(device='cpu', feature_size=4096, hidden_layer_size=256)
+        net.train_vgg_cifar10_v2('./data', 1, 0.001, 128)
+        running_acc = net.running_acc
+        running_loss = net.running_loss
+        running_curr_loss = net.running_curr_loss
+        plt.figure()
+        plt.plot(range(len(running_loss)), running_loss)
+        plt.title('loss vs. iteration - net with batch size: 128 - VGGv2 - CIFAR10')
+        plt.xlabel('iteration')
+        plt.ylabel('loss')
+        plt.savefig('loss_batch_128_vgg_cifar10_v2.jpeg', dpi=300)
+        plt.show()
+        plt.figure()
+        plt.plot(range(len(running_acc)), running_acc)
+        plt.title('acc vs. iteration - net with batch size: 128 - VGGv2 - CIFAR10')
+        plt.xlabel('iteration')
+        plt.ylabel('acc')
+        plt.savefig('acc_batch_128_vgg_cifar10_v2.jpeg', dpi=300)
+        plt.show()
+        plt.figure()
+        plt.plot(range(len(running_curr_loss)), running_curr_loss)
+        plt.title('all loss vs. iteration - net with batch size: 128 - VGGv2 - CIFAR10')
+        plt.xlabel('iteration')
+        plt.ylabel('loss')
+        plt.savefig('all_loss_batch_128_vgg_cifar10_v2.jpeg', dpi=300)
+        plt.show()
 

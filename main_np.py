@@ -120,3 +120,22 @@ if __name__ == '__main__':
         plt.ylabel('acc')
         plt.savefig('acc_ff_net_minibatch_np_cifar10.jpeg', dpi=300)
         plt.show()
+    elif args.mode == 'scaled-int-numpy-vgg-cifar10':
+        model = ScaledIntegerNetNumpy(8, 8, 10, input_vector_size=25088, hidden_layer_size=128)
+        model.train_vgg_cifar10('./data', 1, 0.001, 128)
+        running_acc = model.running_acc
+        running_loss = model.running_loss
+        plt.figure()
+        plt.plot(range(len(running_loss)), running_loss)
+        plt.title('loss vs. iteration - finite field net (minibatch) - NumPy - VGG - CIFAR10')
+        plt.xlabel('iteration')
+        plt.ylabel('loss')
+        plt.savefig('loss_ff_net_minibatch_np_vgg_cifar10.jpeg', dpi=300)
+        plt.show()
+        plt.figure()
+        plt.plot(range(len(running_acc)), running_acc)
+        plt.title('acc vs. iteration - finite field net (minibatch) - NumPy - VGG - CIFAR10')
+        plt.xlabel('iteration')
+        plt.ylabel('acc')
+        plt.savefig('acc_ff_net_minibatch_np_vgg_cifar10.jpeg', dpi=300)
+        plt.show()
