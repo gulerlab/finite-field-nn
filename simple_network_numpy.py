@@ -18,7 +18,7 @@ from utils_numpy import to_int_domain, ToIntDomain, from_int_to_real_domain, int
 
 ## ff training
 from utils_numpy import to_real_domain, to_finite_field_domain, finite_field_truncation, load_all_data, \
-    from_finite_field_to_int_domain, create_batch_data, load_all_data_cifar10
+    from_finite_field_to_int_domain, create_batch_data, load_all_data_cifar10, load_all_data_apply_vgg_cifar10
 
 ## logging
 from utils_numpy import info
@@ -907,6 +907,7 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
 
         self.__running_loss = None
         self.__running_acc = None
+        self.__running_curr_loss = None
         self.batch_size = None
         self.batch_size_param = None
 
@@ -936,6 +937,14 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
     @running_acc.setter
     def running_acc(self, value):
         self.__running_acc = value
+    
+    @property
+    def running_curr_loss(self):
+        return self.__running_curr_loss
+
+    @running_curr_loss.setter
+    def running_curr_loss(self, value):
+        self.__running_curr_loss = value
 
     @property
     def batch_size(self):
@@ -1169,3 +1178,53 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
                     curr_acc = 0
         self.__running_loss = running_loss
         self.__running_acc = running_acc
+    
+    # noinspection DuplicatedCode
+    def train_vgg_cifar10(self, num_of_epochs: int, learning_rate: float, batch_size: int):
+        self.__batch_size = batch_size
+        self.__batch_size_param = int(np.log2(self.__batch_size))
+        train_data, train_label, test_data_all, test_label_all = load_all_data_apply_vgg_cifar10(self.__scale_input_parameter, 
+                                                                                                 self.__scale_weight_parameter,
+                                                                                                 self.__prime)
+        train_data, train_label, test_data_all, test_label_all = create_batch_data(train_data, train_label,
+                                                                                   test_data_all, test_label_all,
+                                                                                   self.__batch_size)
+        info('datasets and loaders are initialized')
+
+        running_loss = []
+        running_acc = []
+        running_curr_loss = []
+        for epoch in range(num_of_epochs):
+            curr_loss = 0
+            curr_acc = 0
+            for idx, (data, label) in enumerate(zip(train_data, train_label)):
+                out = self._forward(data)
+                loss = self._criterion(label, out)
+                self._backward()
+                self._optimizer(learning_rate)
+                curr_loss += loss
+                info('epoch: {}, iter: {}, loss: {}'.format(epoch, idx + 1, loss))
+                running_curr_loss.append(loss)
+
+                if (idx + 1) % 100 == 0 or (idx + 1) == len(train_data):
+                    running_loss.append((curr_loss / 100))
+                    test_total = 0
+                    for test_data, test_label in zip(test_data_all, test_label_all):
+                        test_out = self._forward(test_data, mode='eval')
+                        test_out = from_finite_field_to_int_domain(test_out, self.__prime)
+                        pred_label = np.argmax(test_out, axis=1)
+                        curr_acc = curr_acc + np.count_nonzero(pred_label == test_label)
+                        test_total = test_total + test_data.shape[0]
+                    running_acc.append(curr_acc / (test_total + 1))
+                    if (idx + 1) % 100 == 0 or (idx + 1) == len(train_data):
+                        print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                        info('#############epoch: {}, avg loss: {}, acc: {}#############'.format(epoch,
+                                                                                                 running_loss[-1],
+                                                                                                 running_acc[-1]),
+                             verbose=False)
+                    curr_loss = 0
+                    curr_acc = 0
+        self.__running_loss = running_loss
+        self.__running_acc = running_acc
+        self.__running_curr_loss = running_curr_loss
+
