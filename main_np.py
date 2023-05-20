@@ -174,7 +174,6 @@ if __name__ == '__main__':
         with open(os.path.join(save_path, 'weight_2.npy'), 'wb') as fp:
             # noinspection PyTypeChecker
             np.save(fp, model.weight_2)
-
     elif args.mode == 'scaled-ff-numpy-vgg-cifar10':
         model = ScaledFiniteFieldNetNumpy(8, 8, 10, 2**26 - 5, input_vector_size=25088, hidden_layer_size=128)
         model.train_vgg_cifar10(1, 0.001, 128)
@@ -183,24 +182,10 @@ if __name__ == '__main__':
         running_curr_loss = model.running_curr_loss
         plt.figure()
         plt.plot(range(len(running_loss)), running_loss)
-        plt.title('loss vs. iteration - integer net (minibatch) - NumPy - VGG - CIFAR10')
+        plt.title('loss vs. iteration - finite field net (minibatch) - NumPy - VGG - CIFAR10')
         plt.xlabel('iteration')
         plt.ylabel('loss')
-        plt.savefig('loss_int_net_minibatch_np_vgg_cifar10.jpeg', dpi=300)
-        plt.show()
-        plt.figure()
-        plt.plot(range(len(running_curr_loss)), running_curr_loss)
-        plt.title('all loss vs. iteration - integer net (minibatch) - NumPy - VGG - CIFAR10')
-        plt.xlabel('iteration')
-        plt.ylabel('all loss')
-        plt.savefig('all_loss_int_net_minibatch_np_vgg_cifar10.jpeg', dpi=300)
-        plt.show()
-        plt.figure()
-        plt.plot(range(len(running_acc)), running_acc)
-        plt.title('acc vs. iteration - integer net (minibatch) - NumPy - VGG - CIFAR10')
-        plt.xlabel('iteration')
-        plt.ylabel('acc')
-        plt.savefig('acc_int_net_minibatch_np_vgg_cifar10.jpeg', dpi=300)
+        plt.savefig('loss_ff_net_minibatch_np_vgg_cifar10.jpeg', dpi=300)
         plt.show()
         plt.figure()
         plt.plot(range(len(running_curr_loss)), running_curr_loss)
@@ -209,6 +194,40 @@ if __name__ == '__main__':
         plt.ylabel('all loss')
         plt.savefig('all_loss_ff_net_minibatch_np_vgg_cifar10.jpeg', dpi=300)
         plt.show()
-        
+        plt.figure()
+        plt.plot(range(len(running_acc)), running_acc)
+        plt.title('acc vs. iteration - finite field net (minibatch) - NumPy - VGG - CIFAR10')
+        plt.xlabel('iteration')
+        plt.ylabel('acc')
+        plt.savefig('acc_ff_net_minibatch_np_vgg_cifar10.jpeg', dpi=300)
+        plt.show()
+        plt.figure()
+
+        save_path = os.path.join('./params', '{}{}{}-{}{}{}-{}'.format(experiment_now.year, experiment_now.month,
+                                                                       experiment_now.day, experiment_now.hour,
+                                                                       experiment_now.minute,
+                                                                       experiment_now.second, args.mode))
+        os.makedirs(save_path)
+
+        with open(os.path.join(save_path, 'running_loss.npy'), 'wb') as fp:
+            # noinspection PyTypeChecker
+            np.save(fp, running_loss)
+
+        with open(os.path.join(save_path, 'running_acc.npy'), 'wb') as fp:
+            # noinspection PyTypeChecker
+            np.save(fp, running_acc)
+
+        with open(os.path.join(save_path, 'running_curr_loss.npy'), 'wb') as fp:
+            # noinspection PyTypeChecker
+            np.save(fp, running_curr_loss)
+
+        with open(os.path.join(save_path, 'weight_1.npy'), 'wb') as fp:
+            # noinspection PyTypeChecker
+            np.save(fp, model.weight_1)
+
+        with open(os.path.join(save_path, 'weight_2.npy'), 'wb') as fp:
+            # noinspection PyTypeChecker
+            np.save(fp, model.weight_2)
+
 
 

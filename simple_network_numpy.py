@@ -1015,6 +1015,14 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
     def prime(self, value):
         self.__prime = value
 
+    @property
+    def weight_1(self):
+        return self._weight_1
+
+    @property
+    def weight_2(self):
+        return self._weight_2
+
     def _criterion(self, label: np.ndarray, prediction: np.ndarray) -> np.float64:
         self.__save_for_backward['label'] = label
         real_label = to_real_domain(label, self.__scale_weight_parameter, self.__prime)
@@ -1227,8 +1235,11 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
                 info('epoch: {}, iter: {}, loss: {}'.format(epoch, idx + 1, loss))
                 running_curr_loss.append(loss)
 
-                if (idx + 1) % 100 == 0 or (idx + 1) == len(train_data):
-                    running_loss.append((curr_loss / 100))
+                if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == len(train_data):
+                    if idx == 0:
+                        running_loss.append(curr_loss)
+                    else:
+                        running_loss.append((curr_loss / 10))
                     test_total = 0
                     for test_data, test_label in zip(test_data_all, test_label_all):
                         test_out = self._forward(test_data, mode='eval')
@@ -1237,7 +1248,7 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
                         curr_acc = curr_acc + np.count_nonzero(pred_label == test_label)
                         test_total = test_total + test_data.shape[0]
                     running_acc.append(curr_acc / (test_total + 1))
-                    if (idx + 1) % 100 == 0 or (idx + 1) == len(train_data):
+                    if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == len(train_data):
                         print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
                         info('#############epoch: {}, avg loss: {}, acc: {}#############'.format(epoch,
                                                                                                  running_loss[-1],
