@@ -160,7 +160,7 @@ if __name__ == '__main__':
         plt.title('acc vs. iteration - net with batch size: 128')
         plt.xlabel('iteration')
         plt.ylabel('acc')
-        plt.savefig('acc_batch_128.jpeg', dpi=300)
+        plt.savefig('acc_real_batch_128.jpeg', dpi=300)
         plt.show()
     elif args.mode == 'net-cifar10':
         net = Net(device='cpu', feature_size=3072, hidden_layer_size=256)
@@ -179,7 +179,7 @@ if __name__ == '__main__':
         plt.title('acc vs. iteration - net with batch size: 128 - CIFAR10')
         plt.xlabel('iteration')
         plt.ylabel('acc')
-        plt.savefig('acc_batch_128_cifar10.jpeg', dpi=300)
+        plt.savefig('acc_real_batch_128_cifar10.jpeg', dpi=300)
         plt.show()
     elif args.mode == 'net-vgg-cifar10':
         net = Net(device='cpu', feature_size=25088, hidden_layer_size=128)
@@ -209,7 +209,7 @@ if __name__ == '__main__':
         # plt.title('acc vs. iteration - net with batch size: 128 - VGG - CIFAR10')
         # plt.xlabel('iteration')
         # plt.ylabel('acc')
-        # plt.savefig('acc_batch_128_vgg_cifar10.jpeg', dpi=300)
+        # plt.savefig('acc_real_batch_128_vgg_cifar10.jpeg', dpi=300)
         # plt.show()
     elif args.mode == 'net-vgg-cifar10-v2': # NOT WORKING
         net = Net(device='cpu', feature_size=4096, hidden_layer_size=256)
