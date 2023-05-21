@@ -123,7 +123,7 @@ if __name__ == '__main__':
         plt.show()
     elif args.mode == 'scaled-int-numpy-vgg-cifar10':
         model = ScaledIntegerNetNumpy(8, 8, 10, input_vector_size=25088, hidden_layer_size=128)
-        model.train_vgg_cifar10('./data', 1, 0.001, 128)
+        model.train_vgg_cifar10('./data', 1, 0.001, 256)
         running_acc = model.running_acc
         running_loss = model.running_loss
         running_curr_loss = model.running_curr_loss

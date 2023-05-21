@@ -648,7 +648,7 @@ class ScaledIntegerNetNumpy(AbstractNetNumpy):
         assert real_label.dtype == np.float64, 'predictions are not in real domain in loss'
         diff = real_label - real_prediction
         diff_norm = np.linalg.norm(diff)
-        return np.square(diff_norm) / self.__batch_size
+        return np.square(diff_norm) / prediction.shape[0]
 
     def _optimizer(self, learning_rate: float):
         weight_2_grad = int_truncation(self.__gradients['weight_2_grad'], self.__scale_learning_rate_parameter
@@ -1033,7 +1033,7 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
         assert real_label.dtype == np.float64, 'predictions are not in real domain in loss'
         diff = real_label - real_prediction
         diff_norm = np.linalg.norm(diff)
-        return np.square(diff_norm) / self.__batch_size
+        return np.square(diff_norm) / prediction.shape[0]
 
     def _optimizer(self, learning_rate: float):
         weight_2_grad = finite_field_truncation(self.__gradients['weight_2_grad'], self.__scale_learning_rate_parameter

@@ -1018,7 +1018,7 @@ class Net(AbstractNet):
         diff = label - prediction
         diff_norm = torch.linalg.norm(diff)
         self.__save_for_backward['label'] = label
-        return torch.square(diff_norm) / self.__batch_size
+        return torch.square(diff_norm) / prediction.size(0)
 
     def _optimizer(self, learning_rate: float):
         self._weight_2 = self._weight_2 - learning_rate * (self.__gradients['weight_2_grad'] / self.__batch_size)
@@ -1198,9 +1198,14 @@ class Net(AbstractNet):
         vgg_backbone = vgg16_bn(weights=VGG16_BN_Weights.DEFAULT).eval()
         vgg_backbone = torch.nn.Sequential(*(list(vgg_backbone.children())[:-1])).to(device)
 
+        last_batch_idx = int(len(train_dataset) / self.__batch_size)
+        if len(train_dataset) % self.__batch_size != 0:
+            last_batch_idx = last_batch_idx + 1
+
         with torch.no_grad():
             running_loss = []
             running_acc = []
+            running_curr_loss = []
             for epoch in range(num_of_epochs):
                 curr_loss = torch.zeros(1).to(self.device)
                 curr_acc = 0
@@ -1214,13 +1219,13 @@ class Net(AbstractNet):
                     self._backward()
                     self._optimizer(learning_rate)
                     curr_loss += loss
+                    running_curr_loss.append(loss.item())
 
-                    del data
-                    del label
-
-                    if idx == 0 or (idx + 1) % 10 == 0:
+                    if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == last_batch_idx:
                         if idx == 0:
                             running_loss.append(curr_loss.item())
+                        elif (idx + 1) == last_batch_idx:
+                            running_loss.append((curr_loss / ((idx + 1) % 10)).item())
                         else:
                             running_loss.append((curr_loss / 10).item())
                         test_total = 0
@@ -1241,6 +1246,7 @@ class Net(AbstractNet):
                         curr_acc = 0
             self.__running_loss = running_loss
             self.__running_acc = running_acc
+            self.__running_curr_loss = running_curr_loss
 
     # NOT WORKING
     def train_vgg_cifar10_v2(self, data_path: str, num_of_epochs: int, learning_rate: float, batch_size: int):
