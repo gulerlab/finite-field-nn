@@ -177,7 +177,7 @@ if __name__ == '__main__':
             np.save(fp, model.weight_2)
     elif args.mode == 'scaled-ff-numpy-vgg-cifar10':
         model = ScaledFiniteFieldNetNumpy(8, 8, 10, 2**26 - 5, input_vector_size=25088, hidden_layer_size=128)
-        model.train_vgg_cifar10(1, 0.001, 128)
+        model.train_vgg_cifar10(1, 0.001, 256)
         running_acc = model.running_acc
         running_loss = model.running_loss
         running_curr_loss = model.running_curr_loss
