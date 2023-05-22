@@ -31,6 +31,20 @@ class SimpleNetwork(nn.Module):
         return data
 
 
+class SimpleNetworkVGGCIFAR10(nn.Module):
+    def __init__(self, num_class=10):
+        super().__init__()
+        self.hidden_layer = nn.Linear(25088, 128, bias=False)
+        self.output_layer = nn.Linear(128, num_class, bias=False)
+        self.relu_act = nn.ReLU()
+
+    def forward(self, data):
+        data = self.hidden_layer(data)
+        data = self.relu_act(data)
+        data = self.output_layer(data)
+        return data
+
+
 # noinspection DuplicatedCode
 class AbstractVectorizedNet(ABC):
     def __init__(self, input_vector_size=784, hidden_layer_size=64, num_classes=10,
