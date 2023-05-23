@@ -18,7 +18,8 @@ from utils_numpy import to_int_domain, ToIntDomain, from_int_to_real_domain, int
 
 ## ff training
 from utils_numpy import to_real_domain, to_finite_field_domain, finite_field_truncation, load_all_data, \
-    from_finite_field_to_int_domain, create_batch_data, load_all_data_cifar10, load_all_data_apply_vgg_cifar10
+    from_finite_field_to_int_domain, create_batch_data, load_all_data_cifar10, load_all_data_apply_vgg_cifar10, \
+    load_all_data_mnist
 
 ## logging
 from utils_numpy import info
@@ -482,7 +483,7 @@ class ScaledVectorizedFiniteFieldNetNumpy(AbstractVectorizedNetNumpy):
 
 # noinspection DuplicatedCode
 class AbstractNetNumpy(ABC):
-    def __init__(self, input_vector_size=784, hidden_layer_size=64, num_classes=10):
+    def __init__(self, input_vector_size=784, hidden_layer_size=128, num_classes=10):
         self.__input_vector_size = input_vector_size
         self.__hidden_layer_size = hidden_layer_size
         self.__num_classes = num_classes
@@ -960,7 +961,7 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
     @running_acc.setter
     def running_acc(self, value):
         self.__running_acc = value
-    
+
     @property
     def running_curr_loss(self):
         return self.__running_curr_loss
@@ -1126,6 +1127,7 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
 
         running_loss = []
         running_acc = []
+        running_curr_loss = []
         for epoch in range(num_of_epochs):
             curr_loss = 0
             curr_acc = 0
@@ -1135,11 +1137,13 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
                 self._backward()
                 self._optimizer(learning_rate)
                 curr_loss += loss
-                info('epoch: {}, iter: {}, loss: {}'.format(epoch + 1, idx + 1, loss), verbose=False)
-
-                if idx == 0 or (idx + 1) % 10 == 0:
+                running_curr_loss.append(loss)
+                info('epoch: {}, iter: {}, loss: {}'.format(epoch + 1, idx + 1, loss))
+                if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == len(train_data):
                     if idx == 0:
                         running_loss.append(curr_loss)
+                    elif (idx + 1) == len(train_data):
+                        running_loss.append(curr_loss / ((idx + 1) % 10))
                     else:
                         running_loss.append((curr_loss / 10))
                     test_total = 0
@@ -1150,7 +1154,7 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
                         curr_acc = curr_acc + np.count_nonzero(pred_label == test_label)
                         test_total = test_total + test_data.shape[0]
                     running_acc.append(curr_acc / (test_total + 1))
-                    if idx == 0 or (idx + 1) % 10 == 0:
+                    if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == len(train_data):
                         print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
                         info('#############epoch: {}, avg loss: {}, acc: {}#############'.format(epoch,
                                                                                                  running_loss[-1],
@@ -1160,12 +1164,13 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
                     curr_acc = 0
         self.__running_loss = running_loss
         self.__running_acc = running_acc
-    
+        self.__running_curr_loss = running_curr_loss
+
     # noinspection DuplicatedCode
     def train_cifar10(self, num_of_epochs: int, learning_rate: float, batch_size: int):
         self.__batch_size = batch_size
         self.__batch_size_param = int(np.log2(self.__batch_size))
-        train_data, train_label, test_data_all, test_label_all = load_all_data_cifar10(self.__scale_input_parameter, 
+        train_data, train_label, test_data_all, test_label_all = load_all_data_cifar10(self.__scale_input_parameter,
                                                                                        self.__scale_weight_parameter,
                                                                                        self.__prime)
         train_data, train_label, test_data_all, test_label_all = create_batch_data(train_data, train_label,
@@ -1209,7 +1214,7 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
                     curr_acc = 0
         self.__running_loss = running_loss
         self.__running_acc = running_acc
-    
+
     # noinspection DuplicatedCode
     def train_vgg_cifar10(self, num_of_epochs: int, learning_rate: float, batch_size: int):
         self.__batch_size = batch_size
@@ -1239,6 +1244,59 @@ class ScaledFiniteFieldNetNumpy(AbstractNetNumpy):
                 info('epoch: {}, iter: {}, loss: {}'.format(epoch, idx + 1, loss))
                 running_curr_loss.append(loss)
 
+                if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == len(train_data):
+                    if idx == 0:
+                        running_loss.append(curr_loss)
+                    elif (idx + 1) == len(train_data):
+                        running_loss.append(curr_loss / ((idx + 1) % 10))
+                    else:
+                        running_loss.append((curr_loss / 10))
+                    test_total = 0
+                    for test_data, test_label in zip(test_data_all, test_label_all):
+                        test_out = self._forward(test_data, mode='eval')
+                        test_out = from_finite_field_to_int_domain(test_out, self.__prime)
+                        pred_label = np.argmax(test_out, axis=1)
+                        curr_acc = curr_acc + np.count_nonzero(pred_label == test_label)
+                        test_total = test_total + test_data.shape[0]
+                    running_acc.append(curr_acc / (test_total + 1))
+                    if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == len(train_data):
+                        print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                        info('#############epoch: {}, avg loss: {}, acc: {}#############'.format(epoch,
+                                                                                                 running_loss[-1],
+                                                                                                 running_acc[-1]),
+                             verbose=False)
+                    curr_loss = 0
+                    curr_acc = 0
+        self.__running_loss = running_loss
+        self.__running_acc = running_acc
+        self.__running_curr_loss = running_curr_loss
+
+    # noinspection DuplicatedCode
+    def train_mnist(self, data_path: str, num_of_epochs: int, learning_rate: float, batch_size: int):
+        self.__batch_size = batch_size
+        self.__batch_size_param = int(np.log2(self.__batch_size))
+        train_data, train_label, test_data_all, test_label_all = load_all_data_mnist(self.__scale_input_parameter,
+                                                                                     self.__scale_weight_parameter,
+                                                                                     self.__prime)
+        train_data, train_label, test_data_all, test_label_all = create_batch_data(train_data, train_label,
+                                                                                   test_data_all, test_label_all,
+                                                                                   self.__batch_size)
+        info('datasets and loaders are initialized')
+
+        running_loss = []
+        running_acc = []
+        running_curr_loss = []
+        for epoch in range(num_of_epochs):
+            curr_loss = 0
+            curr_acc = 0
+            for idx, (data, label) in enumerate(zip(train_data, train_label)):
+                out = self._forward(data)
+                loss = self._criterion(label, out)
+                self._backward()
+                self._optimizer(learning_rate)
+                curr_loss += loss
+                running_curr_loss.append(loss)
+                info('epoch: {}, iter: {}, loss: {}'.format(epoch + 1, idx + 1, loss))
                 if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == len(train_data):
                     if idx == 0:
                         running_loss.append(curr_loss)

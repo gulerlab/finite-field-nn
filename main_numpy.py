@@ -66,23 +66,39 @@ if __name__ == '__main__':
         plt.show()
     elif args.mode == 'scaled-ff-numpy':
         model = ScaledFiniteFieldNetNumpy(8, 8, 7, 2**26 - 5)
-        model.train('./data', 1, 0.01, 128)
+        model.train('./data', 1, 0.01, 256)
         running_acc = model.running_acc
         running_loss = model.running_loss
-        plt.figure()
-        plt.plot(range(len(running_loss)), running_loss)
-        plt.title('loss vs. iteration - finite field net (minibatch) - NumPy')
-        plt.xlabel('iteration')
-        plt.ylabel('loss')
-        plt.savefig('loss_ff_batch_128.jpeg', dpi=300)
-        plt.show()
-        plt.figure()
-        plt.plot(range(len(running_acc)), running_acc)
-        plt.title('acc vs. iteration - finite field net (minibatch) - NumPy')
-        plt.xlabel('iteration')
-        plt.ylabel('acc')
-        plt.savefig('acc_ff_batch_128.jpeg', dpi=300)
-        plt.show()
+        running_curr_loss = model.running_curr_loss
+
+        # noinspection DuplicatedCode
+        save_path = os.path.join('./params', '{}{}{}-{}{}{}-{}-fashion-mnist'.format(experiment_now.year,
+                                                                                     experiment_now.month,
+                                                                                     experiment_now.day,
+                                                                                     experiment_now.hour,
+                                                                                     experiment_now.minute,
+                                                                                     experiment_now.second, args.mode))
+        os.makedirs(save_path)
+
+        with open(os.path.join(save_path, 'running_loss.npy'), 'wb') as fp:
+            # noinspection PyTypeChecker
+            np.save(fp, running_loss)
+
+        with open(os.path.join(save_path, 'running_acc.npy'), 'wb') as fp:
+            # noinspection PyTypeChecker
+            np.save(fp, running_acc)
+
+        with open(os.path.join(save_path, 'running_curr_loss.npy'), 'wb') as fp:
+            # noinspection PyTypeChecker
+            np.save(fp, running_curr_loss)
+
+        with open(os.path.join(save_path, 'weight_1.npy'), 'wb') as fp:
+            # noinspection PyTypeChecker
+            np.save(fp, model.weight_1)
+
+        with open(os.path.join(save_path, 'weight_2.npy'), 'wb') as fp:
+            # noinspection PyTypeChecker
+            np.save(fp, model.weight_2)
     elif args.mode == 'scaled-int-numpy-cifar10':
         model = ScaledIntegerNetNumpy(8, 8, 10, input_vector_size=3072, hidden_layer_size=256)
         model.train_cifar10('./data', 1, 0.001, 128)
@@ -207,6 +223,42 @@ if __name__ == '__main__':
         # noinspection DuplicatedCode
         save_path = os.path.join('./params', '{}{}{}-{}{}{}-{}'.format(experiment_now.year, experiment_now.month,
                                                                        experiment_now.day, experiment_now.hour,
+                                                                       experiment_now.minute,
+                                                                       experiment_now.second, args.mode))
+        os.makedirs(save_path)
+
+        with open(os.path.join(save_path, 'running_loss.npy'), 'wb') as fp:
+            # noinspection PyTypeChecker
+            np.save(fp, running_loss)
+
+        with open(os.path.join(save_path, 'running_acc.npy'), 'wb') as fp:
+            # noinspection PyTypeChecker
+            np.save(fp, running_acc)
+
+        with open(os.path.join(save_path, 'running_curr_loss.npy'), 'wb') as fp:
+            # noinspection PyTypeChecker
+            np.save(fp, running_curr_loss)
+
+        with open(os.path.join(save_path, 'weight_1.npy'), 'wb') as fp:
+            # noinspection PyTypeChecker
+            np.save(fp, model.weight_1)
+
+        with open(os.path.join(save_path, 'weight_2.npy'), 'wb') as fp:
+            # noinspection PyTypeChecker
+            np.save(fp, model.weight_2)
+
+    elif args.mode == 'scaled-ff-numpy-mnist':
+        model = ScaledFiniteFieldNetNumpy(8, 8, 7, 2**26 - 5)
+        model.train_mnist('./data', 1, 0.01, 256)
+        running_acc = model.running_acc
+        running_loss = model.running_loss
+        running_curr_loss = model.running_curr_loss
+
+        # noinspection DuplicatedCode
+        save_path = os.path.join('./params', '{}{}{}-{}{}{}-{}'.format(experiment_now.year,
+                                                                       experiment_now.month,
+                                                                       experiment_now.day,
+                                                                       experiment_now.hour,
                                                                        experiment_now.minute,
                                                                        experiment_now.second, args.mode))
         os.makedirs(save_path)
