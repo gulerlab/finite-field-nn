@@ -5,9 +5,8 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-from simple_network_numpy import ScaledVectorizedIntegerNetNumpy, ScaledVectorizedFiniteFieldNetNumpy,\
+from simple_network_numpy import ScaledVectorizedIntegerNetNumpy, ScaledVectorizedFiniteFieldNetNumpy, \
     ScaledIntegerNetNumpy, ScaledFiniteFieldNetNumpy
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -15,7 +14,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     experiment_now = datetime.now()
-    year, month, day, hour, minute, second = experiment_now.year, experiment_now.month, experiment_now.day,\
+    year, month, day, hour, minute, second = experiment_now.year, experiment_now.month, experiment_now.day, \
         experiment_now.hour, experiment_now.minute, experiment_now.second
 
     log_file_name = '{}{}{}-{}{}{}-{}.log'.format(experiment_now.year, experiment_now.month, experiment_now.day,
@@ -43,7 +42,7 @@ if __name__ == '__main__':
         plt.savefig('acc_int_net_np.jpeg', dpi=300)
         plt.show()
     elif args.mode == 'scaled-vectorized-ff-numpy':
-        model = ScaledVectorizedFiniteFieldNetNumpy(8, 8, 10, 2**26 - 5)
+        model = ScaledVectorizedFiniteFieldNetNumpy(8, 8, 10, 2 ** 26 - 5)
         model.train('./data', 1, 0.001)
     elif args.mode == 'scaled-int-numpy':
         model = ScaledIntegerNetNumpy(8, 8, 7)
@@ -65,7 +64,7 @@ if __name__ == '__main__':
         plt.savefig('acc_int_batch_128.jpeg', dpi=300)
         plt.show()
     elif args.mode == 'scaled-ff-numpy':
-        model = ScaledFiniteFieldNetNumpy(8, 8, 7, 2**26 - 5)
+        model = ScaledFiniteFieldNetNumpy(8, 8, 7, 2 ** 26 - 5)
         model.train('./data', 1, 0.01, 256)
         running_acc = model.running_acc
         running_loss = model.running_loss
@@ -119,7 +118,7 @@ if __name__ == '__main__':
         plt.savefig('acc_int_batch_128_cifar10.jpeg', dpi=300)
         plt.show()
     elif args.mode == 'scaled-ff-numpy-cifar10':
-        model = ScaledFiniteFieldNetNumpy(8, 8, 10, 2**26 - 5, input_vector_size=3072, hidden_layer_size=256)
+        model = ScaledFiniteFieldNetNumpy(8, 8, 10, 2 ** 26 - 5, input_vector_size=3072, hidden_layer_size=256)
         model.train_cifar10(1, 0.001, 128)
         running_acc = model.running_acc
         running_loss = model.running_loss
@@ -192,7 +191,7 @@ if __name__ == '__main__':
             # noinspection PyTypeChecker
             np.save(fp, model.weight_2)
     elif args.mode == 'scaled-ff-numpy-vgg-cifar10':
-        model = ScaledFiniteFieldNetNumpy(8, 8, 10, 2**26 - 5, input_vector_size=25088, hidden_layer_size=128)
+        model = ScaledFiniteFieldNetNumpy(8, 8, 10, 2 ** 26 - 5, input_vector_size=25088, hidden_layer_size=128)
         model.train_vgg_cifar10(1, 0.001, 256)
         running_acc = model.running_acc
         running_loss = model.running_loss
@@ -248,7 +247,7 @@ if __name__ == '__main__':
             np.save(fp, model.weight_2)
 
     elif args.mode == 'scaled-ff-numpy-mnist':
-        model = ScaledFiniteFieldNetNumpy(8, 8, 7, 2**26 - 5)
+        model = ScaledFiniteFieldNetNumpy(8, 8, 7, 2 ** 26 - 5)
         model.train_mnist('./data', 1, 0.01, 256)
         running_acc = model.running_acc
         running_loss = model.running_loss

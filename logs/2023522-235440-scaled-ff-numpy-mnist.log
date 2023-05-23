@@ -1,0 +1,262 @@
+INFO:root:weights are initialized
+INFO:root:datasets and loaders are initialized
+INFO:root:epoch: 1, iter: 1, loss: 2.057431399822235
+INFO:root:#############epoch: 0, avg loss: 2.057431399822235, acc: 0.14808519148085192#############
+INFO:root:epoch: 1, iter: 2, loss: 1.3407282829284668
+INFO:root:epoch: 1, iter: 3, loss: 1.2299749851226804
+INFO:root:epoch: 1, iter: 4, loss: 1.1113977432250977
+INFO:root:epoch: 1, iter: 5, loss: 1.1358791589736936
+INFO:root:epoch: 1, iter: 6, loss: 1.0941427946090698
+INFO:root:epoch: 1, iter: 7, loss: 1.0212050080299377
+INFO:root:epoch: 1, iter: 8, loss: 0.9653692841529846
+INFO:root:epoch: 1, iter: 9, loss: 0.9234049916267395
+INFO:root:epoch: 1, iter: 10, loss: 0.8676674962043763
+INFO:root:#############epoch: 0, avg loss: 0.9689769744873047, acc: 0.5072492750724927#############
+INFO:root:epoch: 1, iter: 11, loss: 0.8631795644760132
+INFO:root:epoch: 1, iter: 12, loss: 0.8665462136268617
+INFO:root:epoch: 1, iter: 13, loss: 0.782593607902527
+INFO:root:epoch: 1, iter: 14, loss: 0.8130578398704528
+INFO:root:epoch: 1, iter: 15, loss: 0.7722448110580445
+INFO:root:epoch: 1, iter: 16, loss: 0.7366167306900024
+INFO:root:epoch: 1, iter: 17, loss: 0.7661529183387757
+INFO:root:epoch: 1, iter: 18, loss: 0.7430866956710815
+INFO:root:epoch: 1, iter: 19, loss: 0.8378386497497559
+INFO:root:epoch: 1, iter: 20, loss: 0.7043330073356627
+INFO:root:#############epoch: 0, avg loss: 0.7885650038719177, acc: 0.6454354564543545#############
+INFO:root:epoch: 1, iter: 21, loss: 0.6918282508850098
+INFO:root:epoch: 1, iter: 22, loss: 0.6463498473167419
+INFO:root:epoch: 1, iter: 23, loss: 0.6642188429832458
+INFO:root:epoch: 1, iter: 24, loss: 0.6385731101036072
+INFO:root:epoch: 1, iter: 25, loss: 0.6459026336669922
+INFO:root:epoch: 1, iter: 26, loss: 0.6149287223815918
+INFO:root:epoch: 1, iter: 27, loss: 0.693871796131134
+INFO:root:epoch: 1, iter: 28, loss: 0.686210036277771
+INFO:root:epoch: 1, iter: 29, loss: 0.7135002613067627
+INFO:root:epoch: 1, iter: 30, loss: 0.6855364441871643
+INFO:root:#############epoch: 0, avg loss: 0.668091994524002, acc: 0.7123287671232876#############
+INFO:root:epoch: 1, iter: 31, loss: 0.6679347753524779
+INFO:root:epoch: 1, iter: 32, loss: 0.6461615562438965
+INFO:root:epoch: 1, iter: 33, loss: 0.6347548961639405
+INFO:root:epoch: 1, iter: 34, loss: 0.648833394050598
+INFO:root:epoch: 1, iter: 35, loss: 0.6807007193565369
+INFO:root:epoch: 1, iter: 36, loss: 0.6152699589729309
+INFO:root:epoch: 1, iter: 37, loss: 0.6228724122047425
+INFO:root:epoch: 1, iter: 38, loss: 0.6025451421737672
+INFO:root:epoch: 1, iter: 39, loss: 0.5849667787551881
+INFO:root:epoch: 1, iter: 40, loss: 0.5861788392066956
+INFO:root:#############epoch: 0, avg loss: 0.6290218472480774, acc: 0.7509249075092491#############
+INFO:root:epoch: 1, iter: 41, loss: 0.5814051032066345
+INFO:root:epoch: 1, iter: 42, loss: 0.54978746175766
+INFO:root:epoch: 1, iter: 43, loss: 0.5184964537620544
+INFO:root:epoch: 1, iter: 44, loss: 0.5538036823272705
+INFO:root:epoch: 1, iter: 45, loss: 0.5350223779678345
+INFO:root:epoch: 1, iter: 46, loss: 0.5906057953834535
+INFO:root:epoch: 1, iter: 47, loss: 0.5945397615432738
+INFO:root:epoch: 1, iter: 48, loss: 0.5372227430343627
+INFO:root:epoch: 1, iter: 49, loss: 0.5776523351669312
+INFO:root:epoch: 1, iter: 50, loss: 0.6386144757270813
+INFO:root:#############epoch: 0, avg loss: 0.5677150189876556, acc: 0.7784221577842215#############
+INFO:root:epoch: 1, iter: 51, loss: 0.5807223916053772
+INFO:root:epoch: 1, iter: 52, loss: 0.5824143886566162
+INFO:root:epoch: 1, iter: 53, loss: 0.5175619721412659
+INFO:root:epoch: 1, iter: 54, loss: 0.5633662343025208
+INFO:root:epoch: 1, iter: 55, loss: 0.5769184231758118
+INFO:root:epoch: 1, iter: 56, loss: 0.5861757993698121
+INFO:root:epoch: 1, iter: 57, loss: 0.5958825945854186
+INFO:root:epoch: 1, iter: 58, loss: 0.6782594323158264
+INFO:root:epoch: 1, iter: 59, loss: 0.4937890768051147
+INFO:root:epoch: 1, iter: 60, loss: 0.536328375339508
+INFO:root:#############epoch: 0, avg loss: 0.5711418688297272, acc: 0.8026197380261973#############
+INFO:root:epoch: 1, iter: 61, loss: 0.5054768323898315
+INFO:root:epoch: 1, iter: 62, loss: 0.6053931713104249
+INFO:root:epoch: 1, iter: 63, loss: 0.5633254647254944
+INFO:root:epoch: 1, iter: 64, loss: 0.4619820713996888
+INFO:root:epoch: 1, iter: 65, loss: 0.4792247414588928
+INFO:root:epoch: 1, iter: 66, loss: 0.5462819337844848
+INFO:root:epoch: 1, iter: 67, loss: 0.5154009461402893
+INFO:root:epoch: 1, iter: 68, loss: 0.502177894115448
+INFO:root:epoch: 1, iter: 69, loss: 0.5596317052841187
+INFO:root:epoch: 1, iter: 70, loss: 0.5613060593605043
+INFO:root:#############epoch: 0, avg loss: 0.5300200819969177, acc: 0.8208179182081792#############
+INFO:root:epoch: 1, iter: 71, loss: 0.45128738880157476
+INFO:root:epoch: 1, iter: 72, loss: 0.4698740243911743
+INFO:root:epoch: 1, iter: 73, loss: 0.5045908093452454
+INFO:root:epoch: 1, iter: 74, loss: 0.45219230651855474
+INFO:root:epoch: 1, iter: 75, loss: 0.5035739541053772
+INFO:root:epoch: 1, iter: 76, loss: 0.4894367456436157
+INFO:root:epoch: 1, iter: 77, loss: 0.46421998739242554
+INFO:root:epoch: 1, iter: 78, loss: 0.4904351830482483
+INFO:root:epoch: 1, iter: 79, loss: 0.5427443981170655
+INFO:root:epoch: 1, iter: 80, loss: 0.44447511434555054
+INFO:root:#############epoch: 0, avg loss: 0.4812829911708832, acc: 0.831916808319168#############
+INFO:root:epoch: 1, iter: 81, loss: 0.46146267652511597
+INFO:root:epoch: 1, iter: 82, loss: 0.512292206287384
+INFO:root:epoch: 1, iter: 83, loss: 0.4539016485214234
+INFO:root:epoch: 1, iter: 84, loss: 0.49787318706512446
+INFO:root:epoch: 1, iter: 85, loss: 0.4704772233963012
+INFO:root:epoch: 1, iter: 86, loss: 0.41215670108795166
+INFO:root:epoch: 1, iter: 87, loss: 0.5595011711120605
+INFO:root:epoch: 1, iter: 88, loss: 0.48405385017395014
+INFO:root:epoch: 1, iter: 89, loss: 0.5167827606201172
+INFO:root:epoch: 1, iter: 90, loss: 0.41752386093139654
+INFO:root:#############epoch: 0, avg loss: 0.4786025285720825, acc: 0.8391160883911609#############
+INFO:root:epoch: 1, iter: 91, loss: 0.45040690898895264
+INFO:root:epoch: 1, iter: 92, loss: 0.4367344975471496
+INFO:root:epoch: 1, iter: 93, loss: 0.5023187398910522
+INFO:root:epoch: 1, iter: 94, loss: 0.47751122713088984
+INFO:root:epoch: 1, iter: 95, loss: 0.44993054866790766
+INFO:root:epoch: 1, iter: 96, loss: 0.4453173279762268
+INFO:root:epoch: 1, iter: 97, loss: 0.46934741735458374
+INFO:root:epoch: 1, iter: 98, loss: 0.4548468589782715
+INFO:root:epoch: 1, iter: 99, loss: 0.47903519868850714
+INFO:root:epoch: 1, iter: 100, loss: 0.4192978143692016
+INFO:root:#############epoch: 0, avg loss: 0.4584746539592743, acc: 0.8502149785021498#############
+INFO:root:epoch: 1, iter: 101, loss: 0.41552519798278803
+INFO:root:epoch: 1, iter: 102, loss: 0.4448268413543702
+INFO:root:epoch: 1, iter: 103, loss: 0.4203352928161621
+INFO:root:epoch: 1, iter: 104, loss: 0.49151682853698725
+INFO:root:epoch: 1, iter: 105, loss: 0.477280855178833
+INFO:root:epoch: 1, iter: 106, loss: 0.44036895036697393
+INFO:root:epoch: 1, iter: 107, loss: 0.4979145526885987
+INFO:root:epoch: 1, iter: 108, loss: 0.44226568937301636
+INFO:root:epoch: 1, iter: 109, loss: 0.4489774107933044
+INFO:root:epoch: 1, iter: 110, loss: 0.3822804093360901
+INFO:root:#############epoch: 0, avg loss: 0.4461292028427124, acc: 0.8563143685631437#############
+INFO:root:epoch: 1, iter: 111, loss: 0.43998759984970087
+INFO:root:epoch: 1, iter: 112, loss: 0.43231248855590826
+INFO:root:epoch: 1, iter: 113, loss: 0.411169707775116
+INFO:root:epoch: 1, iter: 114, loss: 0.48596310615539556
+INFO:root:epoch: 1, iter: 115, loss: 0.4608996510505676
+INFO:root:epoch: 1, iter: 116, loss: 0.4042893648147583
+INFO:root:epoch: 1, iter: 117, loss: 0.49438184499740606
+INFO:root:epoch: 1, iter: 118, loss: 0.5017657279968262
+INFO:root:epoch: 1, iter: 119, loss: 0.41051399707794184
+INFO:root:epoch: 1, iter: 120, loss: 0.46487182378768926
+INFO:root:#############epoch: 0, avg loss: 0.45061553120613096, acc: 0.8649135086491351#############
+INFO:root:epoch: 1, iter: 121, loss: 0.45993942022323614
+INFO:root:epoch: 1, iter: 122, loss: 0.44567799568176264
+INFO:root:epoch: 1, iter: 123, loss: 0.468894362449646
+INFO:root:epoch: 1, iter: 124, loss: 0.49913674592971796
+INFO:root:epoch: 1, iter: 125, loss: 0.4415018558502197
+INFO:root:epoch: 1, iter: 126, loss: 0.45101529359817505
+INFO:root:epoch: 1, iter: 127, loss: 0.5143288373947145
+INFO:root:epoch: 1, iter: 128, loss: 0.43284505605697626
+INFO:root:epoch: 1, iter: 129, loss: 0.4259808659553528
+INFO:root:epoch: 1, iter: 130, loss: 0.40071785449981684
+INFO:root:#############epoch: 0, avg loss: 0.4540038287639618, acc: 0.8733126687331267#############
+INFO:root:epoch: 1, iter: 131, loss: 0.44002711772918707
+INFO:root:epoch: 1, iter: 132, loss: 0.40164858102798456
+INFO:root:epoch: 1, iter: 133, loss: 0.3651006221771241
+INFO:root:epoch: 1, iter: 134, loss: 0.37676882743835455
+INFO:root:epoch: 1, iter: 135, loss: 0.4314828515052796
+INFO:root:epoch: 1, iter: 136, loss: 0.43784439563751215
+INFO:root:epoch: 1, iter: 137, loss: 0.3995493650436402
+INFO:root:epoch: 1, iter: 138, loss: 0.4006057977676391
+INFO:root:epoch: 1, iter: 139, loss: 0.3965837955474854
+INFO:root:epoch: 1, iter: 140, loss: 0.39407259225845337
+INFO:root:#############epoch: 0, avg loss: 0.404368394613266, acc: 0.875012498750125#############
+INFO:root:epoch: 1, iter: 141, loss: 0.46612513065338135
+INFO:root:epoch: 1, iter: 142, loss: 0.43387168645858765
+INFO:root:epoch: 1, iter: 143, loss: 0.41846197843551636
+INFO:root:epoch: 1, iter: 144, loss: 0.381775438785553
+INFO:root:epoch: 1, iter: 145, loss: 0.40192371606826777
+INFO:root:epoch: 1, iter: 146, loss: 0.42404735088348394
+INFO:root:epoch: 1, iter: 147, loss: 0.44388830661773676
+INFO:root:epoch: 1, iter: 148, loss: 0.41632914543151855
+INFO:root:epoch: 1, iter: 149, loss: 0.3953031897544861
+INFO:root:epoch: 1, iter: 150, loss: 0.4199501872062683
+INFO:root:#############epoch: 0, avg loss: 0.42016761302947997, acc: 0.8772122787721228#############
+INFO:root:epoch: 1, iter: 151, loss: 0.4071632623672485
+INFO:root:epoch: 1, iter: 152, loss: 0.37124305963516235
+INFO:root:epoch: 1, iter: 153, loss: 0.3626519441604614
+INFO:root:epoch: 1, iter: 154, loss: 0.42500513792037964
+INFO:root:epoch: 1, iter: 155, loss: 0.41953474283218384
+INFO:root:epoch: 1, iter: 156, loss: 0.4557141065597535
+INFO:root:epoch: 1, iter: 157, loss: 0.40064978599548334
+INFO:root:epoch: 1, iter: 158, loss: 0.39994430541992193
+INFO:root:epoch: 1, iter: 159, loss: 0.426862359046936
+INFO:root:epoch: 1, iter: 160, loss: 0.35709768533706665
+INFO:root:#############epoch: 0, avg loss: 0.4025866389274597, acc: 0.8817118288171183#############
+INFO:root:epoch: 1, iter: 161, loss: 0.39818620681762695
+INFO:root:epoch: 1, iter: 162, loss: 0.4585840702056884
+INFO:root:epoch: 1, iter: 163, loss: 0.42113530635833735
+INFO:root:epoch: 1, iter: 164, loss: 0.39145845174789423
+INFO:root:epoch: 1, iter: 165, loss: 0.3938705325126648
+INFO:root:epoch: 1, iter: 166, loss: 0.4464581608772278
+INFO:root:epoch: 1, iter: 167, loss: 0.41296213865280146
+INFO:root:epoch: 1, iter: 168, loss: 0.4031102657318116
+INFO:root:epoch: 1, iter: 169, loss: 0.3942601084709167
+INFO:root:epoch: 1, iter: 170, loss: 0.31483161449432373
+INFO:root:#############epoch: 0, avg loss: 0.4034856855869293, acc: 0.8837116288371163#############
+INFO:root:epoch: 1, iter: 171, loss: 0.3444742560386658
+INFO:root:epoch: 1, iter: 172, loss: 0.40279299020767206
+INFO:root:epoch: 1, iter: 173, loss: 0.41420686244964594
+INFO:root:epoch: 1, iter: 174, loss: 0.3929862976074218
+INFO:root:epoch: 1, iter: 175, loss: 0.33797317743301397
+INFO:root:epoch: 1, iter: 176, loss: 0.4376155734062195
+INFO:root:epoch: 1, iter: 177, loss: 0.37621182203292847
+INFO:root:epoch: 1, iter: 178, loss: 0.39700776338577265
+INFO:root:epoch: 1, iter: 179, loss: 0.3741993308067322
+INFO:root:epoch: 1, iter: 180, loss: 0.44956165552139277
+INFO:root:#############epoch: 0, avg loss: 0.3927029728889465, acc: 0.8852114788521148#############
+INFO:root:epoch: 1, iter: 181, loss: 0.42486554384231573
+INFO:root:epoch: 1, iter: 182, loss: 0.3848684430122375
+INFO:root:epoch: 1, iter: 183, loss: 0.3720828294754029
+INFO:root:epoch: 1, iter: 184, loss: 0.3683422803878784
+INFO:root:epoch: 1, iter: 185, loss: 0.40660315752029413
+INFO:root:epoch: 1, iter: 186, loss: 0.4022205471992493
+INFO:root:epoch: 1, iter: 187, loss: 0.34032106399536133
+INFO:root:epoch: 1, iter: 188, loss: 0.36919271945953364
+INFO:root:epoch: 1, iter: 189, loss: 0.3524572849273681
+INFO:root:epoch: 1, iter: 190, loss: 0.36748600006103516
+INFO:root:#############epoch: 0, avg loss: 0.37884398698806765, acc: 0.8882111788821118#############
+INFO:root:epoch: 1, iter: 191, loss: 0.353188693523407
+INFO:root:epoch: 1, iter: 192, loss: 0.45156985521316534
+INFO:root:epoch: 1, iter: 193, loss: 0.38764762878417963
+INFO:root:epoch: 1, iter: 194, loss: 0.45821672677993774
+INFO:root:epoch: 1, iter: 195, loss: 0.3900588154792785
+INFO:root:epoch: 1, iter: 196, loss: 0.3856328725814819
+INFO:root:epoch: 1, iter: 197, loss: 0.4326349496841431
+INFO:root:epoch: 1, iter: 198, loss: 0.3762490153312683
+INFO:root:epoch: 1, iter: 199, loss: 0.37952047586441034
+INFO:root:epoch: 1, iter: 200, loss: 0.3309501409530639
+INFO:root:#############epoch: 0, avg loss: 0.3945669174194336, acc: 0.8945105489451055#############
+INFO:root:epoch: 1, iter: 201, loss: 0.375258207321167
+INFO:root:epoch: 1, iter: 202, loss: 0.3002398014068604
+INFO:root:epoch: 1, iter: 203, loss: 0.33991551399230957
+INFO:root:epoch: 1, iter: 204, loss: 0.43232524394989014
+INFO:root:epoch: 1, iter: 205, loss: 0.35440766811370855
+INFO:root:epoch: 1, iter: 206, loss: 0.3401168584823608
+INFO:root:epoch: 1, iter: 207, loss: 0.4244155883789062
+INFO:root:epoch: 1, iter: 208, loss: 0.35632497072219843
+INFO:root:epoch: 1, iter: 209, loss: 0.31008875370025635
+INFO:root:epoch: 1, iter: 210, loss: 0.36706155538558966
+INFO:root:#############epoch: 0, avg loss: 0.36001541614532473, acc: 0.8963103689631037#############
+INFO:root:epoch: 1, iter: 211, loss: 0.37004524469375605
+INFO:root:epoch: 1, iter: 212, loss: 0.3740419745445252
+INFO:root:epoch: 1, iter: 213, loss: 0.3459970951080322
+INFO:root:epoch: 1, iter: 214, loss: 0.3136714100837707
+INFO:root:epoch: 1, iter: 215, loss: 0.4156433939933777
+INFO:root:epoch: 1, iter: 216, loss: 0.31935822963714594
+INFO:root:epoch: 1, iter: 217, loss: 0.33212441205978394
+INFO:root:epoch: 1, iter: 218, loss: 0.3433794975280762
+INFO:root:epoch: 1, iter: 219, loss: 0.31265968084335327
+INFO:root:epoch: 1, iter: 220, loss: 0.3570391535758972
+INFO:root:#############epoch: 0, avg loss: 0.34839600920677183, acc: 0.8949105089491051#############
+INFO:root:epoch: 1, iter: 221, loss: 0.3522682189941407
+INFO:root:epoch: 1, iter: 222, loss: 0.33752387762069697
+INFO:root:epoch: 1, iter: 223, loss: 0.31938403844833374
+INFO:root:epoch: 1, iter: 224, loss: 0.3705878853797913
+INFO:root:epoch: 1, iter: 225, loss: 0.34811824560165405
+INFO:root:epoch: 1, iter: 226, loss: 0.35849648714065546
+INFO:root:epoch: 1, iter: 227, loss: 0.35446614027023315
+INFO:root:epoch: 1, iter: 228, loss: 0.2830103039741516
+INFO:root:epoch: 1, iter: 229, loss: 0.3151755332946777
+INFO:root:epoch: 1, iter: 230, loss: 0.3347198963165283
+INFO:root:#############epoch: 0, avg loss: 0.3373750627040863, acc: 0.8973102689731027#############
+INFO:root:epoch: 1, iter: 231, loss: 0.2323485612869263
+INFO:root:epoch: 1, iter: 232, loss: 0.3166150450706482
+INFO:root:epoch: 1, iter: 233, loss: 0.30863302946090704
+INFO:root:epoch: 1, iter: 234, loss: 0.3005822896957397
+INFO:root:epoch: 1, iter: 235, loss: 0.3847176233927409
+INFO:root:#############epoch: 0, avg loss: 0.3085793097813924, acc: 0.8973102689731027#############
