@@ -134,8 +134,8 @@ if __name__ == '__main__':
             last_batch_idx = last_batch_idx + 1
 
         model = SimpleNetworkVGGCIFAR10().to(device)
-        optimizer = SGD(model.parameters(), lr=0.1)
-        criterion = nn.MSELoss()
+        optimizer = SGD(model.parameters(), lr=0.0001)
+        criterion = nn.MSELoss(reduction='sum')
         running_loss = []
         running_acc = []
         running_curr_loss = []
@@ -152,8 +152,8 @@ if __name__ == '__main__':
                 loss = criterion(label, out)
                 loss.backward()
                 optimizer.step()
-                curr_loss += loss
-                running_curr_loss.append(loss.item())
+                curr_loss += loss / data.size(0)
+                running_curr_loss.append(loss.item() / data.size(0))
 
                 with torch.no_grad():
                     if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == last_batch_idx:
@@ -319,3 +319,19 @@ if __name__ == '__main__':
         plt.ylabel('loss')
         plt.savefig('all_loss_batch_128_vgg_cifar10_v2.jpeg', dpi=300)
         plt.show()
+    elif args.mode == 'net-vgg-cifar10-relu':
+        net = Net(device='cpu', feature_size=25088, hidden_layer_size=128)
+        net.train_vgg_cifar10_relu('./data', 1, 0.001, 256)
+        running_acc = net.running_acc
+        running_loss = net.running_loss
+        running_curr_loss = net.running_curr_loss
+        weight_1 = net.weight_1
+        weight_2 = net.weight_2
+
+        torch.save({
+            'weight_1': weight_1,
+            'weight_2': weight_2,
+            'running_acc': running_acc,
+            'running_loss': running_loss,
+            'running_curr_loss': running_curr_loss
+        }, '{}.pth'.format(args.mode))

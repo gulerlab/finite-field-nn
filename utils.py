@@ -125,6 +125,20 @@ def finite_field_truncation_int(finite_field: int, scale_down: int) -> int:
     return finite_field_domain
 
 
+def relu(input_sample: torch.Tensor) -> torch.Tensor:
+    result = torch.zeros(input_sample.size())
+    pos_mask = input_sample > 0
+    result[pos_mask] = input_sample[pos_mask]
+    return result
+
+
+def grad_relu(input_sample: torch.Tensor) -> torch.Tensor:
+    result = torch.zeros(input_sample.size())
+    pos_mask = input_sample > 0
+    result[pos_mask] = 1
+    return result
+
+
 class ToFiniteFieldDomain(object):
     def __init__(self, scale_input_parameter, prime):
         self.__scale_input_parameter = scale_input_parameter
