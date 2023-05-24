@@ -80,7 +80,7 @@ if __name__ == '__main__':
         num_epoch, batch_size = 1, 256
         net = FiniteFieldClover(scaled_input, scale_weight, learning_rate, prime,
                                 feature_size=feature_size, hidden_layer_size=hidden_layer_size, num_classes=num_class)
-        net.train_cifar10(num_epoch, batch_size)
+        net.train_vgg_cifar10(num_epoch, batch_size)
     if net is not None:
         save_params(args.mode, experiment_now, net)
     else:
