@@ -1148,7 +1148,7 @@ class Net(AbstractNet):
             curr_acc = 0
             for idx, (data, label) in enumerate(train_loader):
                 data, label = data.to(self.device), label.to(self.device)
-                data, label = data.squeeze().reshape(data.size(0), -1), label.reshape(label.size(0), -1)
+                data, label = data.reshape(data.size(0), -1), label.reshape(label.size(0), -1)
 
                 out = self._forward(data)
                 loss = self._criterion(label, out)
@@ -1213,7 +1213,7 @@ class Net(AbstractNet):
             curr_acc = 0
             for idx, (data, label) in enumerate(train_loader):
                 data, label = data.to(self.device), label.to(self.device)
-                data, label = data.squeeze().reshape(data.size(0), -1), label.reshape(label.size(0), -1)
+                data, label = data.reshape(data.size(0), -1), label.reshape(label.size(0), -1)
 
                 out = self._forward(data)
                 loss = self._criterion(label, out)
@@ -1233,7 +1233,7 @@ class Net(AbstractNet):
                     test_total = 0
                     for test_data, test_label in test_loader:
                         test_data, test_label = test_data.to(self.device), test_label.to(self.device)
-                        test_data = test_data.squeeze().reshape(test_data.size(0), -1)
+                        test_data = test_data.reshape(test_data.size(0), -1)
                         test_out = self._forward(test_data, mode='eval')
                         pred_label = torch.argmax(test_out, dim=1)
                         curr_acc = curr_acc + torch.count_nonzero(pred_label == test_label)

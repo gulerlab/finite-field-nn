@@ -382,7 +382,7 @@ if __name__ == '__main__':
         }, '{}-fashion-mnist.pth'.format(args.mode))
     elif args.mode == 'net-mnist':
         net = Net(device='cpu')
-        net.train('./data', 1, 0.01, 256)
+        net.train_mnist('./data', 1, 0.01, 256)
         torch.save({
             'weight_1': net.weight_1,
             'weight_2': net.weight_2,
