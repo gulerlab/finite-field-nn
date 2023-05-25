@@ -1529,3 +1529,68 @@ class Net(AbstractNet):
             self.__running_loss = running_loss
             self.__running_acc = running_acc
             self.__running_curr_loss = running_curr_loss
+
+    def train_relu(self, data_path: str, num_of_epochs: int, learning_rate: float, batch_size: int):
+        self.__batch_size = batch_size
+
+        # transformations
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.5,), (0.5,))
+        ])
+
+        target_transform = transforms.Lambda(lambda y: torch.zeros(10, dtype=torch.float)
+                                             .scatter_(0, torch.tensor(y), 1))
+        # load data
+        train_dataset = FashionMNIST(data_path, train=True, transform=transform, target_transform=target_transform,
+                                     download=True)
+        train_loader = DataLoader(train_dataset, batch_size=self.__batch_size, shuffle=True)
+
+        test_dataset = FashionMNIST(data_path, train=False, transform=transform, download=True)
+        test_loader = DataLoader(test_dataset, batch_size=self.__batch_size, shuffle=True)
+
+        last_batch_idx = int(len(train_dataset) / self.__batch_size)
+        if len(train_dataset) % self.__batch_size != 0:
+            last_batch_idx = last_batch_idx + 1
+
+        running_loss = []
+        running_acc = []
+        running_curr_loss = []
+        for epoch in range(num_of_epochs):
+            curr_loss = torch.zeros(1).to(self.device)
+            curr_acc = 0
+            for idx, (data, label) in enumerate(train_loader):
+                data, label = data.to(self.device), label.to(self.device)
+                data, label = data.reshape(data.size(0), -1), label.reshape(label.size(0), -1)
+
+                out = self._forward_relu(data)
+                loss = self._criterion(label, out)
+                self._backward_relu()
+                self.__curr_batch_size = data.size(0)
+                self._optimizer(learning_rate)
+                curr_loss += loss
+                running_curr_loss.append(loss)
+
+                if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == last_batch_idx:
+                    if idx == 0:
+                        running_loss.append(curr_loss.item())
+                    elif (idx + 1) == last_batch_idx:
+                        running_loss.append((curr_loss / ((idx + 1) % 10)).item())
+                    else:
+                        running_loss.append((curr_loss / 10).item())
+                    test_total = 0
+                    for test_data, test_label in test_loader:
+                        test_data, test_label = test_data.to(self.device), test_label.to(self.device)
+                        test_data = test_data.squeeze().reshape(test_data.size(0), -1)
+                        test_out = self._forward(test_data, mode='eval')
+                        pred_label = torch.argmax(test_out, dim=1)
+                        curr_acc = curr_acc + torch.count_nonzero(pred_label == test_label)
+                        test_total = test_total + test_data.size(0)
+                    running_acc.append(curr_acc / test_total)
+                    if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == last_batch_idx:
+                        print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
+                    curr_loss = torch.zeros(1).to(self.device)
+                    curr_acc = 0
+        self.__running_loss = running_loss
+        self.__running_acc = running_acc
+        self.__running_curr_loss = running_curr_loss

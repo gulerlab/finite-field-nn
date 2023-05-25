@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import argparse
 import torch.nn as nn
-from torch.optim import SGD
+from torch.optim import SGD, Adam
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -134,7 +134,7 @@ if __name__ == '__main__':
             last_batch_idx = last_batch_idx + 1
 
         model = SimpleNetworkVGGCIFAR10().to(device)
-        optimizer = SGD(model.parameters(), lr=0.1)
+        optimizer = Adam(model.parameters(), lr=0.0001)
         criterion = nn.MSELoss()
         running_loss = []
         running_acc = []
@@ -210,7 +210,7 @@ if __name__ == '__main__':
             last_batch_idx = last_batch_idx + 1
 
         model = SimpleNetworkReLU().to(device)
-        optimizer = SGD(model.parameters(), lr=0.1)
+        optimizer = Adam(model.parameters(), lr=0.001)
         criterion = nn.MSELoss()
         running_loss = []
         running_acc = []
@@ -283,7 +283,7 @@ if __name__ == '__main__':
             last_batch_idx = last_batch_idx + 1
 
         model = SimpleNetworkReLU().to(device)
-        optimizer = SGD(model.parameters(), lr=0.1)
+        optimizer = Adam(model.parameters(), lr=0.001)
         criterion = nn.MSELoss()
         running_loss = []
         running_acc = []
@@ -383,6 +383,16 @@ if __name__ == '__main__':
     elif args.mode == 'net-mnist':
         net = Net(device='cpu')
         net.train_mnist('./data', 1, 0.01, 256)
+        torch.save({
+            'weight_1': net.weight_1,
+            'weight_2': net.weight_2,
+            'running_acc': net.running_acc,
+            'running_loss': net.running_loss,
+            'running_curr_loss': net.running_curr_loss
+        }, '{}.pth'.format(args.mode))
+    elif args.mode == 'net-fashion-mnist-relu':
+        net = Net(device='cpu')
+        net.train_relu('./data', 1, 0.02, 256)
         torch.save({
             'weight_1': net.weight_1,
             'weight_2': net.weight_2,
