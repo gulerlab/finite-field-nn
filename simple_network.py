@@ -686,7 +686,7 @@ class ScaledVectorizedIntegerNet(AbstractVectorizedNet):
             'max_input': self.__max_input_value,
             'running_loss': self.__running_loss,
             'running_acc': self.__running_loss
-        }, 'params/scaled_vectorized_int_nn_params.tar.gz')
+        }, 'params/hist_params/scaled_vectorized_int_nn_params.tar.gz')
 
 
 # noinspection DuplicatedCode
