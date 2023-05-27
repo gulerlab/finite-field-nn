@@ -37,7 +37,7 @@ def save_params(mode, experiment_datetime, model):
         np.save(fp, model.weight_2)
 
     with open(os.path.join(save_path, 'elapsed_time.txt'), 'w') as fp:
-        fp.write(model.elapsed_time)
+        fp.write('{} seconds'.format(model.elapsed_time))
 
 
 if __name__ == '__main__':
