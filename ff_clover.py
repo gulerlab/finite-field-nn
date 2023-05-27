@@ -7,6 +7,7 @@
 # extra utils
 from abc import ABC, abstractmethod
 import math
+import time
 
 # numpy
 import numpy as np
@@ -44,6 +45,7 @@ class AbstractFiniteField(ABC):
         self._weight_2 = None
 
         self.__init_weight()
+        self._elapsed_time = -1
 
     def __init_weight(self):
         """
@@ -101,6 +103,10 @@ class AbstractFiniteField(ABC):
     @property
     def weight_2(self):
         return self._weight_2
+
+    @property
+    def elapsed_time(self):
+        return self._elapsed_time
 
     # basis methods that should be used in every finite field setup
     @abstractmethod
@@ -311,6 +317,7 @@ class FiniteFieldClover(AbstractFiniteField):
         running_loss = []
         running_acc = []
         running_curr_loss = []
+        start_training = time.time()
         for epoch in range(num_of_epochs):
             curr_loss = 0
             curr_acc = 0
@@ -350,6 +357,8 @@ class FiniteFieldClover(AbstractFiniteField):
                              verbose=False)
                     curr_loss = 0
                     curr_acc = 0
+        self._elapsed_time = time.time() - start_training
+        info('elapsed time: {} seconds'.format(self._elapsed_time))
         self.__running_loss = running_loss
         self.__running_acc = running_acc
         self.__running_curr_loss = running_curr_loss
@@ -376,6 +385,7 @@ class FiniteFieldClover(AbstractFiniteField):
         running_loss = []
         running_acc = []
         running_curr_loss = []
+        start_training = time.time()
         for epoch in range(num_of_epochs):
             curr_loss = 0
             curr_acc = 0
@@ -413,6 +423,8 @@ class FiniteFieldClover(AbstractFiniteField):
                              verbose=False)
                     curr_loss = 0
                     curr_acc = 0
+        self._elapsed_time = time.time() - start_training
+        info('elapsed time: {} seconds'.format(self._elapsed_time))
         self.__running_loss = running_loss
         self.__running_acc = running_acc
         self.__running_curr_loss = running_curr_loss
@@ -441,6 +453,7 @@ class FiniteFieldClover(AbstractFiniteField):
         running_loss = []
         running_acc = []
         running_curr_loss = []
+        start_training = time.time()
         for epoch in range(num_of_epochs):
             curr_loss = 0
             curr_acc = 0
@@ -480,6 +493,8 @@ class FiniteFieldClover(AbstractFiniteField):
                              verbose=False)
                     curr_loss = 0
                     curr_acc = 0
+        self._elapsed_time = time.time() - start_training
+        info('elapsed time: {} seconds'.format(self._elapsed_time))
         self.__running_loss = running_loss
         self.__running_acc = running_acc
         self.__running_curr_loss = running_curr_loss
@@ -506,6 +521,7 @@ class FiniteFieldClover(AbstractFiniteField):
         running_loss = []
         running_acc = []
         running_curr_loss = []
+        start_training = time.time()
         for epoch in range(num_of_epochs):
             curr_loss = 0
             curr_acc = 0
@@ -545,6 +561,8 @@ class FiniteFieldClover(AbstractFiniteField):
                              verbose=False)
                     curr_loss = 0
                     curr_acc = 0
+        self._elapsed_time = time.time() - start_training
+        info('elapsed time: {} seconds'.format(self._elapsed_time))
         self.__running_loss = running_loss
         self.__running_acc = running_acc
         self.__running_curr_loss = running_curr_loss

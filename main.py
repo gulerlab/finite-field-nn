@@ -8,7 +8,8 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import argparse
 import torch.nn as nn
-from torch.optim import SGD, Adam
+from torch.optim import Adam
+import time
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -139,6 +140,7 @@ if __name__ == '__main__':
         running_loss = []
         running_acc = []
         running_curr_loss = []
+        start_training = time.time()
         for epoch in range(num_of_epochs):
             curr_loss = torch.zeros(1).to(device)
             for idx, (data, label) in enumerate(train_loader):
@@ -178,11 +180,14 @@ if __name__ == '__main__':
                         if idx == 0 or (idx + 1) % 10 == 0:
                             print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
                         curr_loss = torch.zeros(1).to(device)
+        elapsed_training_time = time.time() - start_training
         torch.save({
             'running_acc': running_acc,
             'running_loss': running_loss,
             'running_curr_loss': running_curr_loss
         }, '{}.pth'.format(args.mode))
+        with open('elapsed_time_torch_cifar10_vgg.txt', 'w') as fp:
+            fp.write('{} seconds'.format(elapsed_training_time))
     elif args.mode == 'torch-fashion-mnist':
         batch_size = 256
         num_of_epochs = 1
@@ -215,6 +220,7 @@ if __name__ == '__main__':
         running_loss = []
         running_acc = []
         running_curr_loss = []
+        start_training = time.time()
         for epoch in range(num_of_epochs):
             curr_loss = torch.zeros(1).to(device)
             for idx, (data, label) in enumerate(train_loader):
@@ -251,11 +257,14 @@ if __name__ == '__main__':
                         if idx == 0 or (idx + 1) % 10 == 0:
                             print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
                         curr_loss = torch.zeros(1).to(device)
+        elapsed_training_time = time.time() - start_training
         torch.save({
             'running_acc': running_acc,
             'running_loss': running_loss,
             'running_curr_loss': running_curr_loss
         }, '{}.pth'.format(args.mode))
+        with open('elapsed_time/elapsed_time_torch_fashion_mnist.txt', 'w') as fp:
+            fp.write('{} seconds'.format(elapsed_training_time))
     elif args.mode == 'torch-mnist':
         batch_size = 256
         num_of_epochs = 1
@@ -288,6 +297,7 @@ if __name__ == '__main__':
         running_loss = []
         running_acc = []
         running_curr_loss = []
+        start_training = time.time()
         for epoch in range(num_of_epochs):
             curr_loss = torch.zeros(1).to(device)
             for idx, (data, label) in enumerate(train_loader):
@@ -324,11 +334,14 @@ if __name__ == '__main__':
                         if idx == 0 or (idx + 1) % 10 == 0:
                             print('epoch: {}, loss: {}, acc: {}'.format(epoch, running_loss[-1], running_acc[-1]))
                         curr_loss = torch.zeros(1).to(device)
+        elapsed_training_time = time.time() - start_training
         torch.save({
             'running_acc': running_acc,
             'running_loss': running_loss,
             'running_curr_loss': running_curr_loss
         }, '{}.pth'.format(args.mode))
+        with open('elapsed_time/elapsed_time_torch_mnist.txt', 'w') as fp:
+            fp.write('{} seconds'.format(elapsed_training_time))
     elif args.mode == 'scaled-vectorized-real':
         scaled_net = ScaledVectorizedNet(8, 8, device='cpu')
         scaled_net.train('./data', 1, 0.001)
