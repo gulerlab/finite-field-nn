@@ -1,3 +1,4 @@
+from mpi4py import MPI
 import sys
 import os
 # import time
@@ -194,10 +195,18 @@ elif rank <= N:
         # save the records to a separate file
         time_records_compute = np.array([t_compute_M_matrix, t_compute_X_LCC, t_compute_Y_LCC])
         time_records_comm = np.array([volume_X_LCC, volume_Y_LCC])
-        np.savetxt("testing_results/" + str(N) + "_case/PICO_NN_K-" + str(K) + "_T-" + str(T) + "_client-" + str(
-            rank) + "_MINIST_40BW_DatasetEncoding_compute.txt", time_records_compute)
-        np.savetxt("testing_results/" + str(N) + "_case/PICO_NN_K-" + str(K) + "_T-" + str(T) + "_client-" + str(
-            rank) + "_MINIST_40BW_DatasetEncoding_comm.txt", time_records_comm)
+        save_folder = os.path.join('testing_results', '{}_case'.format(N))
+        exp_name = 'clover_k_{}_t_{}_rank_{}_dataset_label_encoding'.format(K, T, rank) 
+        # if rank == 1:
+        #     os.makedirs(save_folder, exist_ok=True)
+        #     comm.Barrier()
+        # else:
+        #     comm.Barrier()
+        os.makedirs(save_folder, exist_ok=True)
+        save_comp = os.path.join(save_folder, '{}_comp.txt'.format(exp_name))
+        save_comm = os.path.join(save_folder, '{}_comm.txt'.format(exp_name))
+        np.savetxt(save_comp, time_records_compute)
+        np.savetxt(save_comm, time_records_comm)
 
 
 
