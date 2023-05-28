@@ -14,7 +14,7 @@ from utils.polyapprox_function import *
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
-print(rank, size)
+# print(rank, size)
 
 if len(sys.argv) == 1:
     if rank == 0:
@@ -22,6 +22,18 @@ if len(sys.argv) == 1:
     exit()
 else:
     N = int(sys.argv[1])
+
+itemsize = MPI.DOUBLE.Get_size()
+if rank == 0:
+    nbytes = (N + 1) * itemsize
+else:
+    nbytes = 0
+win = MPI.Win.Allocate_shared(nbytes, itemsize, comm=comm)
+
+buf, itemsize = win.Shared_query(0)
+assert itemsize == MPI.DOUBLE.Get_size()
+buf = np.array(buf, dtype='B', copy=False)
+ary = np.ndarray(buffer=buf, dtype='d', shape=(size,)) 
 
 # for different cases of (K, T) pairs
 N_case = 1
@@ -46,8 +58,8 @@ BW = 40_000_000  # 40Mbps
 ######################################################
 
 if rank == 0:
-    print("### This is the Rank-0 Distributor ! ####")
-    print("00.Load in and Process the CIFAR-10 dataset.")
+    # print("### This is the Rank-0 Distributor ! ####")
+    # print("00.Load in and Process the CIFAR-10 dataset.")
 
     # iterates over different settings of (K, T)
     for idx_case in range(N_case):
@@ -55,12 +67,12 @@ if rank == 0:
         # the particular case of (K, T) pair
         K = K_[idx_case]
         T = T_[idx_case]
-        print("########### For the Case : K = ", K, " and T = ", T, " #########")
+        # print("########### For the Case : K = ", K, " and T = ", T, " #########")
         # the size of dataset MNIST/Fashion-MNIST
-        m = 60000
-        d = 784
+        m = 50000
+        d = 25088
         c = 10
-        print("01.Data Conversion : Real to Finite Field")
+        # print("01.Data Conversion : Real to Finite Field")
         for j in range(1, N + 1):
             # split the original dataset equally
             m_j = int(m / N)
@@ -73,7 +85,7 @@ if rank == 0:
             comm.send(d, dest=j)  # send number of columns = number of features
             comm.send(c, dest=j)  # send the number of classes
 
-        print("02.Generation of all random matrices")
+        # print("02.Generation of all random matrices")
         comm.Barrier()
 
 
@@ -83,7 +95,7 @@ if rank == 0:
 
 elif rank <= N:
 
-    print("### This is the client-", rank, " ####")
+    # print("### This is the client-", rank, " ####")
 
     for idx_case in range(N_case):
 
@@ -130,6 +142,7 @@ elif rank <= N:
         t_compute_Y_LCC = time.time()
         y_SS_T_i = LCC_encoding_w_Random(y_i, a_i, N, K, T, p)
         t_compute_Y_LCC = time.time() - t_compute_Y_LCC
+
         # communicate the SS of X_i for [X]_i, and the SS of y_scale_i for [y]_i
         X_SS_T = []
         y_SS_T = []
@@ -183,30 +196,43 @@ elif rank <= N:
         # record the communication time-cost
         volume_X_LCC = time.time() - volume_X_LCC + delta_time_X_LCC
         volume_Y_LCC = time.time() - volume_Y_LCC + delta_time_Y_LCC
-        # concatination for overall X_LCC
-        delta_time = time.time()
-        X_SS_T = np.concatenate(np.array(X_SS_T))
-        t_compute_X_LCC += (time.time() - delta_time)
-        # time-cost for concatination for overall Y_LCC
-        delta_time = time.time()
-        y_SS_T = np.concatenate(np.array(y_SS_T))
-        t_compute_Y_LCC += (time.time() - delta_time)
+        # print("# client-", rank, ", X_SS_T is of ", np.array(X_SS_T).shape)
+        # print("# client-", rank, ", y_SS_T is of ", np.array(y_SS_T).shape)
+        # # concatination for overall X_LCC
+        # delta_time = time.time()
+        # X_SS_T = np.concatenate(np.array(X_SS_T))
+        # t_compute_X_LCC += (time.time() - delta_time)
+        # # time-cost for concatination for overall Y_LCC
+        # delta_time = time.time()
+        # y_SS_T = np.concatenate(np.array(y_SS_T))
+        # t_compute_Y_LCC += (time.time() - delta_time)
 
         # save the records to a separate file
-        time_records_compute = np.array([t_compute_M_matrix, t_compute_X_LCC, t_compute_Y_LCC])
-        time_records_comm = np.array([volume_X_LCC, volume_Y_LCC])
-        save_folder = os.path.join('testing_results', '{}_case'.format(N))
-        exp_name = 'clover_k_{}_t_{}_rank_{}_dataset_label_encoding'.format(K, T, rank) 
+        # time_records_compute = np.array([t_compute_M_matrix, t_compute_X_LCC, t_compute_Y_LCC])
+        # time_records_comm = np.array([volume_X_LCC, volume_Y_LCC])
+        # save_folder = os.path.join('testing_results', '{}_case'.format(N))
+        # exp_name = 'clover_k_{}_t_{}_rank_{}_dataset_label_encoding'.format(K, T, rank) 
         # if rank == 1:
         #     os.makedirs(save_folder, exist_ok=True)
         #     comm.Barrier()
         # else:
         #     comm.Barrier()
-        os.makedirs(save_folder, exist_ok=True)
-        save_comp = os.path.join(save_folder, '{}_comp.txt'.format(exp_name))
-        save_comm = os.path.join(save_folder, '{}_comm.txt'.format(exp_name))
-        np.savetxt(save_comp, time_records_compute)
-        np.savetxt(save_comm, time_records_comm)
+        # os.makedirs(save_folder, exist_ok=True)
+        # save_comp = os.path.join(save_folder, '{}_comp.txt'.format(exp_name))
+        # save_comm = os.path.join(save_folder, '{}_comm.txt'.format(exp_name))
+        # np.savetxt(save_comp, time_records_compute)
+        # np.savetxt(save_comm, time_records_comm)
+        ary[rank] = t_compute_M_matrix + t_compute_X_LCC + t_compute_Y_LCC + volume_X_LCC + volume_Y_LCC
+        # print(t_compute_M_matrix + t_compute_X_LCC + t_compute_Y_LCC + volume_X_LCC + volume_Y_LCC)
+
+comm.Barrier()
+
+if rank == 0:
+    # print(ary)
+    with open('dataset_label_encoding_cifar10_vgg.txt'.format(N), 'a') as fp:
+        fp.write('{}, {}\n'.format(N, np.amax(ary[1:])))
+    print(np.amax(ary))
+    
 
 
 
