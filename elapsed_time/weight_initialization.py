@@ -38,6 +38,18 @@ T_ = [int(N / 8)]
 K = K_[0]
 T = T_[0]
 
+itemsize = MPI.DOUBLE.Get_size()
+if rank == 0:
+    nbytes = (N + 1) * itemsize
+else:
+    nbytes = 0
+win = MPI.Win.Allocate_shared(nbytes, itemsize, comm=comm)
+
+buf, itemsize = win.Shared_query(0)
+assert itemsize == MPI.DOUBLE.Get_size()
+buf = np.array(buf, dtype='B', copy=False)
+ary = np.ndarray(buffer=buf, dtype='d', shape=(size,)) 
+
 #################################################
 ################# Learning parameters ###########
 #################################################
@@ -54,18 +66,18 @@ BW = 40_000_000  # 40Mbps
 ######################################################
 
 if rank == 0:
-    print("### This is the Rank-0 Distributor ! ####")
-    print("00.Load in and Process the CIFAR-10 dataset.")
+    # print("### This is the Rank-0 Distributor ! ####")
+    # print("00.Load in and Process the CIFAR-10 dataset.")
 
     # iterates over different settings of (K, T)
     for idx_case in range(N_case):
 
-        print("########### For the Case : K = ", K, " and T = ", T, " #########")
+        # print("########### For the Case : K = ", K, " and T = ", T, " #########")
         # the size of dataset MINIST
-        m = 60000
+        m = 50000
         d = 25088
         c = 10
-        print("01.Data Conversion : Real to Finite Field")
+        # print("01.Data Conversion : Real to Finite Field")
         for j in range(1, N + 1):
             # split the original dataset equally
             m_j = int(m / N)
@@ -78,7 +90,7 @@ if rank == 0:
             comm.send(d, dest=j)  # send number of columns = number of features
             comm.send(c, dest=j)  # send the number of classes
 
-        print("02.Generation of all random matrices")
+        # print("02.Generation of all random matrices")
         comm.Barrier()
 
         # No Broadcasting step in Model Initialization !!
@@ -90,7 +102,7 @@ if rank == 0:
 
 elif rank <= N:
 
-    print("### This is the client-", rank, " ####")
+    # print("### This is the client-", rank, " ####")
 
     for idx_case in range(N_case):
 
@@ -105,7 +117,7 @@ elif rank <= N:
         y_i = np.random.randint(p, size=(m_i, c))
 
         # receive the random matrices for encoding
-        d_hidden = 256
+        d_hidden = 128
         d_hidden = d_hidden + (N - T) - np.mod(d_hidden, (N - T))
         V_i_hidden = np.random.randint(p, size=(T, int(d_hidden / (N - T)), 1))
         d_out = 10
@@ -258,7 +270,7 @@ elif rank <= N:
                     comm.Send(np.reshape(b_out_i[j_others - 1, :, :], int(d_out / (N - T))), dest=j_others)
             else:
                 data = np.empty(int(d_out / (N - T)), dtype='int64')
-                print(data.shape)
+                # print(data.shape)
                 comm.Recv(data, source=j)
                 if rank == N:
                     delta_time += (N - 1) * int(d_out / (N - T)) * 64 / BW
@@ -280,25 +292,34 @@ elif rank <= N:
         t_compute_b_out += time.time() - t_b_init
 
         # accumulate for all the model it is running
-        print("############ For the client-", rank, " ##########")
-        print("# W hidden : ", t_compute_w_hidden * d)
-        print("# b hidden : ", t_compute_b_hidden)
-        print("# commu W hidden : ", volume_w_hidden * d)
-        print("# commu b hidden : ", volume_b_hidden)
-        print("# W out : ", t_compute_w_out * d_hidden)
-        print("# b out : ", t_compute_b_out)
-        print("# commu W out : ", volume_w_out * d_hidden)
-        print("# commu b out : ", volume_b_out)
-        print("#################################################")
+        # print("############ For the client-", rank, " ##########")
+        # print("# W hidden : ", t_compute_w_hidden * d)
+        # print("# b hidden : ", t_compute_b_hidden)
+        # print("# commu W hidden : ", volume_w_hidden * d)
+        # print("# commu b hidden : ", volume_b_hidden)
+        # print("# W out : ", t_compute_w_out * d_hidden)
+        # print("# b out : ", t_compute_b_out)
+        # print("# commu W out : ", volume_w_out * d_hidden)
+        # print("# commu b out : ", volume_b_out)
+        # print("#################################################")
 
         # save the records to a separate file
-        time_records_compute = np.array([t_compute_w_hidden, t_compute_b_hidden, t_compute_w_out, t_compute_b_out])
-        time_records_comm = np.array([volume_w_hidden, volume_b_hidden, volume_w_out, volume_b_out])
-        np.savetxt("testing_results/" + str(N) + "_case/PICO_NN_K-" + str(K) + "_T-" + str(T) + "_client-" + str(
-            rank) + "_MINIST_40BW_ModelInit_compute.txt", time_records_compute)
-        np.savetxt("testing_results/" + str(N) + "_case/PICO_NN_K-" + str(K) + "_T-" + str(T) + "_client-" + str(
-            rank) + "_MINIST_40BW_ModelInit_comm.txt", time_records_comm)
+        time_records_compute = np.array([t_compute_w_hidden*d, t_compute_b_hidden, t_compute_w_out*d_hidden, t_compute_b_out])
+        time_records_comm = np.array([volume_w_hidden*d, volume_b_hidden, volume_w_out*d_hidden, volume_b_out])
+        total_time_elapsed = np.sum(time_records_compute) + np.sum(time_records_comm)
+        ary[rank] = total_time_elapsed
+        # print('{}, {}'.format(rank, total_time_elapsed))
+        # np.savetxt("testing_results/" + str(N) + "_case/PICO_NN_K-" + str(K) + "_T-" + str(T) + "_client-" + str(
+        #     rank) + "_MINIST_40BW_ModelInit_compute.txt", time_records_compute)
+        # np.savetxt("testing_results/" + str(N) + "_case/PICO_NN_K-" + str(K) + "_T-" + str(T) + "_client-" + str(
+        #     rank) + "_MINIST_40BW_ModelInit_comm.txt", time_records_comm)
 
+comm.Barrier()
 
+if rank == 0:
+    # print(ary)
+    with open('weight_initialization_cifar10_vgg.txt'.format(N), 'a') as fp:
+        fp.write('{}, {}\n'.format(N, np.amax(ary[1:])))
+    print(np.amax(ary))
 
 
