@@ -20,18 +20,38 @@ class RealLinearLayer(RealModule):
         return self._out_dim
 
     def __init_weights(self, init_fnc=kaiming_uniform):
-        self.__weight = init_fnc(self._in_dim, self._out_dim)
+        self._weight = init_fnc(self._in_dim, self._out_dim)
 
     def forward(self, input_data):
         self._input_data = input_data
-        return self._input_data @ self.__weight
+        return self._input_data @ self._weight
 
     def backprop(self, propagated_error):
-        self.__propagated_error = propagated_error
-        self.__gradient = self._input_data.T @ propagated_error
+        self._propagated_error = propagated_error
+        self._gradient = (self._input_data.T @ propagated_error)
 
     def optimize(self, learning_rate):
-        self.__weight = self.__weight - learning_rate * self.__gradient
+        self._weight = self._weight - learning_rate * self._gradient
 
     def loss(self):
-        return self.__propagated_error @ self.__weight.T
+        return self._propagated_error @ self._weight.T
+
+
+class RealConvLayer(RealModule):
+    def __init__(self, in_channels, out_channels, kernel_size):
+        super().__init__()
+        self.__in_channels = in_channels
+        self.__out_channels = out_channels
+        self.__kernel_size = kernel_size
+
+    def forward(self, input_data):
+        pass
+
+    def backprop(self, propagated_error):
+        pass
+
+    def optimize(self, learning_rate):
+        pass
+
+    def loss(self):
+        pass

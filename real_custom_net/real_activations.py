@@ -10,8 +10,8 @@ class RealQuadraticAct(RealActivation):
         return self._input_data ** 2
 
     def backprop(self, propagated_error):
-        self.__propagated_error = propagated_error
-        self.__gradient = 2 * self._input_data
+        self._propagated_error = propagated_error
+        self._gradient = 2 * self._input_data
 
     def loss(self):
-        return self.__propagated_error * self.__gradient
+        return self._propagated_error * self._gradient

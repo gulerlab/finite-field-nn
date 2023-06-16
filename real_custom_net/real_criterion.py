@@ -10,4 +10,4 @@ class RealMSELoss:
         return (np.linalg.norm(self.__diff) ** 2) / self.__diff.shape[0]
 
     def error_derivative(self):
-        return (-2 * self.__diff) / self.__diff.shape[0]
+        return -2 * self.__diff / self.__diff.shape[0]

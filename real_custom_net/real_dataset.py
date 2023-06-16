@@ -19,10 +19,10 @@ def load_all_data_mnist(load_path):
     # load data
     train_dataset = MNIST(load_path, train=True, transform=transform, target_transform=target_transform,
                           download=True)
-    train_loader = DataLoader(train_dataset, batch_size=len(train_dataset), shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=len(train_dataset), shuffle=True)
 
     test_dataset = MNIST(load_path, train=False, transform=transform, download=True)
-    test_loader = DataLoader(test_dataset, batch_size=len(test_dataset), shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=len(test_dataset), shuffle=True)
 
     train_data, train_label = next(iter(train_loader))
     test_data, test_label = next(iter(test_loader))

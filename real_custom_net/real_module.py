@@ -6,11 +6,9 @@ class RealModule(ABC):
         super().__init__()
         # protected
         self._input_data = None
-
-        # private
-        self.__gradient = None
-        self.__weight = None
-        self.__propagated_error = None
+        self._gradient = None
+        self._weight = None
+        self._propagated_error = None
 
     @property
     def input_data(self):
@@ -38,10 +36,8 @@ class RealActivation(ABC):
         super().__init__()
         # protected
         self._input_data = None
-
-        # private
-        self.__gradient = None
-        self.__propagated_error = None
+        self._gradient = None
+        self._propagated_error = None
 
     @abstractmethod
     def forward(self, input_data):
