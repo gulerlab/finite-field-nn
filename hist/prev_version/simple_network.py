@@ -59,6 +59,49 @@ class SimpleNetworkReLU(nn.Module):
         return data
 
 
+class SimpleNetworkQuadratic(nn.Module):
+    def __init__(self, num_class=10):
+        super().__init__()
+        self.hidden_layer_01 = nn.Linear(784, 512, bias=False)
+        self.hidden_layer_02 = nn.Linear(512, 256, bias=False)
+        self.hidden_layer_03 = nn.Linear(256, 128, bias=False)
+        self.hidden_layer_04 = nn.Linear(128, 64, bias=False)
+        self.hidden_layer_05 = nn.Linear(64, 32, bias=False)
+        self.output_layer = nn.Linear(32, num_class, bias=False)
+
+    def forward(self, data):
+        data = torch.square(self.hidden_layer_01(data))
+        data = torch.square(self.hidden_layer_02(data))
+        data = torch.square(self.hidden_layer_03(data))
+        data = torch.square(self.hidden_layer_04(data))
+        data = torch.square(self.hidden_layer_05(data))
+        data = self.output_layer(data)
+        return data
+
+
+class SimpleNetworkReLU_v2(nn.Module):
+    def __init__(self, num_class=10):
+        super().__init__()
+        self.hidden_layer_01 = nn.Sequential(
+            nn.Linear(784, 512, bias=False),
+            nn.ReLU(),
+            nn.Linear(512, 256, bias=False),
+            nn.ReLU(),
+            nn.Linear(256, 128, bias=False),
+            nn.ReLU(),
+            nn.Linear(128, 64, bias=False),
+            nn.ReLU(),
+            nn.Linear(64, 32, bias=False),
+            nn.ReLU()
+        )
+        self.output_layer = nn.Linear(32, num_class, bias=False)
+
+    def forward(self, data):
+        data = self.hidden_layer_01(data)
+        data = self.output_layer(data)
+        return data
+
+
 # noinspection DuplicatedCode
 class AbstractVectorizedNet(ABC):
     def __init__(self, input_vector_size=784, hidden_layer_size=64, num_classes=10,
@@ -686,7 +729,7 @@ class ScaledVectorizedIntegerNet(AbstractVectorizedNet):
             'max_input': self.__max_input_value,
             'running_loss': self.__running_loss,
             'running_acc': self.__running_loss
-        }, 'params/hist_params/scaled_vectorized_int_nn_params.tar.gz')
+        }, '../../params/hist_params/scaled_vectorized_int_nn_params.tar.gz')
 
 
 # noinspection DuplicatedCode

@@ -8,12 +8,12 @@ from ff_clover import FiniteFieldClover
 
 
 def save_params(mode, experiment_datetime, model):
-    save_path = os.path.join('./params', '{}{}{}-{}{}{}-{}-ff-clover'.format(experiment_datetime.year,
-                                                                             experiment_datetime.month,
-                                                                             experiment_datetime.day,
-                                                                             experiment_datetime.hour,
-                                                                             experiment_datetime.minute,
-                                                                             experiment_datetime.second, mode))
+    save_path = os.path.join('../../params', '{}{}{}-{}{}{}-{}-ff-clover'.format(experiment_datetime.year,
+                                                                                 experiment_datetime.month,
+                                                                                 experiment_datetime.day,
+                                                                                 experiment_datetime.hour,
+                                                                                 experiment_datetime.minute,
+                                                                                 experiment_datetime.second, mode))
     os.makedirs(save_path)
 
     with open(os.path.join(save_path, 'running_loss.npy'), 'wb') as fp:
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     log_file_name = '{}{}{}-{}{}{}-{}-ff-clover.log'.format(experiment_now.year, experiment_now.month,
                                                             experiment_now.day, experiment_now.hour,
                                                             experiment_now.minute, experiment_now.second, args.mode)
-    log_file_path = os.path.join('./logs', log_file_name)
+    log_file_path = os.path.join('logs', log_file_name)
     logging.basicConfig(filename=log_file_path, encoding='utf-8', level=logging.DEBUG)
 
     net = None

@@ -1,5 +1,6 @@
 from simple_network import VectorizedNet, SimpleNetwork, ScaledVectorizedFiniteFieldNet, ScaledVectorizedNet, \
-    ScaledVectorizedIntegerNet, Net, SimpleNetworkVGGCIFAR10, SimpleNetworkReLU
+    ScaledVectorizedIntegerNet, Net, SimpleNetworkVGGCIFAR10, SimpleNetworkReLU, SimpleNetworkQuadratic, \
+    SimpleNetworkReLU_v2
 import torch
 from torchvision.datasets import FashionMNIST, CIFAR10, MNIST
 import torchvision.transforms as transforms
@@ -8,7 +9,7 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import argparse
 import torch.nn as nn
-from torch.optim import Adam
+from torch.optim import Adam, SGD
 import time
 
 if __name__ == '__main__':
@@ -291,8 +292,8 @@ if __name__ == '__main__':
         if len(train_dataset) % batch_size != 0:
             last_batch_idx = last_batch_idx + 1
 
-        model = SimpleNetworkReLU().to(device)
-        optimizer = Adam(model.parameters(), lr=0.001)
+        model = SimpleNetworkReLU_v2().to(device)
+        optimizer = SGD(model.parameters(), lr=0.001)
         criterion = nn.MSELoss()
         running_loss = []
         running_acc = []

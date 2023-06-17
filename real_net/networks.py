@@ -1,14 +1,15 @@
-from real_module import RealModule
-from real_layers import RealLinearLayer
-from real_activations import RealQuadraticAct
+from modules import RealModule
+from layers import RealLinearLayer
+from activations import RealQuadraticActivation
 
 
+# TODO: after conv implementation is done implement some known networks
 class RealNetworkLinearTest(RealModule):
     def __init__(self):
         super().__init__()
         self.__model = [
             RealLinearLayer(784, 128),
-            RealQuadraticAct(),
+            RealQuadraticActivation(),
             RealLinearLayer(128, 10)
         ]
 
@@ -40,15 +41,15 @@ class RealNetworkLinearTest_v2(RealModule):
         super().__init__()
         self.__model = [
             RealLinearLayer(784, 512),
-            RealQuadraticAct(),
+            RealQuadraticActivation(),
             RealLinearLayer(512, 256),
-            RealQuadraticAct(),
+            RealQuadraticActivation(),
             RealLinearLayer(256, 128),
-            RealQuadraticAct(),
+            RealQuadraticActivation(),
             RealLinearLayer(128, 64),
-            RealQuadraticAct(),
+            RealQuadraticActivation(),
             RealLinearLayer(64, 32),
-            RealQuadraticAct(),
+            RealQuadraticActivation(),
             RealLinearLayer(32, 10),
         ]
 

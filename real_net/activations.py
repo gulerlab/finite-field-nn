@@ -1,7 +1,7 @@
-from real_module import RealActivation
+from modules import RealActivationModule
 
 
-class RealQuadraticAct(RealActivation):
+class RealQuadraticActivation(RealActivationModule):
     def __init__(self):
         super().__init__()
 

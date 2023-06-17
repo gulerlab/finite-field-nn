@@ -5,7 +5,7 @@ import torch
 import numpy as np
 
 
-def load_all_data_mnist(load_path):
+def real_load_all_data_mnist(load_path):
     # transformations
     transform = Compose([
         ToTensor(),

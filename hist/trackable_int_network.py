@@ -8,8 +8,8 @@ from torch.utils.data import DataLoader, Dataset
 import torch.nn as nn
 
 # this project
-from utils import from_int_to_real_domain, to_int_domain, to_int_domain_int, finite_field_truncation, ToIntDomain
-from simple_network import AbstractVectorizedNet
+from hist.prev_version.utils import from_int_to_real_domain, to_int_domain, to_int_domain_int, finite_field_truncation, ToIntDomain
+from hist.prev_version.simple_network import AbstractVectorizedNet
 
 import matplotlib.pyplot as plt
 

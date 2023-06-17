@@ -20,7 +20,7 @@ if __name__ == '__main__':
     log_file_name = '{}{}{}-{}{}{}-{}.log'.format(experiment_now.year, experiment_now.month, experiment_now.day,
                                                   experiment_now.hour, experiment_now.minute, experiment_now.second,
                                                   args.mode)
-    log_file_path = os.path.join('./logs', log_file_name)
+    log_file_path = os.path.join('logs', log_file_name)
     logging.basicConfig(filename=log_file_path, encoding='utf-8', level=logging.DEBUG)
     if args.mode == 'scaled-vectorized-int-numpy':
         model = ScaledVectorizedIntegerNetNumpy(8, 8, 10)
@@ -71,12 +71,12 @@ if __name__ == '__main__':
         running_curr_loss = model.running_curr_loss
 
         # noinspection DuplicatedCode
-        save_path = os.path.join('./params', '{}{}{}-{}{}{}-{}-fashion-mnist'.format(experiment_now.year,
-                                                                                     experiment_now.month,
-                                                                                     experiment_now.day,
-                                                                                     experiment_now.hour,
-                                                                                     experiment_now.minute,
-                                                                                     experiment_now.second, args.mode))
+        save_path = os.path.join('../../params', '{}{}{}-{}{}{}-{}-fashion-mnist'.format(experiment_now.year,
+                                                                                         experiment_now.month,
+                                                                                         experiment_now.day,
+                                                                                         experiment_now.hour,
+                                                                                         experiment_now.minute,
+                                                                                         experiment_now.second, args.mode))
         os.makedirs(save_path)
 
         with open(os.path.join(save_path, 'running_loss.npy'), 'wb') as fp:
@@ -165,10 +165,10 @@ if __name__ == '__main__':
         plt.show()
 
         # noinspection DuplicatedCode
-        save_path = os.path.join('./params', '{}{}{}-{}{}{}-{}'.format(experiment_now.year, experiment_now.month,
-                                                                       experiment_now.day, experiment_now.hour,
-                                                                       experiment_now.minute,
-                                                                       experiment_now.second, args.mode))
+        save_path = os.path.join('../../params', '{}{}{}-{}{}{}-{}'.format(experiment_now.year, experiment_now.month,
+                                                                           experiment_now.day, experiment_now.hour,
+                                                                           experiment_now.minute,
+                                                                           experiment_now.second, args.mode))
         os.makedirs(save_path)
 
         with open(os.path.join(save_path, 'running_loss.npy'), 'wb') as fp:
@@ -220,10 +220,10 @@ if __name__ == '__main__':
         plt.figure()
 
         # noinspection DuplicatedCode
-        save_path = os.path.join('./params', '{}{}{}-{}{}{}-{}'.format(experiment_now.year, experiment_now.month,
-                                                                       experiment_now.day, experiment_now.hour,
-                                                                       experiment_now.minute,
-                                                                       experiment_now.second, args.mode))
+        save_path = os.path.join('../../params', '{}{}{}-{}{}{}-{}'.format(experiment_now.year, experiment_now.month,
+                                                                           experiment_now.day, experiment_now.hour,
+                                                                           experiment_now.minute,
+                                                                           experiment_now.second, args.mode))
         os.makedirs(save_path)
 
         with open(os.path.join(save_path, 'running_loss.npy'), 'wb') as fp:
@@ -254,12 +254,12 @@ if __name__ == '__main__':
         running_curr_loss = model.running_curr_loss
 
         # noinspection DuplicatedCode
-        save_path = os.path.join('./params', '{}{}{}-{}{}{}-{}'.format(experiment_now.year,
-                                                                       experiment_now.month,
-                                                                       experiment_now.day,
-                                                                       experiment_now.hour,
-                                                                       experiment_now.minute,
-                                                                       experiment_now.second, args.mode))
+        save_path = os.path.join('../../params', '{}{}{}-{}{}{}-{}'.format(experiment_now.year,
+                                                                           experiment_now.month,
+                                                                           experiment_now.day,
+                                                                           experiment_now.hour,
+                                                                           experiment_now.minute,
+                                                                           experiment_now.second, args.mode))
         os.makedirs(save_path)
 
         with open(os.path.join(save_path, 'running_loss.npy'), 'wb') as fp:

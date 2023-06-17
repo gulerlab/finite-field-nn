@@ -1,6 +1,6 @@
 # this project
-from real_weight_initialization import kaiming_uniform
-from real_module import RealModule
+from weight_initializations import kaiming_uniform
+from modules import RealModule
 
 
 class RealLinearLayer(RealModule):

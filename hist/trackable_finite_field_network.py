@@ -7,9 +7,9 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
 
 # this project
-from utils import to_real_domain, to_finite_field_domain, ToFiniteFieldDomain, to_finite_field_domain_int, \
+from hist.prev_version.utils import to_real_domain, to_finite_field_domain, ToFiniteFieldDomain, to_finite_field_domain_int, \
     finite_field_truncation_ext
-from simple_network import AbstractVectorizedNet
+from hist.prev_version.simple_network import AbstractVectorizedNet
 
 
 class GaussianRandomDataset(Dataset):

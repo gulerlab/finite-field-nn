@@ -31,7 +31,7 @@ class RealModule(ABC):
         pass
 
 
-class RealActivation(ABC):
+class RealActivationModule(ABC):
     def __init__(self):
         super().__init__()
         # protected
