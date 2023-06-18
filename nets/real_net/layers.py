@@ -88,15 +88,34 @@ class RealConvLayer(RealModule):
                                                                           + image_height)] = self._input_data
         image_height = image_height + (padding_top + padding_bottom)
         image_width = image_width + (padding_top + padding_bottom)
-        for width_idx in range(0, image_width - kernel_width + stride_over_width, stride_over_width):
-            for height_idx in range(0, image_height - kernel_height + stride_over_height, stride_over_height):
-                self.__patches.append(curr_input_data[:, :, height_idx:(height_idx + kernel_height),
-                                      width_idx:(width_idx + kernel_width)])
+        for output_width_idx, width_idx in enumerate(range(0, image_width - kernel_width + stride_over_width,
+                                                           stride_over_width)):
+            for output_height_idx, height_idx in enumerate(
+                    range(0, image_height - kernel_height + stride_over_height, stride_over_height)):
+                self.__patches.append((
+                    output_height_idx, output_width_idx,
+                    curr_input_data[:, :, height_idx:(height_idx + kernel_height), width_idx:(width_idx + kernel_width)]
+                ))
 
     def forward(self, input_data):
         self._input_data = input_data
         self.__generate_patches()
-        pass
+        num_of_samples, _, image_height, image_width = self._input_data.shape
+        kernel_height, kernel_width = self._kernel_size
+        stride_over_height, stride_over_width = self._stride
+        padding_top, padding_bottom, padding_left, padding_right = self._padding
+        image_height = image_height + (padding_top + padding_bottom)
+        image_width = image_width + (padding_top + padding_bottom)
+        output_height, output_width = (image_height - kernel_height + stride_over_height / stride_over_height,
+                                       image_width - kernel_width + stride_over_width / stride_over_width)
+        output_data = np.empty((num_of_samples, self._out_channels, output_height, output_width),
+                               dtype=self._input_data.dtype)
+        for patch in self.__patches:
+            output_height_idx, output_width_idx, patch_data = patch
+            output_data[:, :, output_height_idx, output_width_idx] = (np.reshape(patch, (num_of_samples, -1)) @
+                                                                      np.reshape(self._weight, (-1,
+                                                                                                self._out_channels)))
+        return output_data
 
     def backprop(self, propagated_error):
         pass
