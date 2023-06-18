@@ -118,10 +118,30 @@ class RealConvLayer(RealModule):
         return output_data
 
     def backprop(self, propagated_error):
-        pass
+        self._propagated_error = propagated_error
+        self._gradient = np.zeros(self._weight.shape, dtype=self._weight.dtype)
+        for patch in self.__patches:
+            output_height_idx, output_width_idx, patch_data = patch
+            self._gradient += (np.reshape(patch_data, (patch_data.shape[0], -1)).T
+                               @ np.reshape(self._propagated_error,
+                                            (-1, self._out_channels))).reshape(self._weight.shape)
 
     def optimize(self, learning_rate):
         pass
 
     def loss(self):
-        pass
+        num_of_samples, _, image_height, image_width = self._input_data.shape
+        kernel_height, kernel_width = self._kernel_size
+        stride_over_height, stride_over_width = self._stride
+        padding_top, padding_bottom, padding_left, padding_right = self._padding
+        resulting_error = np.zeros((self._input_data.shape[0], self._input_data.shape[1], image_height
+                                    + (padding_top + padding_bottom), image_width +
+                                    (padding_left + padding_right)), dtype=self._input_data.dtype)
+        image_height = image_height + (padding_top + padding_bottom)
+        image_width = image_width + (padding_top + padding_bottom)
+        for output_width_idx, width_idx in enumerate(range(0, image_width - kernel_width + stride_over_width,
+                                                           stride_over_width)):
+            for output_height_idx, height_idx in enumerate(
+                    range(0, image_height - kernel_height + stride_over_height, stride_over_height)):
+                pass
+
