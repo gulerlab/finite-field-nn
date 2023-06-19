@@ -5,7 +5,7 @@ import torch
 import numpy as np
 
 
-def real_load_all_data_mnist(load_path):
+def real_load_all_data_mnist(load_path, flatten=True):
     # transformations
     transform = Compose([
         ToTensor(),
@@ -26,13 +26,15 @@ def real_load_all_data_mnist(load_path):
 
     train_data, train_label = next(iter(train_loader))
     test_data, test_label = next(iter(test_loader))
-    train_data, train_label, test_data, test_label = train_data.squeeze(), train_label.squeeze(), test_data.squeeze(), \
-        test_label.squeeze()
+    if flatten:
+        train_data, train_label, test_data, test_label = train_data.squeeze(), train_label.squeeze(), test_data.squeeze(), \
+            test_label.squeeze()
     train_data, train_label, test_data, test_label = train_data.numpy(), train_label.numpy(), test_data.numpy(), \
         test_label.numpy()
 
-    # reshape data
-    train_data, test_data = train_data.reshape((train_data.shape[0], -1)), test_data.reshape((test_data.shape[0], -1))
+    if flatten:
+        # reshape data
+        train_data, test_data = train_data.reshape((train_data.shape[0], -1)), test_data.reshape((test_data.shape[0], -1))
     return train_data, train_label, test_data, test_label
 
 

@@ -1,11 +1,11 @@
 # this project
 from weight_initializations import kaiming_uniform, kaiming_uniform_conv
-from modules import RealModule
+from modules import Module
 
 import numpy as np
 
 
-class RealLinearLayer(RealModule):
+class RealLinearLayer(Module):
     def __init__(self, in_dim, out_dim):
         super().__init__()
         # protected
@@ -39,9 +39,7 @@ class RealLinearLayer(RealModule):
         return self._propagated_error @ self._weight.T
 
 
-# TODO: for now it will be just for stride=1 and padding=1, I will consider other setups after applying the main conv
-#  operation
-class RealConvLayer(RealModule):
+class RealConvLayer(Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=(1, 1), padding=(0, 0, 0, 0)):
         super().__init__()
         self._in_channels = in_channels
@@ -106,13 +104,13 @@ class RealConvLayer(RealModule):
         padding_top, padding_bottom, padding_left, padding_right = self._padding
         image_height = image_height + (padding_top + padding_bottom)
         image_width = image_width + (padding_top + padding_bottom)
-        output_height, output_width = (image_height - kernel_height + stride_over_height / stride_over_height,
-                                       image_width - kernel_width + stride_over_width / stride_over_width)
+        output_height, output_width = (int(image_height - kernel_height + stride_over_height / stride_over_height),
+                                       int(image_width - kernel_width + stride_over_width / stride_over_width))
         output_data = np.empty((num_of_samples, self._out_channels, output_height, output_width),
                                dtype=self._input_data.dtype)
         for patch in self.__patches:
             output_height_idx, output_width_idx, patch_data = patch
-            output_data[:, :, output_height_idx, output_width_idx] = (np.reshape(patch, (num_of_samples, -1)) @
+            output_data[:, :, output_height_idx, output_width_idx] = (np.reshape(patch_data, (num_of_samples, -1)) @
                                                                       np.reshape(self._weight, (-1,
                                                                                                 self._out_channels)))
         return output_data
@@ -123,11 +121,11 @@ class RealConvLayer(RealModule):
         for patch in self.__patches:
             output_height_idx, output_width_idx, patch_data = patch
             self._gradient += (np.reshape(patch_data, (patch_data.shape[0], -1)).T
-                               @ np.reshape(self._propagated_error,
-                                            (-1, self._out_channels))).reshape(self._weight.shape)
+                               @ self._propagated_error[:, :, output_height_idx, output_width_idx])\
+                .reshape(self._weight.shape)
 
     def optimize(self, learning_rate):
-        pass
+        self._weight = self._weight - learning_rate * self._gradient
 
     def loss(self):
         num_of_samples, _, image_height, image_width = self._input_data.shape
@@ -143,5 +141,14 @@ class RealConvLayer(RealModule):
                                                            stride_over_width)):
             for output_height_idx, height_idx in enumerate(
                     range(0, image_height - kernel_height + stride_over_height, stride_over_height)):
-                pass
-
+                patch_gradient = (self._propagated_error[:, :, output_height_idx, output_width_idx] @
+                                  np.reshape(self._weight, (-1, self._out_channels)).T).reshape((num_of_samples,
+                                                                                                 self._in_channels,
+                                                                                                 kernel_height,
+                                                                                                 kernel_width))
+                resulting_error[:, :, height_idx:(height_idx + kernel_height), width_idx:(width_idx + kernel_width)] \
+                    += patch_gradient
+        resulting_error = resulting_error[:, :, padding_top:(image_height -
+                                                             padding_bottom), padding_left:(image_width -
+                                                                                            padding_right)]
+        return resulting_error

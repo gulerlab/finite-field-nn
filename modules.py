@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class RealModule(ABC):
+class Module(ABC):
     def __init__(self):
         super().__init__()
         # protected
@@ -31,7 +31,7 @@ class RealModule(ABC):
         pass
 
 
-class RealActivationModule(ABC):
+class ActivationModule(ABC):
     def __init__(self):
         super().__init__()
         # protected
