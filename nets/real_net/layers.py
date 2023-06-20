@@ -152,3 +152,73 @@ class RealConvLayer(Module):
                                                              padding_bottom), padding_left:(image_width -
                                                                                             padding_right)]
         return resulting_error
+
+
+# for now its just second order, I will try to make it generalizable
+class RealPiNetSecondOrderLinearLayer(Module):
+    def __init__(self, in_dim, out_dim):
+        super().__init__()
+        self.__first_fc = RealLinearLayer(in_dim, out_dim)
+        self.__second_fc = RealLinearLayer(in_dim, out_dim)
+        self.__inner_forward = {}
+        self.__inner_prop = {}
+
+    def forward(self, input_data):
+        self._input_data = input_data
+        first_out = self.__first_fc.forward(input_data)
+        second_out = self.__second_fc.forward(input_data)
+        self.__inner_forward['out_1'] = first_out
+        self.__inner_forward['out_2'] = second_out
+        return (first_out * second_out) + first_out
+
+    def backprop(self, propagated_error):
+        self._propagated_error = propagated_error
+        second_prop = self._propagated_error * self.__inner_forward['out_1']
+        first_prop = (self._propagated_error * self.__inner_forward['out_2']) + self._propagated_error
+        self.__inner_prop['prop_1'] = first_prop
+        self.__inner_prop['prop_2'] = second_prop
+
+        self.__first_fc.backprop(first_prop)
+        self.__second_fc.backprop(second_prop)
+
+    def optimize(self, learning_rate):
+        self.__first_fc.optimize(learning_rate)
+        self.__second_fc.optimize(learning_rate)
+
+    def loss(self):
+        return self.__first_fc.loss() + self.__second_fc.loss()
+
+
+# for now its just second order, I will try to make it generalizable
+class RealPiNetSecondOrderConvLayer(Module):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=(1, 1), padding=(0, 0, 0, 0)):
+        super().__init__()
+        self.__first_fc = RealConvLayer(in_channels, out_channels, kernel_size, stride=stride, padding=padding)
+        self.__second_fc = RealConvLayer(in_channels, out_channels, kernel_size, stride=stride, padding=padding)
+        self.__inner_forward = {}
+        self.__inner_prop = {}
+
+    def forward(self, input_data):
+        self._input_data = input_data
+        first_out = self.__first_fc.forward(input_data)
+        second_out = self.__second_fc.forward(input_data)
+        self.__inner_forward['out_1'] = first_out
+        self.__inner_forward['out_2'] = second_out
+        return (first_out * second_out) + first_out
+
+    def backprop(self, propagated_error):
+        self._propagated_error = propagated_error
+        second_prop = self._propagated_error * self.__inner_forward['out_1']
+        first_prop = (self._propagated_error * self.__inner_forward['out_2']) + self._propagated_error
+        self.__inner_prop['prop_1'] = first_prop
+        self.__inner_prop['prop_2'] = second_prop
+
+        self.__first_fc.backprop(first_prop)
+        self.__second_fc.backprop(second_prop)
+
+    def optimize(self, learning_rate):
+        self.__first_fc.optimize(learning_rate)
+        self.__second_fc.optimize(learning_rate)
+
+    def loss(self):
+        return self.__first_fc.loss() + self.__second_fc.loss()

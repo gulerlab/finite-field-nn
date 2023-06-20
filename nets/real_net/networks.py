@@ -1,5 +1,5 @@
 from modules import Module
-from layers import RealLinearLayer, RealConvLayer
+from layers import RealLinearLayer, RealConvLayer, RealPiNetSecondOrderLinearLayer, RealPiNetSecondOrderConvLayer
 from activations import RealQuadraticActivation, RealReLU
 from utils import Flatten
 
@@ -131,6 +131,73 @@ class RealLeNetReLU(Module):
             RealReLU(),
             RealLinearLayer(120, 84),
             RealReLU(),
+            RealLinearLayer(84, 10)
+        ]
+
+    def forward(self, input_data):
+        self._input_data = input_data
+        curr_data = self._input_data
+        for layer in self.__model:
+            curr_data = layer.forward(curr_data)
+        return curr_data
+
+    def backprop(self, propagated_error):
+        self._propagated_error = propagated_error
+        curr_error = self._propagated_error
+        for layer in reversed(self.__model):
+            layer.backprop(curr_error)
+            curr_error = layer.loss()
+
+    def optimize(self, learning_rate):
+        for layer in self.__model:
+            if isinstance(layer, Module):
+                layer.optimize(learning_rate)
+
+    def loss(self):
+        pass
+
+
+class RealPiNetNetworkLinear(Module):
+    def __init__(self):
+        super().__init__()
+        self.__model = [
+            RealPiNetSecondOrderLinearLayer(784, 128),
+            RealPiNetSecondOrderLinearLayer(128, 64),
+            RealLinearLayer(64, 10)
+        ]
+
+    def forward(self, input_data):
+        self._input_data = input_data
+        curr_data = self._input_data
+        for layer in self.__model:
+            curr_data = layer.forward(curr_data)
+        return curr_data
+
+    def backprop(self, propagated_error):
+        self._propagated_error = propagated_error
+        curr_error = self._propagated_error
+        for layer in reversed(self.__model):
+            layer.backprop(curr_error)
+            curr_error = layer.loss()
+
+    def optimize(self, learning_rate):
+        for layer in self.__model:
+            if isinstance(layer, Module):
+                layer.optimize(learning_rate)
+
+    def loss(self):
+        pass
+
+
+class RealPiNetNetworkLeNet(Module):
+    def __init__(self):
+        super().__init__()
+        self.__model = [
+            RealPiNetSecondOrderConvLayer(1, 6, (5, 5), padding=(2, 2, 2, 2)),
+            RealPiNetSecondOrderConvLayer(6, 16, (5, 5)),
+            Flatten(),
+            RealPiNetSecondOrderLinearLayer(9216, 120),
+            RealPiNetSecondOrderLinearLayer(120, 84),
             RealLinearLayer(84, 10)
         ]
 
