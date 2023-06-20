@@ -162,8 +162,8 @@ class RealPiNetNetworkLinear(Module):
         super().__init__()
         self.__model = [
             RealPiNetSecondOrderLinearLayer(784, 128),
-            RealPiNetSecondOrderLinearLayer(128, 64),
-            RealLinearLayer(64, 10)
+            # RealPiNetSecondOrderLinearLayer(128, 64),
+            RealLinearLayer(128, 10)
         ]
 
     def forward(self, input_data):
