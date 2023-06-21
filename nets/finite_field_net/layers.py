@@ -244,10 +244,10 @@ class FiniteFieldConvLayer(Module):
         self._gradient = np.zeros(self._weight.shape, dtype=self._weight.dtype)
         for patch in self.__patches:
             output_height_idx, output_width_idx, patch_data = patch
-            unscaled_gradient = (
+            unscaled_gradient = ((
                     np.reshape(patch_data, (patch_data.shape[0], -1)).T @
                     self._propagated_error[:, :, output_height_idx, output_width_idx]
-            ).reshape(self._weight.shape) % self._prime
+            ).reshape(self._weight.shape)) % self._prime
 
             if self._first_layer:
                 scaled_gradient = finite_field_truncation(unscaled_gradient, self._quantization_bit_input, self._prime)
@@ -279,9 +279,9 @@ class FiniteFieldConvLayer(Module):
                                                            stride_over_width)):
             for output_height_idx, height_idx in enumerate(
                     range(0, image_height - kernel_height + stride_over_height, stride_over_height)):
-                unscaled_patch_gradient = ((self._propagated_error[:, :, output_height_idx, output_width_idx] @
+                unscaled_patch_gradient = (((self._propagated_error[:, :, output_height_idx, output_width_idx] @
                                             np.reshape(self._weight, (-1, self._out_channels)).T).reshape(
-                    (num_of_samples, self._in_channels, kernel_height, kernel_width)) % self._prime)
+                    (num_of_samples, self._in_channels, kernel_height, kernel_width))) % self._prime)
                 patch_gradient = finite_field_truncation(unscaled_patch_gradient, self._quantization_bit_weight,
                                                          self._prime)
                 resulting_error[:, :, height_idx:(height_idx + kernel_height), width_idx:(width_idx + kernel_width)]\
