@@ -3,6 +3,8 @@
 
 # In[6]:
 
+import sys
+sys.path.append('../../')
 
 import numpy as np
 from datasets import load_all_data_mnist, load_all_data_cifar10, load_all_data_fashion_mnist, \
@@ -11,7 +13,6 @@ from utils import create_batch_data
 import modules
 import layers
 from criterions import RealMSELoss
-
 
 # In[7]:
 
