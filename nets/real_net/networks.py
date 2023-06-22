@@ -224,6 +224,73 @@ class RealPiNetNetworkLeNet(Module):
         pass
 
 
+class RealPiNetNetworkDebug(Module):
+    def __init__(self):
+        super().__init__()
+        self.__model = [
+            RealPiNetSecondOrderConvLayer(1, 6, (9, 9)),
+            Flatten(),
+            RealPiNetSecondOrderLinearLayer(2400, 128),
+            RealLinearLayer(128, 10)
+        ]
+
+    def forward(self, input_data):
+        self._input_data = input_data
+        curr_data = self._input_data
+        for layer in self.__model:
+            curr_data = layer.forward(curr_data)
+        return curr_data
+
+    def backprop(self, propagated_error):
+        self._propagated_error = propagated_error
+        curr_error = self._propagated_error
+        for layer in reversed(self.__model):
+            layer.backprop(curr_error)
+            curr_error = layer.loss()
+
+    def optimize(self, learning_rate):
+        for layer in self.__model:
+            if isinstance(layer, Module):
+                layer.optimize(learning_rate)
+
+    def loss(self):
+        pass
+
+
+class RealPiNetNetworkDebug2(Module):
+    def __init__(self):
+        super().__init__()
+        self.__model = [
+            RealPiNetSecondOrderConvLayer(1, 3, (9, 9)),
+            RealPiNetSecondOrderConvLayer(3, 1, (9, 9)),
+            Flatten(),
+            RealPiNetSecondOrderLinearLayer(144, 128),
+            RealLinearLayer(128, 10)
+        ]
+
+    def forward(self, input_data):
+        self._input_data = input_data
+        curr_data = self._input_data
+        for layer in self.__model:
+            curr_data = layer.forward(curr_data)
+        return curr_data
+
+    def backprop(self, propagated_error):
+        self._propagated_error = propagated_error
+        curr_error = self._propagated_error
+        for layer in reversed(self.__model):
+            layer.backprop(curr_error)
+            curr_error = layer.loss()
+
+    def optimize(self, learning_rate):
+        for layer in self.__model:
+            if isinstance(layer, Module):
+                layer.optimize(learning_rate)
+
+    def loss(self):
+        pass
+
+
 class RealPiNetNetworkLeNetCIFAR10(Module):
     def __init__(self):
         super().__init__()

@@ -231,12 +231,13 @@ class FiniteFieldConvLayer(Module):
         for patch in self.__patches:
             output_height_idx, output_width_idx, patch_data = patch
             unscaled_out = (np.reshape(patch_data, (num_of_samples, -1)) @
-                            np.reshape(self._weight, (-1, self._out_channels))) % self._prime
-            if self._first_layer:
-                out = finite_field_truncation(unscaled_out, self._quantization_bit_input, self._prime)
-            else:
-                out = finite_field_truncation(unscaled_out, self._quantization_bit_weight, self._prime)
-            output_data[:, :, output_height_idx, output_width_idx] = out
+                            np.reshape(self._weight, (-1, self._out_channels)))
+            output_data[:, :, output_height_idx, output_width_idx] = unscaled_out
+        output_data = output_data % self._prime
+        if self._first_layer:
+            output_data = finite_field_truncation(output_data, self._quantization_bit_input, self._prime)
+        else:
+            output_data = finite_field_truncation(output_data, self._quantization_bit_weight, self._prime)
         return output_data
 
     def backprop(self, propagated_error):
@@ -249,12 +250,12 @@ class FiniteFieldConvLayer(Module):
                     self._propagated_error[:, :, output_height_idx, output_width_idx]
             ).reshape(self._weight.shape)) % self._prime
 
-            if self._first_layer:
-                scaled_gradient = finite_field_truncation(unscaled_gradient, self._quantization_bit_input, self._prime)
-            else:
-                scaled_gradient = finite_field_truncation(unscaled_gradient, self._quantization_bit_weight, self._prime)
-
-            self._gradient = (self._gradient + scaled_gradient) % self._prime
+            self._gradient = self._gradient + unscaled_gradient
+        self._gradient = self._gradient % self._prime
+        if self._first_layer:
+            self._gradient = finite_field_truncation(self._gradient, self._quantization_bit_input, self._prime)
+        else:
+            self._gradient = finite_field_truncation(self._gradient, self._quantization_bit_weight, self._prime)
 
     def optimize(self, learning_rate):
         scaled_gradient = finite_field_truncation(self._gradient, learning_rate, self._prime)
@@ -279,20 +280,19 @@ class FiniteFieldConvLayer(Module):
                                                            stride_over_width)):
             for output_height_idx, height_idx in enumerate(
                     range(0, image_height - kernel_height + stride_over_height, stride_over_height)):
-                unscaled_patch_gradient = (((self._propagated_error[:, :, output_height_idx, output_width_idx] @
-                                            np.reshape(self._weight, (-1, self._out_channels)).T).reshape(
-                    (num_of_samples, self._in_channels, kernel_height, kernel_width))) % self._prime)
-                patch_gradient = finite_field_truncation(unscaled_patch_gradient, self._quantization_bit_weight,
-                                                         self._prime)
-                resulting_error[:, :, height_idx:(height_idx + kernel_height), width_idx:(width_idx + kernel_width)]\
-                    = (
-                              resulting_error[:, :, height_idx:(height_idx + kernel_height), width_idx:(width_idx
-                                                                                                        + kernel_width)]
-                              + patch_gradient
-                      ) % self._prime
+                patch_gradient = (self._propagated_error[:, :, output_height_idx, output_width_idx] @
+                                  np.reshape(self._weight, (-1, self._out_channels)).T).reshape((num_of_samples,
+                                                                                                 self._in_channels,
+                                                                                                 kernel_height,
+                                                                                                 kernel_width))
+                patch_gradient = patch_gradient % self._prime
+                resulting_error[:, :, height_idx:(height_idx + kernel_height), width_idx:(width_idx + kernel_width)] \
+                    += patch_gradient
         resulting_error = resulting_error[:, :, padding_top:(image_height -
                                                              padding_bottom), padding_left:(image_width -
                                                                                             padding_right)]
+        resulting_error = resulting_error % self._prime
+        resulting_error = finite_field_truncation(resulting_error, self._quantization_bit_weight, self._prime)
         return resulting_error
 
 
