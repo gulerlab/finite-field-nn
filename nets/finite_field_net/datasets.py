@@ -121,7 +121,8 @@ def load_all_data_cifar10(load_path, quantization_bit_data: int, quantization_bi
     return train_data, train_label, test_data, test_label
 
 
-def load_all_data_apply_vgg_cifar10(load_path, quantization_bit_data: int, quantization_bit_label: int, prime: int):
+def load_all_data_apply_vgg_cifar10(load_path, quantization_bit_data: int, quantization_bit_label: int, prime: int,
+                                    flatten=True):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     transform = Compose([
         ToTensor(),
@@ -147,7 +148,9 @@ def load_all_data_apply_vgg_cifar10(load_path, quantization_bit_data: int, quant
         train_data_all, train_label_all, test_data_all, test_label_all = [], [], [], []
         for train_data, train_label in train_loader:
             train_data = train_data.to(device)
-            train_data = vgg_backbone(train_data).reshape(train_data.size(0), -1).to('cpu').numpy()
+            if flatten:
+                train_data = vgg_backbone(train_data).reshape(train_data.size(0), -1)
+            train_data = train_data.to('cpu').numpy()
             train_label = train_label.numpy()
 
             train_data, train_label = to_finite_field_domain(train_data, quantization_bit_data, prime), \
@@ -160,7 +163,9 @@ def load_all_data_apply_vgg_cifar10(load_path, quantization_bit_data: int, quant
         for test_data, test_label in test_loader:
             test_label_all.append(test_label.numpy())
             test_data = test_data.to(device)
-            test_data = vgg_backbone(test_data).reshape(test_data.size(0), -1).to('cpu').numpy()
+            if flatten:
+                test_data = vgg_backbone(test_data).reshape(test_data.size(0), -1)
+            test_data = test_data.to('cpu').numpy()
             test_data = to_finite_field_domain(test_data, quantization_bit_data, prime)
             test_data_all.append(test_data)
 

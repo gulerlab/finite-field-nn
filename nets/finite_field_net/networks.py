@@ -1,8 +1,9 @@
 from modules import Module
 from layers import FiniteFieldLinearLayer, FiniteFieldPiNetSecondOrderLinearLayer, FiniteFieldPiNetSecondOrderConvLayer
-from utils import Flatten
+from modules import Flatten
 
 
+# TODO: this file can be completely ignored, however, for common network definitions create functions here
 class FiniteFieldPiNetNetworkLinear(Module):
     def __init__(self, quantization_bit_weight, prime, quantization_bit_input):
         super().__init__()

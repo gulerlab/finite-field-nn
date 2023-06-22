@@ -1,12 +1,9 @@
-from modules import Module
+from modules import Module, Flatten
 from layers import RealLinearLayer, RealConvLayer, RealPiNetSecondOrderLinearLayer, RealPiNetSecondOrderConvLayer
 from activations import RealQuadraticActivation, RealReLU
-from utils import Flatten
 
 
-# TODO: after conv implementation is done implement some known networks
-# TODO: delete the previous implementations after implementing the known ones
-#  and make it customizable
+# TODO: this file can be completely ignored, however, for common network definitions create functions here
 class RealNetworkLinearTest(Module):
     def __init__(self):
         super().__init__()

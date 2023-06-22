@@ -1,26 +1,7 @@
-from modules import ActivationModule
-
 import numpy as np
 import logging
 from numpy import ndarray
 import math
-
-
-class Flatten(ActivationModule):
-    def __init__(self):
-        super().__init__()
-        self._input_data_shape = None
-
-    def forward(self, input_data):
-        self._input_data_shape = input_data.shape
-        return np.reshape(input_data, (self._input_data_shape[0], -1))
-
-    def backprop(self, propagated_error):
-        self._gradient = np.reshape(propagated_error, self._input_data_shape)
-
-    def loss(self):
-        return self._gradient
-
 
 ############
 # domain converting operations
@@ -229,6 +210,7 @@ def create_batch_data(train_data, train_label, test_data, test_label, batch_size
         test_label.append(last_batch_test_label)
 
     return train_data, train_label, test_data, test_label
+
 
 #############
 # utils for debug
