@@ -3,6 +3,9 @@ import logging
 from numpy import ndarray
 import math
 
+from itertools import product
+
+
 ############
 # domain converting operations
 ############
@@ -232,3 +235,41 @@ def info(msg, verbose=True):
     logging.info(msg)
     if verbose:
         print(msg)
+
+
+#############
+# galois field implementations
+#############
+
+def to_galois_field(real, quantization_bit, prime, field):
+    scaled_real = real * (2 ** quantization_bit)
+    int_domain = np.around(scaled_real)
+    galois_field = field.Zeros(int_domain.shape)
+    negative_mask = int_domain < 0
+    galois_field[~negative_mask] = int_domain[~negative_mask].astype(np.uint64)
+    galois_field[negative_mask] = prime - (int_domain[negative_mask] * -1).astype(np.uint64)
+    return galois_field
+
+
+def from_galois_to_real_domain(galois_field, quantization_bit, prime):
+    threshold = (prime - 1) / 2
+    negative_mask = galois_field > threshold
+    real_domain = np.zeros(galois_field.shape, dtype=np.float64)
+    positive_galois_field = galois_field[~negative_mask]
+    positive_items = [x.item() for x in positive_galois_field]
+    negative_galois_field = galois_field[negative_mask]
+    negative_items = [x.item() for x in negative_galois_field]
+    real_domain[~negative_mask] = np.asarray(positive_items)
+    real_domain[negative_mask] = np.asarray(negative_items) - prime
+    real_domain = real_domain / (2 ** quantization_bit)
+    return real_domain
+
+
+def from_galois_to_finite_field(galois_field):
+    shape = galois_field.shape
+    finite_field = np.zeros(shape, dtype=np.uint64)
+    shape_prod = [range(shape_idx) for shape_idx in shape]
+    generator = product(*shape_prod)
+    for idx in generator:
+        finite_field[idx] = galois_field[idx].item()
+    return finite_field
