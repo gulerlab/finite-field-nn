@@ -80,7 +80,9 @@ for epoch in range(EPOCH):
         model.optimize(LR)
         print('epoch: {}, idx: {}, curr loss: {}'.format(epoch + 1, train_idx + 1, loss))
         if train_idx == 0 or (train_idx + 1) % PRINT == 0:
-            print('epoch: {}, idx: {}, avg loss: {}'.format(epoch + 1, train_idx + 1, tot_loss / PRINT))
+            if train_idx != 0:
+                tot_loss = tot_loss / PRINT
+            print('epoch: {}, idx: {}, avg loss: {}'.format(epoch + 1, train_idx + 1, tot_loss))
             tot_loss = 0
 
     tot_acc = 0
