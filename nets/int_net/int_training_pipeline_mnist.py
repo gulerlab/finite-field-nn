@@ -78,19 +78,20 @@ for epoch in range(EPOCH):
 
         model.backprop(propagated_error)
         model.optimize(LR)
+        print('epoch: {}, idx: {}, curr loss: {}'.format(epoch + 1, train_idx + 1, loss))
         if train_idx == 0 or (train_idx + 1) % PRINT == 0:
-            tot_acc = 0
-            tot_sample = 0
-            for train_acc_idx, (test_data_batch, test_label_batch) in enumerate(zip(test_data, test_label)):
-                # train accuracy
-                preds = model.forward(test_data_batch)
-                pred_args = np.argmax(preds, axis=1)
-
-                tot_acc += np.count_nonzero(pred_args == test_label_batch)
-                tot_sample += test_data_batch.shape[0]
-            accuracy = tot_acc / tot_sample
-            if train_idx != 0:
-                tot_loss = tot_loss / PRINT
-            print('epoch: {}, idx: {}, accuracy: {}, loss: {}'.format(epoch + 1, train_idx + 1, accuracy, tot_loss))
+            print('epoch: {}, idx: {}, avg loss: {}'.format(epoch + 1, train_idx + 1, tot_loss / PRINT))
             tot_loss = 0
+
+    tot_acc = 0
+    tot_sample = 0
+    for train_acc_idx, (test_data_batch, test_label_batch) in enumerate(zip(test_data, test_label)):
+        # train accuracy
+        preds = model.forward(test_data_batch)
+        pred_args = np.argmax(preds, axis=1)
+
+        tot_acc += np.count_nonzero(pred_args == test_label_batch)
+        tot_sample += test_data_batch.shape[0]
+    accuracy = tot_acc / tot_sample
+    print('epoch: {}, accuracy: {}'.format(epoch + 1, accuracy))
 
