@@ -1,7 +1,7 @@
 # this project
 from weight_initializations import kaiming_uniform, kaiming_uniform_conv
 from modules import Module
-from utils import to_int_domain, int_truncation
+from utils import to_int_domain_object, int_truncation_object
 
 import numpy as np
 
@@ -41,31 +41,31 @@ class IntegerLinearLayer(Module):
 
     def __init_weights(self, init_fnc=kaiming_uniform):
         self._weight = init_fnc(self._in_dim, self._out_dim)
-        self._weight = to_int_domain(self._weight, self._quantization_weight)
+        self._weight = to_int_domain_object(self._weight, self._quantization_weight)
 
     def forward(self, input_data):
         self._input_data = input_data
         unscaled_result = self._input_data @ self._weight
         if self._first_layer:
-            scaled_result = int_truncation(unscaled_result, self._quantization_input)
+            scaled_result = int_truncation_object(unscaled_result, self._quantization_input)
         else:
-            scaled_result = int_truncation(unscaled_result, self._quantization_weight)
+            scaled_result = int_truncation_object(unscaled_result, self._quantization_weight)
         return scaled_result
 
     def backprop(self, propagated_error):
         self._propagated_error = propagated_error
         unscaled_gradient = self._input_data.T @ propagated_error
         if self._first_layer:
-            scaled_gradient = int_truncation(unscaled_gradient, self._quantization_input)
+            scaled_gradient = int_truncation_object(unscaled_gradient, self._quantization_input)
         else:
-            scaled_gradient = int_truncation(unscaled_gradient, self._quantization_weight)
+            scaled_gradient = int_truncation_object(unscaled_gradient, self._quantization_weight)
         self._gradient = scaled_gradient
 
     def optimize(self, learning_rate):
-        self._weight = self._weight - int_truncation(self._gradient, learning_rate)
+        self._weight = self._weight - int_truncation_object(self._gradient, learning_rate)
 
     def loss(self):
-        return int_truncation(self._propagated_error @ self._weight.T, self._quantization_weight)
+        return int_truncation_object(self._propagated_error @ self._weight.T, self._quantization_weight)
 
 
 class IntegerPiNetSecondOrderLinearLayer(Module):
@@ -100,15 +100,15 @@ class IntegerPiNetSecondOrderLinearLayer(Module):
         self.__inner_forward['out_1'] = first_out
         self.__inner_forward['out_2'] = second_out
         unscaled_second_order = (first_out * second_out)
-        scaled_second_order = int_truncation(unscaled_second_order, self._quantization_weight)
+        scaled_second_order = int_truncation_object(unscaled_second_order, self._quantization_weight)
         return scaled_second_order + first_out
 
     def backprop(self, propagated_error):
         self._propagated_error = propagated_error
         unscaled_second_prop = self._propagated_error * self.__inner_forward['out_1']
-        second_prop = int_truncation(unscaled_second_prop, self._quantization_weight)
+        second_prop = int_truncation_object(unscaled_second_prop, self._quantization_weight)
         unscaled_first_prop = self._propagated_error * self.__inner_forward['out_2']
-        first_prop = int_truncation(unscaled_first_prop, self._quantization_weight)
+        first_prop = int_truncation_object(unscaled_first_prop, self._quantization_weight)
         first_prop = first_prop + self._propagated_error
         self.__inner_prop['prop_1'] = first_prop
         self.__inner_prop['prop_2'] = second_prop
@@ -172,7 +172,7 @@ class IntegerConvLayer(Module):
 
     def __init_weights(self, init_fnc=kaiming_uniform_conv):
         self._weight = init_fnc(self._in_channels, self._out_channels, self._kernel_size)
-        self._weight = to_int_domain(self._weight, self._quantization_weight)
+        self._weight = to_int_domain_object(self._weight, self._quantization_weight)
 
     def __generate_patches(self):
         self.__patches = []
@@ -216,9 +216,9 @@ class IntegerConvLayer(Module):
                                                                       np.reshape(self._weight, (-1,
                                                                                                 self._out_channels)))
         if self._first_layer:
-            output_data = int_truncation(output_data, self._quantization_input)
+            output_data = int_truncation_object(output_data, self._quantization_input)
         else:
-            output_data = int_truncation(output_data, self._quantization_weight)
+            output_data = int_truncation_object(output_data, self._quantization_weight)
         return output_data
 
     def backprop(self, propagated_error):
@@ -231,12 +231,12 @@ class IntegerConvLayer(Module):
                 .reshape(self._weight.shape)
 
         if self._first_layer:
-            self._gradient = int_truncation(self._gradient, self._quantization_input)
+            self._gradient = int_truncation_object(self._gradient, self._quantization_input)
         else:
-            self._gradient = int_truncation(self._gradient, self._quantization_weight)
+            self._gradient = int_truncation_object(self._gradient, self._quantization_weight)
 
     def optimize(self, learning_rate):
-        self._weight = self._weight - int_truncation(self._gradient, learning_rate)
+        self._weight = self._weight - int_truncation_object(self._gradient, learning_rate)
 
     def loss(self):
         num_of_samples, _, image_height, image_width = self._input_data.shape
@@ -262,7 +262,7 @@ class IntegerConvLayer(Module):
         resulting_error = resulting_error[:, :, padding_top:(image_height -
                                                              padding_bottom), padding_left:(image_width -
                                                                                             padding_right)]
-        resulting_error = int_truncation(resulting_error, self._quantization_weight)
+        resulting_error = int_truncation_object(resulting_error, self._quantization_weight)
         return resulting_error
 
 
@@ -299,15 +299,15 @@ class IntegerPiNetSecondOrderConvLayer(Module):
         self.__inner_forward['out_1'] = first_out
         self.__inner_forward['out_2'] = second_out
         unscaled_second_order = (first_out * second_out)
-        scaled_second_order = int_truncation(unscaled_second_order, self._quantization_weight)
+        scaled_second_order = int_truncation_object(unscaled_second_order, self._quantization_weight)
         return scaled_second_order + first_out
 
     def backprop(self, propagated_error):
         self._propagated_error = propagated_error
         unscaled_second_prop = self._propagated_error * self.__inner_forward['out_1']
-        second_prop = int_truncation(unscaled_second_prop, self._quantization_weight)
+        second_prop = int_truncation_object(unscaled_second_prop, self._quantization_weight)
         unscaled_first_prop = self._propagated_error * self.__inner_forward['out_2']
-        first_prop = int_truncation(unscaled_first_prop, self._quantization_weight)
+        first_prop = int_truncation_object(unscaled_first_prop, self._quantization_weight)
         first_prop = first_prop + self._propagated_error
         self.__inner_prop['prop_1'] = first_prop
         self.__inner_prop['prop_2'] = second_prop

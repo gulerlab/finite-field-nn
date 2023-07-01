@@ -6,7 +6,7 @@ from torchvision.models import vgg16_bn, VGG16_BN_Weights
 from torch.utils.data import DataLoader
 import torch
 
-from utils import to_int_domain
+from utils import to_int_domain_object
 
 
 def load_all_data_mnist(load_path, quantization_input, quantization_label, flatten=True):
@@ -36,8 +36,8 @@ def load_all_data_mnist(load_path, quantization_input, quantization_label, flatt
     train_data, train_label, test_data, test_label = train_data.numpy(), train_label.numpy(), test_data.numpy(), \
         test_label.numpy()
 
-    train_data, train_label, test_data = to_int_domain(train_data, quantization_input),\
-        to_int_domain(train_label, quantization_label), to_int_domain(test_data, quantization_input)
+    train_data, train_label, test_data = to_int_domain_object(train_data, quantization_input),\
+        to_int_domain_object(train_label, quantization_label), to_int_domain_object(test_data, quantization_input)
     if flatten:
         # reshape data
         train_data, test_data = train_data.reshape((train_data.shape[0], -1)), \
@@ -68,8 +68,8 @@ def load_all_data_cifar10(load_path, quantization_input, quantization_label, fla
     test_data, test_label = next(iter(test_loader))
     train_data, train_label, test_data, test_label = train_data.numpy(), train_label.numpy(), test_data.numpy(), \
         test_label.numpy()
-    train_data, train_label, test_data = to_int_domain(train_data, quantization_input), \
-        to_int_domain(train_label, quantization_label), to_int_domain(test_data, quantization_input)
+    train_data, train_label, test_data = to_int_domain_object(train_data, quantization_input), \
+        to_int_domain_object(train_label, quantization_label), to_int_domain_object(test_data, quantization_input)
     if flatten:
         # reshape data
         train_data, test_data = train_data.reshape((train_data.shape[0], -1)), \
@@ -107,7 +107,7 @@ def load_all_data_apply_vgg_cifar10(load_path, quantization_input, quantization_
                 train_data = vgg_backbone(train_data).reshape(train_data.size(0), -1)
             train_data = train_data.to('cpu').numpy()
             train_label = train_label.numpy()
-            train_data, train_label = to_int_domain(train_data, quantization_input), to_int_domain(train_label,
+            train_data, train_label = to_int_domain_object(train_data, quantization_input), to_int_domain_object(train_label,
                                                                                                    quantization_label)
             train_data_all.append(train_data)
             train_label_all.append(train_label)
@@ -118,7 +118,7 @@ def load_all_data_apply_vgg_cifar10(load_path, quantization_input, quantization_
             if flatten:
                 test_data = vgg_backbone(test_data).reshape(test_data.size(0), -1)
             test_data = test_data.to('cpu').numpy()
-            test_data = to_int_domain(test_data, quantization_input)
+            test_data = to_int_domain_object(test_data, quantization_input)
             test_data_all.append(test_data)
 
     train_data_all, train_label_all = np.concatenate(train_data_all, axis=0), np.concatenate(train_label_all, axis=0)
@@ -152,8 +152,8 @@ def load_all_data_fashion_mnist(load_path, quantization_input, quantization_labe
             test_data.squeeze(), test_label.squeeze()
     train_data, train_label, test_data, test_label = train_data.numpy(), train_label.numpy(), test_data.numpy(), \
         test_label.numpy()
-    train_data, train_label, test_data = to_int_domain(train_data, quantization_input), \
-        to_int_domain(train_label, quantization_label), to_int_domain(test_data, quantization_input)
+    train_data, train_label, test_data = to_int_domain_object(train_data, quantization_input), \
+        to_int_domain_object(train_label, quantization_label), to_int_domain_object(test_data, quantization_input)
     if flatten:
         # reshape data
         train_data, test_data = train_data.reshape((train_data.shape[0], -1)), \

@@ -1,5 +1,5 @@
 import numpy as np
-from utils import from_int_to_real_domain, int_truncation
+from utils import from_int_to_real_domain, int_truncation_object
 
 
 class IntegerMSELoss:
@@ -24,4 +24,4 @@ class IntegerMSELoss:
         return (np.linalg.norm(real_diff) ** 2) / real_diff.shape[0]
 
     def error_derivative(self):
-        return int_truncation(-2 * self.__diff, self._quantization_batch_size)
+        return int_truncation_object(-2 * self.__diff, self._quantization_batch_size)

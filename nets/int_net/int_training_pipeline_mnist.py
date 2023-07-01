@@ -7,7 +7,8 @@ import sys
 sys.path.append('../../')
 
 import numpy as np
-from datasets import load_all_data_mnist, load_all_data_cifar10, load_all_data_fashion_mnist, load_all_data_apply_vgg_cifar10
+from datasets import load_all_data_mnist, load_all_data_cifar10, load_all_data_fashion_mnist,\
+    load_all_data_apply_vgg_cifar10
 from utils import create_batch_data
 import modules
 import layers
@@ -36,23 +37,30 @@ LR = 7
 # data fetching
 load_path = '../../data'
 if DATASET_MODE == 0:
-    train_data, train_label, test_data, test_label = load_all_data_mnist(load_path, QUANTIZATION_INPUT, QUANTIZATION_WEIGHT, flatten=FLATTEN)
+    train_data, train_label, test_data, test_label = load_all_data_mnist(load_path, QUANTIZATION_INPUT,
+                                                                         QUANTIZATION_WEIGHT, flatten=FLATTEN)
 elif DATASET_MODE == 1:
-    train_data, train_label, test_data, test_label = load_all_data_fashion_mnist(load_path, QUANTIZATION_INPUT, QUANTIZATION_WEIGHT, flatten=FLATTEN)
+    train_data, train_label, test_data, test_label = load_all_data_fashion_mnist(load_path, QUANTIZATION_INPUT,
+                                                                                 QUANTIZATION_WEIGHT, flatten=FLATTEN)
 elif DATASET_MODE == 2:
-    train_data, train_label, test_data, test_label = load_all_data_cifar10(load_path, QUANTIZATION_INPUT, QUANTIZATION_WEIGHT, flatten=FLATTEN)
+    train_data, train_label, test_data, test_label = load_all_data_cifar10(load_path, QUANTIZATION_INPUT,
+                                                                           QUANTIZATION_WEIGHT, flatten=FLATTEN)
 elif DATASET_MODE == 3:
-    train_data, train_label, test_data, test_label = load_all_data_apply_vgg_cifar10(load_path, QUANTIZATION_INPUT, QUANTIZATION_WEIGHT, flatten=FLATTEN)
+    train_data, train_label, test_data, test_label = load_all_data_apply_vgg_cifar10(load_path, QUANTIZATION_INPUT,
+                                                                                     QUANTIZATION_WEIGHT,
+                                                                                     flatten=FLATTEN)
 else:
     train_data, train_label, test_data, test_label = None, None, None, None
-train_data, train_label, test_data, test_label = create_batch_data(train_data, train_label, test_data, test_label, BATCH_SIZE)
+train_data, train_label, test_data, test_label = create_batch_data(train_data, train_label, test_data, test_label,
+                                                                   BATCH_SIZE)
 
 
 # In[4]:
 
 
 model_arr = [
-    layers.IntegerPiNetSecondOrderConvLayer(1, 6, (5, 5), QUANTIZATION_WEIGHT, first_layer=True, quantization_input=QUANTIZATION_INPUT),
+    layers.IntegerPiNetSecondOrderConvLayer(1, 6, (5, 5), QUANTIZATION_WEIGHT, first_layer=True,
+                                            quantization_input=QUANTIZATION_INPUT),
     layers.IntegerPiNetSecondOrderConvLayer(6, 6, (5, 5), QUANTIZATION_WEIGHT),
     modules.Flatten(),
     layers.IntegerPiNetSecondOrderLinearLayer(2400, 128, QUANTIZATION_WEIGHT),
@@ -96,4 +104,3 @@ for epoch in range(EPOCH):
         tot_sample += test_data_batch.shape[0]
     accuracy = tot_acc / tot_sample
     print('epoch: {}, accuracy: {}'.format(epoch + 1, accuracy))
-

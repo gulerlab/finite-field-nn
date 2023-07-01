@@ -273,3 +273,35 @@ def from_galois_to_finite_field(galois_field):
     for idx in generator:
         finite_field[idx] = galois_field[idx].item()
     return finite_field
+
+
+#############
+# integer representation with object definition
+#############
+
+def int_remainder_to_decimal_scalar(remainder, scale_down):
+    bit_str = np.binary_repr(remainder, width=scale_down)
+    result = 0.0
+    for idx, bit_elem in enumerate(bit_str):
+        if bit_elem == '1':
+            result += 2 ** (-1 * (idx + 1))
+    return result
+
+
+def to_int_domain_object(real: ndarray, quantization_bit: int) -> ndarray:
+    scaled_real = real * (2 ** quantization_bit)
+    int_domain = np.around(scaled_real).astype(np.int64)
+    int_domain = int_domain.astype('object')
+    return int_domain
+
+
+def int_truncation_object(int_domain: ndarray, scale_down: int) -> ndarray:
+    real_domain_floor = int_domain >> scale_down
+    remainders = int_domain % (2 ** scale_down)
+    zero_distributions_fnc = np.vectorize(lambda x: int_remainder_to_decimal_scalar(x, scale_down))
+    zero_distributions = zero_distributions_fnc(remainders)
+    stochastic_fnc = np.vectorize(lambda x: np.random.choice([0, 1], 1, p=[1 - x, x])[0])
+    zero_distributions = stochastic_fnc(zero_distributions)
+
+    truncated_int_domain = (real_domain_floor + zero_distributions).astype('object')
+    return truncated_int_domain
