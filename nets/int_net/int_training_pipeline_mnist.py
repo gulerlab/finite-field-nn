@@ -19,7 +19,7 @@ from criterions import IntegerMSELoss
 
 
 BATCH_SIZE = 256
-EPOCH = 5
+EPOCH = 1
 PRINT = 10
 FLATTEN = False
 # 0, MNIST; 1, FashionMNIST; 2, CIFAR10; 3, VGG-CIFAR10
