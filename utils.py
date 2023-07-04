@@ -2,9 +2,8 @@ import numpy as np
 import logging
 from numpy import ndarray
 import math
-
 from itertools import product
-
+from numba import jit
 
 ############
 # domain converting operations
@@ -305,3 +304,16 @@ def int_truncation_object(int_domain: ndarray, scale_down: int) -> ndarray:
 
     truncated_int_domain = (real_domain_floor + zero_distributions).astype('object')
     return truncated_int_domain
+
+
+def jit_int_truncation_object(int_domain: ndarray, scale_down: int) -> ndarray:
+    real_domain_floor = int_domain >> scale_down
+    remainders = int_domain % (2 ** scale_down)
+    zero_distributions_fnc = jit(lambda x: int_remainder_to_decimal_scalar(x, scale_down))
+    zero_distributions = zero_distributions_fnc(remainders)
+    stochastic_fnc = jit(lambda x: np.random.choice([0, 1], 1, p=[1 - x, x])[0])
+    zero_distributions = stochastic_fnc(zero_distributions)
+
+    truncated_int_domain = (real_domain_floor + zero_distributions).astype('object')
+    return truncated_int_domain
+
