@@ -5,6 +5,7 @@ import math
 from itertools import product
 from numba import jit
 
+
 ############
 # domain converting operations
 ############
@@ -317,3 +318,20 @@ def jit_int_truncation_object(int_domain: ndarray, scale_down: int) -> ndarray:
     truncated_int_domain = (real_domain_floor + zero_distributions).astype('object')
     return truncated_int_domain
 
+
+#############
+# finite field representation with object definition
+#############
+
+def to_finite_field_object(real, quantization_bit, prime):
+    scaled_real = real * (2 ** quantization_bit)
+    int_domain = np.around(scaled_real)
+    finite_field = np.zeros(int_domain.shape, dtype='object')
+    negative_mask = int_domain < 0
+    finite_field[~negative_mask] = (int_domain[~negative_mask]).astype(np.uint64)
+    finite_field[negative_mask] = prime - (int_domain[negative_mask] * -1).astype(np.uint64)
+    return finite_field
+
+
+def finite_field_truncation_object(finite_field, scale_down, prime):
+    pass
