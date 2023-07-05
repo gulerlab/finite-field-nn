@@ -334,4 +334,15 @@ def to_finite_field_object(real, quantization_bit, prime):
 
 
 def finite_field_truncation_object(finite_field, scale_down, prime):
-    pass
+    threshold = (prime - 1) / 2
+    negative_mask = finite_field > threshold
+    neg_to_pos = (-1 * finite_field[negative_mask]) % prime
+    neg_to_pos = int_truncation_object(neg_to_pos, scale_down)
+    neg_to_pos = (-1 * neg_to_pos) % prime
+    pos = finite_field[~negative_mask]
+    pos = int_truncation_object(pos, scale_down)
+
+    truncated_finite_field_domain = np.zeros(finite_field.shape, dtype='object')
+    truncated_finite_field_domain[negative_mask] = neg_to_pos
+    truncated_finite_field_domain[~negative_mask] = pos
+    return truncated_finite_field_domain
