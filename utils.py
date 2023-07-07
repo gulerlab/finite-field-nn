@@ -323,7 +323,7 @@ def jit_int_truncation_object(int_domain: ndarray, scale_down: int) -> ndarray:
 # finite field representation with object definition
 #############
 
-def to_finite_field_object(real, quantization_bit, prime):
+def to_finite_field_domain_object(real, quantization_bit, prime):
     scaled_real = real * (2 ** quantization_bit)
     int_domain = np.around(scaled_real)
     finite_field = np.zeros(int_domain.shape, dtype='object')

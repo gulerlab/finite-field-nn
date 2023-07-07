@@ -1,4 +1,4 @@
-from utils import to_finite_field_domain, info
+from utils import to_finite_field_domain_object, info
 
 import numpy as np
 
@@ -14,7 +14,8 @@ from torchvision.models import vgg16_bn, VGG16_BN_Weights
 #############
 
 # noinspection DuplicatedCode
-def load_all_data_fashion_mnist(load_path, quantization_bit_data: int, quantization_bit_label: int, prime: int, flatten=True):
+def load_all_data_fashion_mnist(load_path, quantization_bit_data: int, quantization_bit_label: int, prime: int,
+                                flatten=True):
     # transformations
     transform = Compose([
         ToTensor(),
@@ -40,9 +41,9 @@ def load_all_data_fashion_mnist(load_path, quantization_bit_data: int, quantizat
             test_data.squeeze(), test_label.squeeze()
     train_data, train_label, test_data, test_label = train_data.numpy(), train_label.numpy(), test_data.numpy(), \
         test_label.numpy()
-    train_data, train_label, test_data = to_finite_field_domain(train_data, quantization_bit_data, prime), \
-        to_finite_field_domain(train_label, quantization_bit_label, prime), \
-        to_finite_field_domain(test_data, quantization_bit_data, prime)
+    train_data, train_label, test_data = to_finite_field_domain_object(train_data, quantization_bit_data, prime), \
+        to_finite_field_domain_object(train_label, quantization_bit_label, prime), \
+        to_finite_field_domain_object(test_data, quantization_bit_data, prime)
     if flatten:
         # reshape data
         train_data, test_data = train_data.reshape((train_data.shape[0], -1)),\
@@ -77,9 +78,9 @@ def load_all_data_mnist(load_path, quantization_bit_data: int, quantization_bit_
             test_data.squeeze(), test_label.squeeze()
     train_data, train_label, test_data, test_label = train_data.numpy(), train_label.numpy(), test_data.numpy(), \
         test_label.numpy()
-    train_data, train_label, test_data = to_finite_field_domain(train_data, quantization_bit_data, prime), \
-        to_finite_field_domain(train_label, quantization_bit_label, prime), \
-        to_finite_field_domain(test_data, quantization_bit_data, prime)
+    train_data, train_label, test_data = to_finite_field_domain_object(train_data, quantization_bit_data, prime), \
+        to_finite_field_domain_object(train_label, quantization_bit_label, prime), \
+        to_finite_field_domain_object(test_data, quantization_bit_data, prime)
 
     if flatten:
         # reshape data
@@ -111,9 +112,9 @@ def load_all_data_cifar10(load_path, quantization_bit_data: int, quantization_bi
     test_data, test_label = next(iter(test_loader))
     train_data, train_label, test_data, test_label = train_data.numpy(), train_label.numpy(), test_data.numpy(), \
         test_label.numpy()
-    train_data, train_label, test_data = to_finite_field_domain(train_data, quantization_bit_data, prime), \
-        to_finite_field_domain(train_label, quantization_bit_label, prime), \
-        to_finite_field_domain(test_data, quantization_bit_data, prime)
+    train_data, train_label, test_data = to_finite_field_domain_object(train_data, quantization_bit_data, prime), \
+        to_finite_field_domain_object(train_label, quantization_bit_label, prime), \
+        to_finite_field_domain_object(test_data, quantization_bit_data, prime)
     if flatten:
         # reshape data
         train_data, test_data = train_data.reshape((train_data.shape[0], -1)),\
@@ -153,8 +154,8 @@ def load_all_data_apply_vgg_cifar10(load_path, quantization_bit_data: int, quant
             train_data = train_data.to('cpu').numpy()
             train_label = train_label.numpy()
 
-            train_data, train_label = to_finite_field_domain(train_data, quantization_bit_data, prime), \
-                to_finite_field_domain(train_label, quantization_bit_label, prime)
+            train_data, train_label = to_finite_field_domain_object(train_data, quantization_bit_data, prime), \
+                to_finite_field_domain_object(train_label, quantization_bit_label, prime)
 
             train_data_all.append(train_data)
             train_label_all.append(train_label)
@@ -166,7 +167,7 @@ def load_all_data_apply_vgg_cifar10(load_path, quantization_bit_data: int, quant
             if flatten:
                 test_data = vgg_backbone(test_data).reshape(test_data.size(0), -1)
             test_data = test_data.to('cpu').numpy()
-            test_data = to_finite_field_domain(test_data, quantization_bit_data, prime)
+            test_data = to_finite_field_domain_object(test_data, quantization_bit_data, prime)
             test_data_all.append(test_data)
 
         info('test data is handled')

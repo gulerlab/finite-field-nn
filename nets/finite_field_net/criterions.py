@@ -1,5 +1,5 @@
 import numpy as np
-from utils import finite_field_truncation, to_real_domain
+from utils import finite_field_truncation_object, to_real_domain
 
 
 class FiniteFieldMSELoss:
@@ -23,14 +23,7 @@ class FiniteFieldMSELoss:
 
     def forward(self, input_data, ground_truth):
         # common error term calculation - finite field subtraction of error
-        ground_truth_mask = ground_truth < input_data
-        ground_truth_diff_input_data = np.zeros(ground_truth.shape, dtype=np.uint64)
-        ground_truth_diff_input_data[ground_truth_mask] = (-1 * (input_data[ground_truth_mask] -
-                                                                 ground_truth[ground_truth_mask]).
-                                                           astype(np.int64)) % self._prime
-        ground_truth_diff_input_data[~ground_truth_mask] = (ground_truth[~ground_truth_mask] -
-                                                            input_data[~ground_truth_mask])
-        self.__diff = ground_truth_diff_input_data
+        self.__diff = (ground_truth - input_data) % self._prime
 
         real_ground_truth = to_real_domain(ground_truth, self._quantization_bit_prediction, self._prime)
         real_input_data = to_real_domain(input_data, self._quantization_bit_prediction, self._prime)
@@ -39,5 +32,5 @@ class FiniteFieldMSELoss:
 
     def error_derivative(self):
         unscaled_error = ((-2 % self._prime) * self.__diff) % self._prime
-        error = finite_field_truncation(unscaled_error, self._batch_size_param, self._prime)
+        error = finite_field_truncation_object(unscaled_error, self._batch_size_param, self._prime)
         return error

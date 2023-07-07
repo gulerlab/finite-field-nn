@@ -1,7 +1,7 @@
 # this project
 from weight_initializations import kaiming_uniform, kaiming_uniform_conv
 from modules import Module
-from utils import to_finite_field_domain, finite_field_truncation
+from utils import to_finite_field_domain_object, finite_field_truncation_object
 
 import numpy as np
 
@@ -47,37 +47,34 @@ class FiniteFieldLinearLayer(Module):
 
     def __init_weights(self, init_fnc=kaiming_uniform):
         self._weight = init_fnc(self._in_dim, self._out_dim)
-        self._weight = to_finite_field_domain(self._weight, self._quantization_bit_weight, self._prime)
+        self._weight = to_finite_field_domain_object(self._weight, self._quantization_bit_weight, self._prime)
 
     def forward(self, input_data):
         self._input_data = input_data
         out = (self._input_data @ self._weight) % self._prime
         if self._first_layer:
-            out = finite_field_truncation(out, self._quantization_bit_input, self._prime)
+            out = finite_field_truncation_object(out, self._quantization_bit_input, self._prime)
         else:
-            out = finite_field_truncation(out, self._quantization_bit_weight, self._prime)
+            out = finite_field_truncation_object(out, self._quantization_bit_weight, self._prime)
         return out
 
     def backprop(self, propagated_error):
         self._propagated_error = propagated_error
         unscaled_gradient = (self._input_data.T @ propagated_error) % self._prime
         if self._first_layer:
-            self._gradient = finite_field_truncation(unscaled_gradient, self._quantization_bit_input, self._prime)
+            self._gradient = finite_field_truncation_object(unscaled_gradient, self._quantization_bit_input,
+                                                            self._prime)
         else:
-            self._gradient = finite_field_truncation(unscaled_gradient, self._quantization_bit_weight, self._prime)
+            self._gradient = finite_field_truncation_object(unscaled_gradient, self._quantization_bit_weight,
+                                                            self._prime)
 
     def optimize(self, learning_rate):
-        scaled_gradient = finite_field_truncation(self._gradient, learning_rate, self._prime)
-        weight_mask = self._weight < scaled_gradient
-        weight_diff_grad = np.zeros(self._weight.shape, dtype=np.uint64)
-        weight_diff_grad[weight_mask] = (-1 * (scaled_gradient[weight_mask] -
-                                               self._weight[weight_mask]).astype(np.int64)) % self._prime
-        weight_diff_grad[~weight_mask] = self._weight[~weight_mask] - scaled_gradient[~weight_mask]
-        self._weight = weight_diff_grad
+        scaled_gradient = finite_field_truncation_object(self._gradient, learning_rate, self._prime)
+        self._weight = (self._weight - scaled_gradient) % self._prime
 
     def loss(self):
-        return finite_field_truncation((self._propagated_error @ self._weight.T) % self._prime,
-                                       self._quantization_bit_weight, self._prime)
+        return finite_field_truncation_object((self._propagated_error @ self._weight.T) % self._prime,
+                                              self._quantization_bit_weight, self._prime)
 
 
 class FiniteFieldPiNetSecondOrderLinearLayer(Module):
@@ -108,17 +105,17 @@ class FiniteFieldPiNetSecondOrderLinearLayer(Module):
         self.__inner_forward['out_1'] = first_out
         self.__inner_forward['out_2'] = second_out
         unscaled_second_order = (first_out * second_out) % self._prime
-        second_order = finite_field_truncation(unscaled_second_order, self._quantization_bit_weight, self._prime)
+        second_order = finite_field_truncation_object(unscaled_second_order, self._quantization_bit_weight, self._prime)
         out = (second_order + first_out) % self._prime
         return out
 
     def backprop(self, propagated_error):
         self._propagated_error = propagated_error
         unscaled_second_prop = (self._propagated_error * self.__inner_forward['out_1']) % self._prime
-        second_prop = finite_field_truncation(unscaled_second_prop, self._quantization_bit_weight, self._prime)
+        second_prop = finite_field_truncation_object(unscaled_second_prop, self._quantization_bit_weight, self._prime)
         unscaled_first_prop_second_order = (self._propagated_error * self.__inner_forward['out_2']) % self._prime
-        first_prop_second_order = finite_field_truncation(unscaled_first_prop_second_order,
-                                                          self._quantization_bit_weight, self._prime)
+        first_prop_second_order = finite_field_truncation_object(unscaled_first_prop_second_order,
+                                                                 self._quantization_bit_weight, self._prime)
         first_prop = (first_prop_second_order + self._propagated_error) % self._prime
         self.__inner_prop['prop_1'] = first_prop
         self.__inner_prop['prop_2'] = second_prop
@@ -190,7 +187,7 @@ class FiniteFieldConvLayer(Module):
 
     def __init_weights(self, init_fnc=kaiming_uniform_conv):
         self._weight = init_fnc(self._in_channels, self._out_channels, self._kernel_size)
-        self._weight = to_finite_field_domain(self._weight, self._quantization_bit_weight, self._prime)
+        self._weight = to_finite_field_domain_object(self._weight, self._quantization_bit_weight, self._prime)
 
     def __generate_patches(self):
         self.__patches = []
@@ -235,9 +232,9 @@ class FiniteFieldConvLayer(Module):
             output_data[:, :, output_height_idx, output_width_idx] = unscaled_out
         output_data = output_data % self._prime
         if self._first_layer:
-            output_data = finite_field_truncation(output_data, self._quantization_bit_input, self._prime)
+            output_data = finite_field_truncation_object(output_data, self._quantization_bit_input, self._prime)
         else:
-            output_data = finite_field_truncation(output_data, self._quantization_bit_weight, self._prime)
+            output_data = finite_field_truncation_object(output_data, self._quantization_bit_weight, self._prime)
         return output_data
 
     def backprop(self, propagated_error):
@@ -253,18 +250,13 @@ class FiniteFieldConvLayer(Module):
             self._gradient = self._gradient + unscaled_gradient
         self._gradient = self._gradient % self._prime
         if self._first_layer:
-            self._gradient = finite_field_truncation(self._gradient, self._quantization_bit_input, self._prime)
+            self._gradient = finite_field_truncation_object(self._gradient, self._quantization_bit_input, self._prime)
         else:
-            self._gradient = finite_field_truncation(self._gradient, self._quantization_bit_weight, self._prime)
+            self._gradient = finite_field_truncation_object(self._gradient, self._quantization_bit_weight, self._prime)
 
     def optimize(self, learning_rate):
-        scaled_gradient = finite_field_truncation(self._gradient, learning_rate, self._prime)
-        weight_mask = self._weight < scaled_gradient
-        weight_diff_grad = np.zeros(self._weight.shape, dtype=np.uint64)
-        weight_diff_grad[weight_mask] = (-1 * (scaled_gradient[weight_mask] -
-                                               self._weight[weight_mask]).astype(np.int64)) % self._prime
-        weight_diff_grad[~weight_mask] = self._weight[~weight_mask] - scaled_gradient[~weight_mask]
-        self._weight = weight_diff_grad
+        scaled_gradient = finite_field_truncation_object(self._gradient, learning_rate, self._prime)
+        self._weight = (self._weight - scaled_gradient) % self._prime
 
     def loss(self):
         num_of_samples, _, image_height, image_width = self._input_data.shape
@@ -292,7 +284,7 @@ class FiniteFieldConvLayer(Module):
                                                              padding_bottom), padding_left:(image_width -
                                                                                             padding_right)]
         resulting_error = resulting_error % self._prime
-        resulting_error = finite_field_truncation(resulting_error, self._quantization_bit_weight, self._prime)
+        resulting_error = finite_field_truncation_object(resulting_error, self._quantization_bit_weight, self._prime)
         return resulting_error
 
 
@@ -326,17 +318,17 @@ class FiniteFieldPiNetSecondOrderConvLayer(Module):
         self.__inner_forward['out_1'] = first_out
         self.__inner_forward['out_2'] = second_out
         unscaled_second_order = (first_out * second_out) % self._prime
-        second_order = finite_field_truncation(unscaled_second_order, self._quantization_bit_weight, self._prime)
+        second_order = finite_field_truncation_object(unscaled_second_order, self._quantization_bit_weight, self._prime)
         out = (second_order + first_out) % self._prime
         return out
 
     def backprop(self, propagated_error):
         self._propagated_error = propagated_error
         unscaled_second_prop = (self._propagated_error * self.__inner_forward['out_1']) % self._prime
-        second_prop = finite_field_truncation(unscaled_second_prop, self._quantization_bit_weight, self._prime)
+        second_prop = finite_field_truncation_object(unscaled_second_prop, self._quantization_bit_weight, self._prime)
         unscaled_first_prop_second_order = (self._propagated_error * self.__inner_forward['out_2']) % self._prime
-        first_prop_second_order = finite_field_truncation(unscaled_first_prop_second_order,
-                                                          self._quantization_bit_weight, self._prime)
+        first_prop_second_order = finite_field_truncation_object(unscaled_first_prop_second_order,
+                                                                 self._quantization_bit_weight, self._prime)
         first_prop = (first_prop_second_order + self._propagated_error) % self._prime
         self.__inner_prop['prop_1'] = first_prop
         self.__inner_prop['prop_2'] = second_prop
