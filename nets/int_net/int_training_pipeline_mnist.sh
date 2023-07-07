@@ -12,4 +12,5 @@
 #SBATCH --wait-all-nodes=1  # Run once all resources are available
 #SBATCH --output=int_mnist_output_%j-%N.txt # logging per job and per host in the current directory. Both stdout and stderr are logged.
 
+conda activate ff-net
 python int_training_pipeline_mnist.py
