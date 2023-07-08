@@ -7,12 +7,12 @@ import sys
 sys.path.append('../../')
 
 import numpy as np
-from datasets import load_all_data_mnist, load_all_data_cifar10, load_all_data_fashion_mnist, \
+from datasets import load_all_data_mnist, load_all_data_cifar10, load_all_data_fashion_mnist,\
     load_all_data_apply_vgg_cifar10
 from utils import create_batch_data
 import modules
 import layers
-from criterions import IntegerMSELoss
+from criterions import FiniteFieldMSELoss
 
 
 # In[2]:
@@ -29,7 +29,7 @@ QUANTIZATION_INPUT = 8
 QUANTIZATION_WEIGHT = 16
 QUANTIZATION_BATCH_SIZE = 8
 LR = 7
-
+PRIME = 684502462494449
 
 # In[3]:
 
@@ -38,16 +38,19 @@ LR = 7
 load_path = '../../data'
 if DATASET_MODE == 0:
     train_data, train_label, test_data, test_label = load_all_data_mnist(load_path, QUANTIZATION_INPUT,
-                                                                         QUANTIZATION_WEIGHT, flatten=FLATTEN)
+                                                                         QUANTIZATION_WEIGHT, PRIME, flatten=FLATTEN)
 elif DATASET_MODE == 1:
     train_data, train_label, test_data, test_label = load_all_data_fashion_mnist(load_path, QUANTIZATION_INPUT,
-                                                                                 QUANTIZATION_WEIGHT, flatten=FLATTEN)
+                                                                                 QUANTIZATION_WEIGHT, PRIME,
+                                                                                 flatten=FLATTEN)
 elif DATASET_MODE == 2:
     train_data, train_label, test_data, test_label = load_all_data_cifar10(load_path, QUANTIZATION_INPUT,
-                                                                           QUANTIZATION_WEIGHT, flatten=FLATTEN)
+                                                                           QUANTIZATION_WEIGHT, PRIME,
+                                                                           flatten=FLATTEN)
 elif DATASET_MODE == 3:
     train_data, train_label, test_data, test_label = load_all_data_apply_vgg_cifar10(load_path, QUANTIZATION_INPUT,
                                                                                      QUANTIZATION_WEIGHT,
+                                                                                     PRIME,
                                                                                      flatten=FLATTEN)
 else:
     train_data, train_label, test_data, test_label = None, None, None, None
@@ -59,16 +62,16 @@ train_data, train_label, test_data, test_label = create_batch_data(train_data, t
 
 
 model_arr = [
-    layers.IntegerPiNetSecondOrderConvLayer(3, 6, (9, 9), QUANTIZATION_WEIGHT, first_layer=True,
-                                            quantization_input=QUANTIZATION_INPUT),
-    layers.IntegerPiNetSecondOrderConvLayer(6, 6, (5, 5), QUANTIZATION_WEIGHT),
+    layers.FiniteFieldPiNetSecondOrderConvLayer(3, 6, (9, 9), QUANTIZATION_WEIGHT, PRIME, first_layer=True,
+                                                quantization_bit_input=QUANTIZATION_INPUT),
+    layers.FiniteFieldPiNetSecondOrderConvLayer(6, 6, (5, 5), QUANTIZATION_WEIGHT, PRIME),
     modules.Flatten(),
-    layers.IntegerPiNetSecondOrderLinearLayer(2400, 128, QUANTIZATION_WEIGHT),
-    layers.IntegerLinearLayer(128, 10, QUANTIZATION_WEIGHT)
+    layers.FiniteFieldPiNetSecondOrderLinearLayer(2400, 128, QUANTIZATION_WEIGHT, PRIME),
+    layers.FiniteFieldLinearLayer(128, 10, QUANTIZATION_WEIGHT, PRIME)
 ]
 
 model = modules.Network(model_arr)
-criterion = IntegerMSELoss(QUANTIZATION_WEIGHT, QUANTIZATION_BATCH_SIZE)
+criterion = FiniteFieldMSELoss(PRIME, QUANTIZATION_WEIGHT, QUANTIZATION_BATCH_SIZE)
 
 
 # In[ ]:
@@ -104,4 +107,3 @@ for epoch in range(EPOCH):
         tot_sample += test_data_batch.shape[0]
     accuracy = tot_acc / tot_sample
     print('epoch: {}, accuracy: {}'.format(epoch + 1, accuracy))
-
