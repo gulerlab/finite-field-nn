@@ -23,4 +23,4 @@ model:
     pinet_instance: 'linear'
     linear_in: 128
     linear_out: 10
-name: 'custom_2_conv_2_linear_v1'
+name: 'custom_2_conv_2_linear_cifar'
