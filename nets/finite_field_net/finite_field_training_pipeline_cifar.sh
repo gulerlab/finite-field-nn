@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1 # Allocate *at most* 1 task for job steps in the job
 #SBATCH --cpus-per-task=1 # Each task needs only one CPU
 #SBATCH --mem=16G # This particular job won't need much memory
-#SBATCH --time=2-00:00:00  # 2 day
+#SBATCH --time=3-00:00:00  # 3 day
 #SBATCH --mail-user=ubasa001@ucr.edu
 #SBATCH --mail-type=ALL
 #SBATCH --job-name="CIFAR10 Finite Field Domain Training"
@@ -13,4 +13,4 @@
 #SBATCH --output=finite_field_cifar10_output_%j-%N.txt # logging per job and per host in the current directory. Both stdout and stderr are logged.
 
 conda activate ff-net
-python finite_field_training_pipeline_cifar.py
+python finite_field_training_pipeline.py -bs 256 -e 5 -dm 0 -qi 8 -qw 16 -qbs 8 -lr 7 -p 684502462494449 -mcp ./model_configurations/custom_2_conv_2_linear_cifar.yaml
