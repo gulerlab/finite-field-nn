@@ -9,13 +9,14 @@ sys.path.append('../../')
 import numpy as np
 from datasets import load_all_data_mnist, load_all_data_cifar10, load_all_data_fashion_mnist,\
     load_all_data_apply_vgg_cifar10
-from utils import create_batch_data
+from utils import create_batch_data, to_real_domain
 import modules
 import layers
 from criterions import FiniteFieldMSELoss
 
 import argparse
 import yaml
+import logging
 
 # argument parser
 parser = argparse.ArgumentParser()
@@ -27,7 +28,7 @@ parser.add_argument('-dm', '--dataset_mode', type=int, required=True, choices=ra
                                                                                              ' MNIST\n\t1: FashionMNIST'
                                                                                              '\n\t2: CIFAR10\n\t'
                                                                                              '3:VGG-CIFAR10')
-parser.add_argument('-f', '--flatten', required=True, action='store_true', help='is flatten true or not')
+parser.add_argument('-f', '--flatten', action='store_true', help='is flatten true or not')
 parser.add_argument('-qi', '--quantization_input', required=True, type=int, help='quantization parameter for input')
 parser.add_argument('-qw', '--quantization_weight', required=True, type=int, help='quantization parameter for weights')
 parser.add_argument('-qbs', '--quantization_batch_size', required=True, type=int, help='quantization parameter'
@@ -38,7 +39,7 @@ parser.add_argument('-mcp', '--model_configuration_path', required=True, type=st
                                                                                         ' configuration')
 
 # additional
-parser.add_argument('-p', '--print', type=int, default=10, help='print after each given number of iterations')
+parser.add_argument('-pr', '--print', type=int, default=10, help='print after each given number of iterations')
 parser.add_argument('-dlp', '--data_load_path', default='../../data', type=str, help='data load path')
 
 args = parser.parse_args()
@@ -86,6 +87,9 @@ with open(args.model_configuration_path, 'r') as fp:
 
 model_layers_conf = model_conf['model']
 model_name = model_conf['name']
+
+# logging library config
+logging.basicConfig(filename=model_name + '.log', level=logging.DEBUG)
 
 model_arr = []
 for idx, key in enumerate(model_layers_conf.keys()):
@@ -153,6 +157,9 @@ criterion = FiniteFieldMSELoss(PRIME, QUANTIZATION_WEIGHT, QUANTIZATION_BATCH_SI
 
 # training and testing loop
 
+running_loss = []
+running_avg_loss = []
+running_acc = []
 for epoch in range(EPOCH):
     tot_loss = 0
     for train_idx, (train_data_batch, train_label_batch) in enumerate(zip(train_data, train_label)):
@@ -166,10 +173,14 @@ for epoch in range(EPOCH):
         model.backprop(propagated_error)
         model.optimize(LR)
         print('epoch: {}, idx: {}, curr loss: {}'.format(epoch + 1, train_idx + 1, loss))
+        logging.info('epoch: {}, idx: {}, curr loss: {}'.format(epoch + 1, train_idx + 1, loss))
+        running_loss.append(loss)
         if train_idx == 0 or (train_idx + 1) % PRINT == 0:
             if train_idx != 0:
                 tot_loss = tot_loss / PRINT
             print('epoch: {}, idx: {}, avg loss: {}'.format(epoch + 1, train_idx + 1, tot_loss))
+            logging.info('epoch: {}, idx: {}, avg loss: {}'.format(epoch + 1, train_idx + 1, tot_loss))
+            running_avg_loss.append(tot_loss)
             tot_loss = 0
 
     tot_acc = 0
@@ -177,9 +188,12 @@ for epoch in range(EPOCH):
     for train_acc_idx, (test_data_batch, test_label_batch) in enumerate(zip(test_data, test_label)):
         # train accuracy
         preds = model.forward(test_data_batch)
+        preds = to_real_domain(preds, QUANTIZATION_WEIGHT, PRIME)
         pred_args = np.argmax(preds, axis=1)
 
         tot_acc += np.count_nonzero(pred_args == test_label_batch)
         tot_sample += test_data_batch.shape[0]
+        logging.debug('epoch: {}, idx: {} for accuracy done'.format(epoch + 1, train_acc_idx + 1))
     accuracy = tot_acc / tot_sample
     print('epoch: {}, accuracy: {}'.format(epoch + 1, accuracy))
+    logging.info('epoch: {}, accuracy: {}'.format(epoch + 1, accuracy))
