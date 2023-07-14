@@ -13,4 +13,4 @@
 #SBATCH --output=finite_field_cifar10_output_%j-%N.txt # logging per job and per host in the current directory. Both stdout and stderr are logged.
 
 conda activate ff-net
-python finite_field_training_pipeline.py -bs 256 -e 5 -dm 0 -qi 8 -qw 16 -qbs 8 -lr 7 -p 684502462494449 -mcp ./model_configurations/custom_2_conv_2_linear_cifar.yaml
+python finite_field_training_pipeline.py -bs 256 -e 5 -dm 2 -qi 8 -qw 16 -qbs 8 -lr 7 -p 684502462494449 -mcp ./model_configurations/custom_2_conv_2_linear_cifar.yaml
