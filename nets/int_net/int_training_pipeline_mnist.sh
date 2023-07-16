@@ -13,4 +13,4 @@
 #SBATCH --output=int_mnist_output_%j-%N.txt # logging per job and per host in the current directory. Both stdout and stderr are logged.
 
 conda activate ff-net
-python int_training_pipeline_mnist.py
+python int_training_pipeline.py -bs 256 -e 1 -dm 0 -qi 8 -qw 16 -qbs 8 -lr 7 -mcp ./model_configurations/custom_2_conv_2_linear_mnist.yaml
