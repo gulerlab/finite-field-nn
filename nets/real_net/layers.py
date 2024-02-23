@@ -104,8 +104,8 @@ class RealConvLayer(Module):
         padding_top, padding_bottom, padding_left, padding_right = self._padding
         image_height = image_height + (padding_top + padding_bottom)
         image_width = image_width + (padding_top + padding_bottom)
-        output_height, output_width = (int(image_height - kernel_height + stride_over_height / stride_over_height),
-                                       int(image_width - kernel_width + stride_over_width / stride_over_width))
+        output_height, output_width = (int((image_height - kernel_height + stride_over_height) / stride_over_height),
+                                       int((image_width - kernel_width + stride_over_width) / stride_over_width))
         output_data = np.empty((num_of_samples, self._out_channels, output_height, output_width),
                                dtype=self._input_data.dtype)
         for patch in self.__patches:
@@ -222,3 +222,5 @@ class RealPiNetSecondOrderConvLayer(Module):
 
     def loss(self):
         return self.__first_fc.loss() + self.__second_fc.loss()
+    
+    
