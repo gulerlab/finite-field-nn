@@ -39,7 +39,7 @@ logging.info('###### EXPERIMENT DETAILS ######' +
              '\n\tQUANTIZATION_WEIGHT: {}'.format(QUANTIZATION_WEIGHT) +
              '\n\tQUANTIZATION_BATCH_SIZE: {}'.format(QUANTIZATION_BATCH_SIZE) +
              '\n\tPRIME: {}'.format(PRIME) +
-             '###### EXPERIMENT DETAILS ######\n')
+             '\n###### EXPERIMENT DETAILS ######\n')
 
 field = galois.GF(PRIME)
 

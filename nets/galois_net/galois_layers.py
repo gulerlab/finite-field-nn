@@ -1,7 +1,7 @@
 # this project
 from weight_initializations import kaiming_uniform, kaiming_uniform_conv
 from modules import Module
-from galois_utils import finite_field_truncation, to_finite_field_domain
+from nets.galois_net.galois_utils import finite_field_truncation, to_finite_field_domain
 import numpy as np
 
 

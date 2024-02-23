@@ -1,4 +1,4 @@
-from galois_utils import to_finite_field_domain
+from nets.galois_net.galois_utils import to_finite_field_domain
 
 import numpy as np
 

@@ -1,6 +1,6 @@
 from modules import ActivationModule
 import numpy as np
-from galois_utils import finite_field_truncation
+from nets.galois_net.galois_utils import finite_field_truncation
 
 class GAPTruncation(ActivationModule):
     def __init__(self, prime, field):
