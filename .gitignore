@@ -240,3 +240,4 @@ fabric.properties
 **/params/
 **/DEL*
 **/.idea/
+**/checkpoints/
