@@ -163,6 +163,17 @@ class RealPiNetSecondOrderLinearLayer(Module):
         self.__inner_forward = {}
         self.__inner_prop = {}
 
+    @property
+    def weight(self):
+        return self.__first_fc.weight, self.__second_fc.weight
+    
+    @weight.setter
+    def weight(self, value):
+        first, second = value
+        self.__first_fc.weight = first
+        self.__second_fc.weight = second
+
+
     def forward(self, input_data):
         self._input_data = input_data
         first_out = self.__first_fc.forward(input_data)
@@ -198,6 +209,16 @@ class RealPiNetSecondOrderConvLayer(Module):
         self.__inner_forward = {}
         self.__inner_prop = {}
 
+    @property
+    def weight(self):
+        return self.__first_fc.weight, self.__second_fc.weight
+
+    @weight.setter
+    def weight(self, value):
+        first, second = value
+        self.__first_fc.weight = first
+        self.__second_fc.weight = second
+        
     def forward(self, input_data):
         self._input_data = input_data
         first_out = self.__first_fc.forward(input_data)

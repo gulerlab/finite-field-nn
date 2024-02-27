@@ -8,8 +8,11 @@ from nets.real_net.criterions import RealMSELoss
 
 import sys
 import logging
+from datetime import datetime
+import os
 
-log_file_name = sys.argv[0].split('.')[0] + '.log'
+now = datetime.now().strftime('%m%d%Y%H%M')
+log_file_name = now + '_' + sys.argv[0].split('.')[0] + '.log'
 logging.basicConfig(filename=log_file_name, filemode='w', format='[%(asctime)s] %(levelname)s - %(message)s', level=logging.DEBUG)
 
 
@@ -22,6 +25,9 @@ FLATTEN = False
 DATASET_MODE = 2
 DATASET_USED = ['MNIST', 'FashionMNIST', 'CIFAR-10', 'VGG-CIFAR-10']
 SCHEDULE_LR = [200, 400]
+# TODO: for now save in this way, automize this line as well
+save_name = now + '_' + sys.argv[0].split('.')[0] + '.pkl'
+SAVE_PATH = './checkpoints/{}'.format(save_name)
 
 logging.info('###### EXPERIMENT DETAILS ######' +
              '\n\tBATCH SIZE: {}'.format(BATCH_SIZE) +
@@ -56,6 +62,9 @@ model_arr = [
 ]
 
 model = modules.Network(model_arr)
+if os.path.exists(SAVE_PATH):
+    model.load_all_weights(SAVE_PATH)
+
 criterion = RealMSELoss()
 
 for epoch in range(EPOCH):
@@ -90,4 +99,6 @@ for epoch in range(EPOCH):
     accuracy = tot_acc / tot_sample
     print('epoch: {}/{}, accuracy: {}'.format(epoch + 1, EPOCH, accuracy))
     logging.info('epoch: {}/{}, accuracy: {}'.format(epoch + 1, EPOCH, accuracy))
-            
+
+    model.save_all_weights(SAVE_PATH)
+    logging.info('model is saved')

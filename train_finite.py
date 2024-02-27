@@ -9,8 +9,11 @@ import galois
 
 import sys
 import logging
+from datetime import datetime
 
-log_file_name = sys.argv[0].split('.')[0] + '.log'
+
+now = datetime.now().strftime('%m%d%Y%H%M')
+log_file_name = now + '_' + sys.argv[0].split('.')[0] + '.log'
 logging.basicConfig(filename=log_file_name, filemode='w', format='[%(asctime)s] %(levelname)s - %(message)s', level=logging.DEBUG)
 
 
@@ -66,7 +69,7 @@ model_arr = [
 ]
 
 model = modules.Network(model_arr)
-criterion = GaloisFieldMSELoss()
+criterion = GaloisFieldMSELoss(PRIME, QUANTIZATION_WEIGHT, QUANTIZATION_BATCH_SIZE, field)
 
 for epoch in range(EPOCH):
     if (epoch + 1) in SCHEDULE_LR:

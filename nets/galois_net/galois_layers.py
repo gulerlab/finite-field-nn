@@ -110,6 +110,16 @@ class GaloisFieldPiNetSecondOrderLinearLayer(Module):
     def field(self):
         return self._field
 
+    @property
+    def weight(self):
+        return self.__first_fc.weight, self.__second_fc.weight
+    
+    @weight.setter
+    def weight(self, value):
+        first, second = value
+        self.__first_fc.weight = first
+        self.__second_fc.weight = second
+    
     def forward(self, input_data):
         self._input_data = input_data
         first_out = self.__first_fc.forward(input_data)
@@ -328,6 +338,16 @@ class GaloisFieldPiNetSecondOrderConvLayer(Module):
     @property
     def field(self):
         return self._field
+    
+    @property
+    def weight(self):
+        return self.__first_conv.weight, self.__second_conv.weight
+    
+    @weight.setter
+    def weight(self, value):
+        first, second = value
+        self.__first_conv.weight = first
+        self.__second_conv.weight = second
 
     def forward(self, input_data):
         self._input_data = input_data
