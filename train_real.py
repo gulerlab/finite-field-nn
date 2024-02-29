@@ -10,11 +10,16 @@ import sys
 import logging
 from datetime import datetime
 import os
+import argparse
+import pickle
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--cp', '-checkpoint-path', dest='checkpoint_path', type=str)
+args = parser.parse_args()
 
 now = datetime.now().strftime('%m%d%Y%H%M')
 log_file_name = now + '_' + sys.argv[0].split('.')[0] + '.log'
 logging.basicConfig(filename=log_file_name, filemode='w', format='[%(asctime)s] %(levelname)s - %(message)s', level=logging.DEBUG)
-
 
 BATCH_SIZE = 16
 EPOCH = 500
@@ -25,9 +30,24 @@ FLATTEN = False
 DATASET_MODE = 2
 DATASET_USED = ['MNIST', 'FashionMNIST', 'CIFAR-10', 'VGG-CIFAR-10']
 SCHEDULE_LR = [200, 400]
+STARTING_EPOCH = 0
+SCALE_LOADED_LR = True
+
 # TODO: for now save in this way, automize this line as well
-save_name = now + '_' + sys.argv[0].split('.')[0] + '.pkl'
-SAVE_PATH = './checkpoints/{}'.format(save_name)
+if args.checkpoint_path is None:
+    save_name = now + '_' + sys.argv[0].split('.')[0] + '.pkl'
+    SAVE_PATH = './checkpoints/{}'.format(save_name)
+else:
+    SAVE_PATH = args.checkpoint_path
+
+checkpoint = None
+if os.path.exists(SAVE_PATH):
+    with open(SAVE_PATH, 'rb') as fp:
+        checkpoint = pickle.load(fp)
+    STARTING_EPOCH = checkpoint['epoch']
+    LR = checkpoint['lr']
+    if SCALE_LOADED_LR:
+        LR = LR * 0.1
 
 logging.info('###### EXPERIMENT DETAILS ######' +
              '\n\tBATCH SIZE: {}'.format(BATCH_SIZE) +
@@ -62,8 +82,8 @@ model_arr = [
 ]
 
 model = modules.Network(model_arr)
-if os.path.exists(SAVE_PATH):
-    model.load_all_weights(SAVE_PATH)
+if checkpoint is not None:
+    model.load_all_weights(checkpoint['state_dict'])
 
 criterion = RealMSELoss()
 
@@ -100,5 +120,17 @@ for epoch in range(EPOCH):
     print('epoch: {}/{}, accuracy: {}'.format(epoch + 1, EPOCH, accuracy))
     logging.info('epoch: {}/{}, accuracy: {}'.format(epoch + 1, EPOCH, accuracy))
 
-    model.save_all_weights(SAVE_PATH)
+    state_dict = model.return_all_weights()
+    
+    if not os.path.exists(os.path.split(SAVE_PATH)[0]):
+        os.makedirs(os.path.split(SAVE_PATH)[0])
+
+    checkpoint_dict = {
+        'state_dict': state_dict,
+        'epoch': epoch + 1,
+        'lr': LR
+    }
+    with open(SAVE_PATH, 'wb') as fp:
+        pickle.dump(checkpoint_dict, fp, pickle.HIGHEST_PROTOCOL)
+
     logging.info('model is saved')

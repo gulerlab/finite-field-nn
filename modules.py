@@ -97,18 +97,8 @@ class Network(Module):
                     dict_elem_arr.append((class_name, curr_weight))
                 iterator = iterator + 1
         return OrderedDict(dict_elem_arr)
-    
-    def save_all_weights(self, save_path):
-        weights = self.return_all_weights()
-        if not os.path.exists(os.path.split(save_path)[0]):
-            os.makedirs(os.path.split(save_path)[0])
 
-        with open(save_path, 'wb') as fp:
-            pickle.dump(weights, fp, pickle.HIGHEST_PROTOCOL)
-
-    def load_all_weights(self, load_path):
-        with open(load_path, 'rb') as fp:
-            weights = pickle.load(fp)
+    def load_all_weights(self, weights):
         iterator = 0
         for layer in self._model:
             if isinstance(layer, Module):
