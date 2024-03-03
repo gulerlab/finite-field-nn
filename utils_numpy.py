@@ -177,6 +177,39 @@ class ToNumpy(object):
 # numpy data
 #############
 
+def collect_augment_aggregate_data(dataset, dataloader, num_of_clients, num_of_classes):
+    data, labels = next(iter(dataloader))
+    data, labels = data.numpy(), labels.numpy()
+    targets = dataset.targets
+    if not isinstance(targets, np.ndarray):
+        targets = np.asarray(targets)
+
+    different_classes_data = []
+    different_classes_labels = []
+    for class_id in range(num_of_classes):
+        different_classes_data.append(np.array_split(data[targets == class_id], num_of_clients))
+        different_classes_labels.append(np.array_split(labels[targets == class_id], num_of_clients))
+    
+    client_data = []
+    client_labels = []
+    for client_idx in range(num_of_clients):
+        client_data_buffer = []
+        client_labels_buffer = []
+        for class_idx in range(num_of_classes):
+            client_data_buffer.append(different_classes_data[class_idx][client_idx])
+            client_labels_buffer.append(different_classes_labels[class_idx][client_idx])
+
+        client_data_buffer = np.concatenate(client_data_buffer)
+        for channel_idx in range(client_data_buffer.shape[1]):
+            client_data_buffer[:, channel_idx, :, :] = (client_data_buffer[:, channel_idx, :, :] - np.mean(client_data_buffer[:, channel_idx, :, :])) / np.std(client_data_buffer[:, channel_idx, :, :])
+
+        client_data.append(client_data_buffer)
+        client_labels.append(np.concatenate(client_labels_buffer))
+    aggregated_data = np.concatenate(client_data)
+    aggregated_labels = np.concatenate(client_labels)
+    randomize = np.random.permutation(aggregated_data.shape[0])
+    return aggregated_data[randomize], aggregated_labels[randomize]
+
 # noinspection DuplicatedCode
 def load_all_data(quantization_bit_data: int, quantization_bit_label: int, prime: int):
     # transformations
@@ -212,11 +245,10 @@ def load_all_data(quantization_bit_data: int, quantization_bit_label: int, prime
 
 
 # noinspection DuplicatedCode
-def load_all_data_mnist(quantization_bit_data: int, quantization_bit_label: int, prime: int):
+def load_all_data_mnist(quantization_bit_data: int, quantization_bit_label: int, prime: int, num_of_clients: int = 10):
     # transformations
     transform = Compose([
-        ToTensor(),
-        Normalize((0.1307,), (0.3081,))
+        ToTensor()
     ])
 
     target_transform = Compose([
@@ -231,12 +263,8 @@ def load_all_data_mnist(quantization_bit_data: int, quantization_bit_label: int,
     test_dataset = MNIST('./data', train=False, transform=transform, download=True)
     test_loader = DataLoader(test_dataset, batch_size=len(test_dataset), shuffle=False)
 
-    train_data, train_label = next(iter(train_loader))
-    test_data, test_label = next(iter(test_loader))
-    train_data, train_label, test_data, test_label = train_data.squeeze(), train_label.squeeze(), test_data.squeeze(), \
-        test_label.squeeze()
-    train_data, train_label, test_data, test_label = train_data.numpy(), train_label.numpy(), test_data.numpy(), \
-        test_label.numpy()
+    train_data, train_label = collect_augment_aggregate_data(train_dataset, train_loader, num_of_clients, 10)
+    test_data, test_label = collect_augment_aggregate_data(test_dataset, test_loader, num_of_clients, 10)
     train_data, train_label, test_data = to_finite_field_domain(train_data, quantization_bit_data, prime), \
         to_finite_field_domain(train_label, quantization_bit_label, prime), \
         to_finite_field_domain(test_data, quantization_bit_data, prime)
@@ -276,11 +304,10 @@ def load_all_data_cifar10(quantization_bit_data: int, quantization_bit_label: in
     return train_data, train_label, test_data, test_label
 
 
-def load_all_data_apply_vgg_cifar10(quantization_bit_data: int, quantization_bit_label: int, prime: int):
+def load_all_data_apply_vgg_cifar10(quantization_bit_data: int, quantization_bit_label: int, prime: int, num_of_clients: int = 10):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     transform = Compose([
         ToTensor(),
-        Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
     ])
 
     target_transform = Compose([
@@ -290,39 +317,45 @@ def load_all_data_apply_vgg_cifar10(quantization_bit_data: int, quantization_bit
     # load data
     train_dataset = CIFAR10('./data', train=True, transform=transform, target_transform=target_transform,
                             download=True)
-    train_loader = DataLoader(train_dataset, batch_size=256, shuffle=False)
-
+    train_loader = DataLoader(train_dataset, batch_size=train_dataset.data.shape[0], shuffle=False)
     test_dataset = CIFAR10('./data', train=False, transform=transform, download=True)
-    test_loader = DataLoader(test_dataset, batch_size=256, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=test_dataset.data.shape[0], shuffle=False)
+
+
+    all_train_data, all_train_labels = collect_augment_aggregate_data(train_dataset, train_loader, num_of_clients, 10)
+    all_test_data, all_test_labels = collect_augment_aggregate_data(test_dataset, test_loader, num_of_clients, 10)
+    all_train_data, all_train_labels, all_test_data, all_test_labels = create_batch_data(all_train_data, all_train_labels, all_test_data, all_test_labels, 256)
 
     vgg_backbone = vgg16_bn(weights=VGG16_BN_Weights.DEFAULT).eval()
     vgg_backbone = torch.nn.Sequential(*(list(vgg_backbone.children())[:-1])).to(device)
 
+
     with torch.no_grad():
         train_data_all, train_label_all, test_data_all, test_label_all = [], [], [], []
-        for train_data, train_label in train_loader:
+        for train_data, train_label in zip(all_train_data, all_train_labels):
+            train_data = torch.tensor(train_data)
             train_data = train_data.to(device)
             train_data = vgg_backbone(train_data).reshape(train_data.size(0), -1).to('cpu').numpy()
-            train_label = train_label.numpy()
-
-            train_data, train_label = to_finite_field_domain(train_data, quantization_bit_data, prime), \
-                to_finite_field_domain(train_label, quantization_bit_label, prime)
 
             train_data_all.append(train_data)
             train_label_all.append(train_label)
         info('train data is handled')
 
-        for test_data, test_label in test_loader:
-            test_label_all.append(test_label.numpy())
+        for test_data, test_label in zip(all_test_data, all_test_labels):
+            test_label_all.append(test_label)
+            test_data = torch.tensor(test_data)
             test_data = test_data.to(device)
             test_data = vgg_backbone(test_data).reshape(test_data.size(0), -1).to('cpu').numpy()
-            test_data = to_finite_field_domain(test_data, quantization_bit_data, prime)
             test_data_all.append(test_data)
-
         info('test data is handled')
+
+
 
     train_data_all, train_label_all = np.concatenate(train_data_all, axis=0), np.concatenate(train_label_all, axis=0)
     test_data_all, test_label_all = np.concatenate(test_data_all, axis=0), np.concatenate(test_label_all, axis=0)
+    train_data_all, train_label_all = to_finite_field_domain(train_data_all, quantization_bit_data, prime), \
+                to_finite_field_domain(train_label_all, quantization_bit_label, prime)
+    test_data_all = to_finite_field_domain(test_data_all, quantization_bit_data, prime)
     return train_data_all, train_label_all, test_data_all, test_label_all
 
 
