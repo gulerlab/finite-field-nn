@@ -97,6 +97,9 @@ for epoch in range(EPOCH):
         # train
         preds = model.forward(train_data_batch)
         curr_training_loss = criterion.forward(preds, train_label_batch)
+        if np.isnan(curr_training_loss):
+            exit()
+             
         propagated_error = criterion.error_derivative()
 
         model.backprop(propagated_error)
