@@ -1,16 +1,18 @@
 import numpy as np
-from nets.galois_net.galois_datasets import load_all_data_mnist, load_all_data_cifar10, load_all_data_fashion_mnist
-from nets.galois_net.galois_utils import create_batch_data, to_real_domain
-import modules
-import nets.galois_net.galois_layers as layers
-from nets.galois_net.galois_activations import GAPTruncation
-from nets.galois_net.galois_criterions import GaloisFieldMSELoss
 import galois
-
 import sys
 import logging
 from datetime import datetime
 
+from utils import create_batch_data
+
+import nets.modules as modules
+
+from nets.galois_net.datasets import load_all_data_mnist, load_all_data_cifar10, load_all_data_fashion_mnist
+from nets.galois_net.utils import to_real_domain
+import nets.galois_net.layers as layers
+from nets.galois_net.activations import GAPTruncation
+from nets.galois_net.criterions import GaloisFieldMSELoss
 
 now = datetime.now().strftime('%m%d%Y%H%M')
 log_file_name = now + '_' + sys.argv[0].split('.')[0] + '.log'

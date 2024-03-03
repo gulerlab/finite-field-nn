@@ -1,5 +1,5 @@
 import numpy as np
-from nets.galois_net.galois_utils import finite_field_truncation, to_real_domain
+from nets.galois_net.utils import finite_field_truncation, to_real_domain
 
 
 class GaloisFieldMSELoss:

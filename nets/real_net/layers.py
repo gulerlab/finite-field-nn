@@ -1,6 +1,6 @@
 # this project
-from weight_initializations import kaiming_uniform, kaiming_uniform_conv
-from modules import Module
+from nets.weight_initializations import kaiming_uniform, kaiming_uniform_conv
+from nets.modules import Module
 
 import numpy as np
 

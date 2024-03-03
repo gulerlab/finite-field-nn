@@ -1,4 +1,4 @@
-from modules import ActivationModule
+from nets.modules import ActivationModule
 import numpy as np
 
 

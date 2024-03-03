@@ -1,7 +1,7 @@
 import numpy as np
 from nets.real_net.datasets import load_all_data_mnist, load_all_data_cifar10, load_all_data_fashion_mnist, load_all_data_apply_vgg_cifar10
 from utils import create_batch_data
-import modules
+import nets.modules as modules
 import nets.real_net.layers as layers
 from nets.real_net.activations import GAPTruncation
 from nets.real_net.criterions import RealMSELoss
