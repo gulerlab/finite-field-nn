@@ -1,0 +1,22 @@
+INFO:root:weights are initialized
+INFO:root:train data is handled
+INFO:root:test data is handled
+INFO:root:datasets and loaders are initialized
+INFO:root:epoch: 0, iter: 1, loss: 1.004266619682312
+INFO:root:#############epoch: 0, avg loss: 1.004266619682312, acc: 0.1424857514248575#############
+INFO:root:epoch: 0, iter: 2, loss: 1.0184445977211
+INFO:root:epoch: 0, iter: 3, loss: 0.9894026517868042
+INFO:root:epoch: 0, iter: 4, loss: 0.9612622261047362
+INFO:root:epoch: 0, iter: 5, loss: 0.9465866088867189
+INFO:root:epoch: 0, iter: 6, loss: 0.9398282766342163
+INFO:root:epoch: 0, iter: 7, loss: 0.9278406500816345
+INFO:root:epoch: 0, iter: 8, loss: 0.9268116354942322
+INFO:root:epoch: 0, iter: 9, loss: 0.9243651628494263
+INFO:root:epoch: 0, iter: 10, loss: 0.914211869239807
+INFO:root:#############epoch: 0, avg loss: 0.8548753678798675, acc: 0.2638736126387361#############
+INFO:root:epoch: 0, iter: 11, loss: 0.9049727916717529
+INFO:root:epoch: 0, iter: 12, loss: 0.8999460339546203
+INFO:root:epoch: 0, iter: 13, loss: 0.8687008619308473
+INFO:root:epoch: 0, iter: 14, loss: 0.8767182826995848
+INFO:root:epoch: 0, iter: 15, loss: 0.8816918730735779
+INFO:root:epoch: 0, iter: 16, loss: 0.8580731153488158

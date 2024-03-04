@@ -245,7 +245,7 @@ def load_all_data(quantization_bit_data: int, quantization_bit_label: int, prime
 
 
 # noinspection DuplicatedCode
-def load_all_data_mnist(quantization_bit_data: int, quantization_bit_label: int, prime: int, num_of_clients: int = 10):
+def load_all_data_mnist(quantization_bit_data: int, quantization_bit_label: int, prime: int, num_of_clients: int = 64):
     # transformations
     transform = Compose([
         ToTensor()
@@ -304,7 +304,7 @@ def load_all_data_cifar10(quantization_bit_data: int, quantization_bit_label: in
     return train_data, train_label, test_data, test_label
 
 
-def load_all_data_apply_vgg_cifar10(quantization_bit_data: int, quantization_bit_label: int, prime: int, num_of_clients: int = 10):
+def load_all_data_apply_vgg_cifar10(quantization_bit_data: int, quantization_bit_label: int, prime: int, num_of_clients: int = 64):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     transform = Compose([
         ToTensor(),
@@ -359,7 +359,7 @@ def load_all_data_apply_vgg_cifar10(quantization_bit_data: int, quantization_bit
     return train_data_all, train_label_all, test_data_all, test_label_all
 
 
-def create_batch_data(train_data, train_label, test_data, test_label, batch_size):
+def create_batch_data(train_data, train_label, test_data, test_label, batch_size, train_label_scalar=False):
     train_num_samples, test_num_samples = train_data.shape[0], test_data.shape[0]
     number_of_full_batch_train = int(train_num_samples / batch_size)
     last_batch_size_train = train_num_samples % batch_size
@@ -369,25 +369,25 @@ def create_batch_data(train_data, train_label, test_data, test_label, batch_size
 
     last_batch_train_data = None
     if last_batch_size_train != 0:
-        last_batch_train_data = train_data[train_num_samples - last_batch_size_train:, :]
+        last_batch_train_data = train_data[train_num_samples - last_batch_size_train:]
 
-    train_data = np.split(train_data[:train_num_samples - last_batch_size_train, :], number_of_full_batch_train)
+    train_data = np.split(train_data[:train_num_samples - last_batch_size_train], number_of_full_batch_train)
     if last_batch_train_data is not None:
         train_data.append(last_batch_train_data)
 
     last_batch_train_label = None
     if last_batch_size_train != 0:
-        last_batch_train_label = train_label[train_num_samples - last_batch_size_train:, :]
+        last_batch_train_label = train_label[train_num_samples - last_batch_size_train:]
 
-    train_label = np.split(train_label[:train_num_samples - last_batch_size_train, :], number_of_full_batch_train)
+    train_label = np.split(train_label[:train_num_samples - last_batch_size_train], number_of_full_batch_train)
     if last_batch_train_label is not None:
         train_label.append(last_batch_train_label)
 
     last_batch_test_data = None
     if last_batch_size_test != 0:
-        last_batch_test_data = test_data[test_num_samples - last_batch_size_test:, :]
+        last_batch_test_data = test_data[test_num_samples - last_batch_size_test:]
 
-    test_data = np.split(test_data[:test_num_samples - last_batch_size_test, :], number_of_full_batch_test)
+    test_data = np.split(test_data[:test_num_samples - last_batch_size_test], number_of_full_batch_test)
     if last_batch_test_data is not None:
         test_data.append(last_batch_test_data)
 
