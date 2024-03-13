@@ -8,6 +8,8 @@ from torchvision.datasets import FashionMNIST, CIFAR10, MNIST
 from torchvision.transforms import Compose, ToTensor, Normalize, Lambda
 from torchvision.models import vgg16_bn, VGG16_BN_Weights
 
+import os
+
 
 #############
 # numpy data
@@ -83,7 +85,6 @@ def load_all_data_mnist(load_path, quantization_bit_data: int, quantization_bit_
     train_data, train_label, test_data = to_finite_field_domain(train_data, quantization_bit_data, prime, field), \
         to_finite_field_domain(train_label, quantization_bit_label, prime, field), \
         to_finite_field_domain(test_data, quantization_bit_data, prime, field)
-    train_data, train_label, test_data = field(train_data), field(train_label), field(test_data)
     if flatten:
         # reshape data
         train_data, test_data = train_data.reshape((train_data.shape[0], -1)),\
@@ -125,4 +126,23 @@ def load_all_data_cifar10(load_path, quantization_bit_data: int, quantization_bi
             test_data.reshape((test_data.shape[0], -1))
     return train_data, train_label, test_data, test_label
 
+def load_all_data_cifar10_vgg(load_path, quantization_bit_data: int, quantization_bit_label: int, prime: int, field):
+    root_path = os.path.join(load_path, 'cifar10-vgg-64')
+    with open(os.path.join(root_path, 'train_data.npy'), 'rb') as fp:
+        train_data = np.load(fp)
+    with open(os.path.join(root_path, 'train_label.npy'), 'rb') as fp:
+        train_label = np.load(fp)
+    with open(os.path.join(root_path, 'test_data.npy'), 'rb') as fp:
+        test_data = np.load(fp)
+    with open(os.path.join(root_path, 'test_label.npy'), 'rb') as fp:
+        test_label = np.load(fp)
+    
+    print('data loaded in real domain')
+    train_data, train_label, test_data = to_finite_field_domain(train_data, quantization_bit_data, prime, field), \
+        to_finite_field_domain(train_label, quantization_bit_label, prime, field), \
+        to_finite_field_domain(test_data, quantization_bit_data, prime, field)
+    print('data mapped to finite field')
+    train_data, train_label, test_data = field(train_data), field(train_label), field(test_data)
+    return train_data, train_label, test_data, test_label
 
+    

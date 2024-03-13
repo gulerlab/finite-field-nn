@@ -27,3 +27,25 @@ class GAPTruncation(ActivationModule):
         resulting_error = finite_field_truncation(resulting_error, self.__divisor, self._prime, self._field)
         resulting_error = resulting_error.reshape(self._input_data.shape)
         return resulting_error
+    
+class GaloisQuadraticActivation(ActivationModule):
+    def __init__(self, quantization_bit, prime, field):
+        super().__init__()
+        self.quantization_bit = quantization_bit
+        self.prime = prime
+        self.field = field
+
+    def forward(self, input_data):
+        self._input_data = input_data
+        self._gradient = 2 * self._input_data
+        out = self._input_data ** 2
+        out = finite_field_truncation(out, self.quantization_bit, self.prime, self.field)
+        return out
+
+    def backprop(self, propagated_error):
+        self._propagated_error = propagated_error
+
+    def loss(self):
+        out = self._propagated_error * self._gradient
+        out = finite_field_truncation(out, self.quantization_bit, self.prime, self.field)
+        return out

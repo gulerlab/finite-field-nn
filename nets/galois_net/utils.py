@@ -19,12 +19,12 @@ def to_finite_field_domain(real: ndarray, quantization_bit: int, prime: int, fie
 
 
 def to_real_domain(finite_field: galois.Array, quantization_bit: int, prime: int) -> ndarray:
-    finite_field = finite_field.view(np.ndarray)
+    buffer = finite_field.view(np.ndarray).astype('object')
     threshold = (prime - 1) / 2
-    negative_mask = finite_field > threshold
-    real_domain = np.empty(finite_field.shape)
-    real_domain[~negative_mask] = finite_field[~negative_mask] / (2 ** quantization_bit) 
-    real_domain[negative_mask] = (finite_field[negative_mask] - prime) / (2 ** quantization_bit)
+    negative_mask = buffer > threshold
+    real_domain = np.empty(buffer.shape)
+    real_domain[~negative_mask] = buffer[~negative_mask] / (2 ** quantization_bit) 
+    real_domain[negative_mask] = (buffer[negative_mask] - prime) / (2 ** quantization_bit)
     return real_domain
 
 
@@ -34,7 +34,7 @@ def int_truncation(int_domain: ndarray, scale_down: int) -> ndarray:
 
 
 def from_finite_field_to_int_domain(finite_field: galois.Array, prime: int) -> ndarray:
-    finite_field = finite_field.view(np.ndarray)
+    finite_field = finite_field.view(np.ndarray).astype('object')
     threshold = (prime - 1) / 2
     negative_mask = finite_field > threshold
     finite_field[negative_mask] = finite_field[negative_mask] - prime

@@ -368,7 +368,6 @@ class GaloisFieldPiNetSecondOrderConvLayer(Module):
         unscaled_first_prop_second_order = self._propagated_error * self.__inner_forward['out_2']
         first_prop_second_order = finite_field_truncation(unscaled_first_prop_second_order,
                                                           self._quantization_bit_weight, self._prime, self._field)
-        first_prop_second_order = self._field(first_prop_second_order)
         first_prop = first_prop_second_order + self._propagated_error
         self.__inner_prop['prop_1'] = first_prop
         self.__inner_prop['prop_2'] = second_prop
