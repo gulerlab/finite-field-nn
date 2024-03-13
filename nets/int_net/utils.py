@@ -30,8 +30,20 @@ def to_real_domain(int_domain: np.ndarray, quantization_bit: int) -> ndarray:
     real_domain = int_domain / (2 ** quantization_bit)
     return real_domain
 
+def mimic_finite_field(int_domain) -> ndarray:
+    finite_field = int_domain % minmax_cache.prime
+    threshold = (minmax_cache.prime - 1) / 2
+    negative_mask = finite_field > threshold
+    finite_field[negative_mask] = finite_field[negative_mask] - minmax_cache.prime
+    overflow_mask = finite_field != int_domain
+    overflow = np.count_nonzero(overflow_mask)
+    logging.debug('{} elements are not the same between the conversion'.format(overflow))
+    minmax_cache.overflow_monitor = minmax_cache.overflow_monitor + overflow
+    return finite_field
+
 def int_truncation(int_domain: ndarray, scale_down: int) -> ndarray:
     update_minmax(int_domain)
+    int_domain = mimic_finite_field(int_domain)
     int_domain = int_domain >> np.int64(scale_down)
     update_minmax(int_domain)
     return int_domain   

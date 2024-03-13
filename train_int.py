@@ -15,12 +15,11 @@ from nets.int_net.criterions import IntMSELoss
 import nets.int_net.minmax_cache as minmax_cache
 
 now = datetime.now().strftime('%m%d%Y%H%M')
-log_file_name = now + '_' + sys.argv[0].split('.')[0] + '.log'
+log_file_name = now + '_' + sys.argv[0].split('.')[0] + '_' + sys.argv[1] + '.log'
 logging.basicConfig(filename=log_file_name, filemode='w', format='[%(asctime)s] %(levelname)s - %(message)s', level=logging.INFO)
 
-
 BATCH_SIZE = 16
-EPOCH = 30
+EPOCH = 50
 FLATTEN = False
 # 0, MNIST; 1, FashionMNIST; 2, CIFAR10
 DATASET_MODE = 2
@@ -30,8 +29,10 @@ QUANTIZATION_INPUT = 8
 QUANTIZATION_WEIGHT = 24
 QUANTIZATION_BATCH_SIZE = 4
 LR = 7
+PRIME = int(sys.argv[1])
 
 minmax_cache.init_globals(EPOCH)
+minmax_cache.prime = PRIME
 
 logging.info('###### EXPERIMENT DETAILS ######' +
              '\n\tBATCH SIZE: {}'.format(BATCH_SIZE) +
@@ -42,6 +43,7 @@ logging.info('###### EXPERIMENT DETAILS ######' +
              '\n\tQUANTIZATION_INPUT: {}'.format(QUANTIZATION_INPUT) +
              '\n\tQUANTIZATION_WEIGHT: {}'.format(QUANTIZATION_WEIGHT) +
              '\n\tQUANTIZATION_BATCH_SIZE: {}'.format(QUANTIZATION_BATCH_SIZE) +
+             '\n\tPRIME: {}'.format(PRIME) +
              '\n###### EXPERIMENT DETAILS ######\n')
 
 # data fetching
@@ -72,6 +74,7 @@ criterion = IntMSELoss(QUANTIZATION_WEIGHT, QUANTIZATION_BATCH_SIZE)
 for epoch in range(EPOCH):
     minmax_cache.epoch = epoch
     for train_idx, (train_data_batch, train_label_batch) in enumerate(zip(train_data, train_label)):
+        minmax_cache.overflow_monitor = 0
         # train
         preds = model.forward(train_data_batch)
         curr_training_loss = criterion.forward(preds, train_label_batch)
@@ -81,7 +84,10 @@ for epoch in range(EPOCH):
         model.optimize(LR)
 
         print('epoch: {}/{}, iteration: {}/{}, loss: {}'.format(epoch + 1, EPOCH, train_idx + 1, len(train_data), curr_training_loss))
-        logging.info('epoch: {}/{}, iteration: {}/{}, loss: {}'.format(epoch + 1, EPOCH, train_idx + 1, len(train_data), curr_training_loss))
+        logging.info('epoch: {}/{}, iteration: {}/{}, loss: {}, for {} number of parameters overflow occured'.format(epoch + 1, EPOCH, train_idx + 1,
+                                                                                                                     len(train_data),
+                                                                                                                     curr_training_loss,
+                                                                                                                     minmax_cache.overflow_monitor))
 
     tot_acc = 0
     tot_sample = 0

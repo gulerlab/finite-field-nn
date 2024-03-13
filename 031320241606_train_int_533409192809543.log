@@ -1,0 +1,18 @@
+[2024-03-13 16:06:54,705] INFO - ###### EXPERIMENT DETAILS ######
+	BATCH SIZE: 16
+	MAX NUMBER OF EPOCHS: 50
+	INITIAL LR: 7
+	FLATTEN: False
+	DATASET USED: CIFAR-10
+	QUANTIZATION_INPUT: 8
+	QUANTIZATION_WEIGHT: 24
+	QUANTIZATION_BATCH_SIZE: 4
+	PRIME: 533409192809543
+###### EXPERIMENT DETAILS ######
+
+[2024-03-13 16:07:05,144] INFO - NUMBER OF ITERATIONS IN ONE TRAINING EPOCH: 3125
+
+[2024-03-13 16:07:08,006] INFO - epoch: 1/50, iteration: 1/3125, loss: 1.0642032317967616, for 25402 number of parameters overflow occured
+[2024-03-13 16:07:10,867] INFO - epoch: 1/50, iteration: 2/3125, loss: 1.0660307042763997, for 25243 number of parameters overflow occured
+[2024-03-13 16:07:13,723] INFO - epoch: 1/50, iteration: 3/3125, loss: 1.0367722773060544, for 17707 number of parameters overflow occured
+[2024-03-13 16:07:21,043] INFO - epoch: 1/50, iteration: 4/3125, loss: 0.9688972792906001, for 23809 number of parameters overflow occured
