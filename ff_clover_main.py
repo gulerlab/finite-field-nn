@@ -70,6 +70,13 @@ if __name__ == '__main__':
         net = FiniteFieldClover(scaled_input, scale_weight, learning_rate, prime,
                                 feature_size=feature_size, hidden_layer_size=hidden_layer_size, num_classes=num_class)
         net.train_mnist(num_epoch, batch_size)
+    elif args.mode == 'mnist-v2':
+        scaled_input, scale_weight, learning_rate, prime = 8, 8, 7, 2 ** 26 - 5
+        feature_size, hidden_layer_size, num_class = 784, 128, 10
+        num_epoch, batch_size = 300, 256
+        net = FiniteFieldClover(scaled_input, scale_weight, learning_rate, prime,
+                                feature_size=feature_size, hidden_layer_size=hidden_layer_size, num_classes=num_class)
+        net.train_mnist_v2(num_epoch, batch_size)
     elif args.mode == 'cifar10':
         scaled_input, scale_weight, learning_rate, prime = 8, 8, 10, 2 ** 26 - 5
         feature_size, hidden_layer_size, num_class = 3072, 128, 10

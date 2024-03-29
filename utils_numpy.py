@@ -210,6 +210,76 @@ def collect_augment_aggregate_data(dataset, dataloader, num_of_clients, num_of_c
     randomize = np.random.permutation(aggregated_data.shape[0])
     return aggregated_data[randomize], aggregated_labels[randomize]
 
+def collect_augment_aggregate_data_v2(dataset, dataloader, num_of_clients, num_of_classes, quantization_bit_data, prime, number_of_iterations=300, batch_size=256, mode='train', quantization_bit_label=None, parallelization_param=8):
+    data, labels = next(iter(dataloader))
+    data, labels = data.numpy(), labels.numpy()
+    targets = dataset.targets
+    if not isinstance(targets, np.ndarray):
+        targets = np.asarray(targets)
+
+    different_classes_data = []
+    different_classes_labels = []
+    for class_id in range(num_of_classes):
+        different_classes_data.append(np.array_split(data[targets == class_id], num_of_clients))
+        different_classes_labels.append(np.array_split(labels[targets == class_id], num_of_clients))
+    
+    client_data = []
+    client_labels = []
+    for client_idx in range(num_of_clients):
+        client_data_buffer = []
+        client_labels_buffer = []
+        for class_idx in range(num_of_classes):
+            client_data_buffer.append(different_classes_data[class_idx][client_idx])
+            client_labels_buffer.append(different_classes_labels[class_idx][client_idx])
+
+        client_data_buffer = np.concatenate(client_data_buffer)
+        client_labels_buffer = np.concatenate(client_labels_buffer)
+        for channel_idx in range(client_data_buffer.shape[1]):
+            client_data_buffer[:, channel_idx, :, :] = (client_data_buffer[:, channel_idx, :, :] - np.mean(client_data_buffer[:, channel_idx, :, :])) / np.std(client_data_buffer[:, channel_idx, :, :])
+        
+        if mode == 'train':
+            shuffle = np.random.permutation(client_data_buffer.shape[0])
+            client_data_buffer = client_data_buffer[shuffle]
+            client_labels_buffer = client_labels_buffer[shuffle]
+        
+        client_data_buffer = to_finite_field_domain(client_data_buffer, quantization_bit_data, prime)
+        if mode == 'train':
+            client_labels_buffer = to_finite_field_domain(client_labels_buffer, quantization_bit_label, prime)
+        
+        client_data_buffer = client_data_buffer.reshape((client_data_buffer.shape[0], -1))
+        if mode == 'train':
+            starting_split = 0
+            for split_idx in range(parallelization_param, client_data_buffer.shape[0], parallelization_param):
+                client_data.append(client_data_buffer[starting_split:split_idx])
+                client_labels.append(client_labels_buffer[starting_split:split_idx])
+                starting_split = split_idx
+            client_data.append(client_data_buffer[split_idx:client_data_buffer.shape[0]])
+            client_labels.append(client_labels_buffer[split_idx:client_labels_buffer.shape[0]])
+        else:
+            client_data.append(client_data_buffer)
+            client_labels.append(client_labels_buffer)
+    
+    data_batches = []
+    labels_batches = []
+    if mode == 'train':
+        number_of_selection = batch_size // parallelization_param
+        if batch_size % parallelization_param != 0:
+            number_of_selection = number_of_selection + 1
+        batched_idx = [np.random.choice(len(client_data), number_of_selection) for _ in range(number_of_iterations)]
+        for curr_batched_idx in batched_idx:
+            data_buff = []
+            labels_buff = []
+            for curr_idx in curr_batched_idx:
+                data_buff.append(client_data[curr_idx])
+                labels_buff.append(client_labels[curr_idx])
+            data_batches.append(np.concatenate(data_buff))
+            labels_batches.append(np.concatenate(labels_buff))
+    else:
+        data_batches.append(np.concatenate(client_data))
+        labels_batches.append(np.concatenate(client_labels))
+
+    return data_batches, labels_batches
+
 # noinspection DuplicatedCode
 def load_all_data(quantization_bit_data: int, quantization_bit_label: int, prime: int):
     # transformations
@@ -270,6 +340,29 @@ def load_all_data_mnist(quantization_bit_data: int, quantization_bit_label: int,
         to_finite_field_domain(test_data, quantization_bit_data, prime)
     # reshape data
     train_data, test_data = train_data.reshape((train_data.shape[0], -1)), test_data.reshape((test_data.shape[0], -1))
+    return train_data, train_label, test_data, test_label
+
+# noinspection DuplicatedCode
+def load_all_data_mnist_v2(quantization_bit_data, quantization_bit_label, prime, number_of_iterations, batch_size, num_of_clients: int = 64):
+    # transformations
+    transform = Compose([
+        ToTensor()
+    ])
+
+    target_transform = Compose([
+        Lambda(lambda y: torch.zeros(10, dtype=torch.float).scatter_(0, torch.tensor(y), 1))
+    ])
+
+    # load data
+    train_dataset = MNIST('./data', train=True, transform=transform, target_transform=target_transform,
+                          download=True)
+    train_loader = DataLoader(train_dataset, batch_size=len(train_dataset), shuffle=False)
+
+    test_dataset = MNIST('./data', train=False, transform=transform, download=True)
+    test_loader = DataLoader(test_dataset, batch_size=len(test_dataset), shuffle=False)
+
+    train_data, train_label = collect_augment_aggregate_data_v2(train_dataset, train_loader, num_of_clients, 10, quantization_bit_data, prime, quantization_bit_label=quantization_bit_label, number_of_iterations=number_of_iterations, batch_size=batch_size)
+    test_data, test_label = collect_augment_aggregate_data_v2(test_dataset, test_loader, num_of_clients, 10, quantization_bit_data, prime, mode='test')
     return train_data, train_label, test_data, test_label
 
 
