@@ -210,7 +210,8 @@ def collect_augment_aggregate_data(dataset, dataloader, num_of_clients, num_of_c
     randomize = np.random.permutation(aggregated_data.shape[0])
     return aggregated_data[randomize], aggregated_labels[randomize]
 
-def collect_augment_aggregate_data_v2(dataset, dataloader, num_of_clients, num_of_classes, quantization_bit_data, prime, number_of_iterations=300, batch_size=256, mode='train', quantization_bit_label=None, parallelization_param=8):
+def collect_augment_aggregate_data_v2(dataset, dataloader, num_of_clients, num_of_classes, quantization_bit_data, prime, number_of_iterations=300,
+                                      batch_size=256, mode='train', quantization_bit_label=None, parallelization_param=8, backbone=None):
     data, labels = next(iter(dataloader))
     data, labels = data.numpy(), labels.numpy()
     targets = dataset.targets
@@ -222,6 +223,11 @@ def collect_augment_aggregate_data_v2(dataset, dataloader, num_of_clients, num_o
     for class_id in range(num_of_classes):
         different_classes_data.append(np.array_split(data[targets == class_id], num_of_clients))
         different_classes_labels.append(np.array_split(labels[targets == class_id], num_of_clients))
+    
+    if backbone == 'vgg':
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        vgg_backbone = vgg16_bn(weights=VGG16_BN_Weights.DEFAULT).eval()
+        vgg_backbone = torch.nn.Sequential(*(list(vgg_backbone.children())[:-1])).to(device)
     
     client_data = []
     client_labels = []
@@ -237,6 +243,13 @@ def collect_augment_aggregate_data_v2(dataset, dataloader, num_of_clients, num_o
         for channel_idx in range(client_data_buffer.shape[1]):
             client_data_buffer[:, channel_idx, :, :] = (client_data_buffer[:, channel_idx, :, :] - np.mean(client_data_buffer[:, channel_idx, :, :])) / np.std(client_data_buffer[:, channel_idx, :, :])
         
+        if backbone == 'vgg':
+            with torch.no_grad():
+                client_data_buffer = torch.tensor(client_data_buffer)
+                client_data_buffer = client_data_buffer.to(device)
+                client_data_buffer = vgg_backbone(client_data_buffer).to('cpu').numpy()
+                print('client {}\'s data is passed from backbone - {}'.format(client_idx, mode))
+
         if mode == 'train':
             shuffle = np.random.permutation(client_data_buffer.shape[0])
             client_data_buffer = client_data_buffer[shuffle]
@@ -259,6 +272,7 @@ def collect_augment_aggregate_data_v2(dataset, dataloader, num_of_clients, num_o
             client_data.append(client_data_buffer)
             client_labels.append(client_labels_buffer)
     
+    print('data and labels are handled - {}'.format(mode))
     data_batches = []
     labels_batches = []
     if mode == 'train':
@@ -451,6 +465,26 @@ def load_all_data_apply_vgg_cifar10(quantization_bit_data: int, quantization_bit
     test_data_all = to_finite_field_domain(test_data_all, quantization_bit_data, prime)
     return train_data_all, train_label_all, test_data_all, test_label_all
 
+def load_all_data_apply_vgg_cifar10_v2(quantization_bit_data: int, quantization_bit_label: int, prime: int, number_of_iterations,
+                                       batch_size, num_of_clients: int = 64):
+    transform = Compose([
+        ToTensor(),
+    ])
+
+    target_transform = Compose([
+        Lambda(lambda y: torch.zeros(10, dtype=torch.float).scatter_(0, torch.tensor(y), 1))
+    ])
+
+    # load data
+    train_dataset = CIFAR10('./data', train=True, transform=transform, target_transform=target_transform,
+                            download=True)
+    train_loader = DataLoader(train_dataset, batch_size=train_dataset.data.shape[0], shuffle=False)
+    test_dataset = CIFAR10('./data', train=False, transform=transform, download=True)
+    test_loader = DataLoader(test_dataset, batch_size=test_dataset.data.shape[0], shuffle=False)
+
+    train_data, train_label = collect_augment_aggregate_data_v2(train_dataset, train_loader, num_of_clients, 10, quantization_bit_data, prime, quantization_bit_label=quantization_bit_label, number_of_iterations=number_of_iterations, batch_size=batch_size, backbone='vgg')
+    test_data, test_label = collect_augment_aggregate_data_v2(test_dataset, test_loader, num_of_clients, 10, quantization_bit_data, prime, mode='test', backbone='vgg')
+    return train_data, train_label, test_data, test_label
 
 def create_batch_data(train_data, train_label, test_data, test_label, batch_size, train_label_scalar=False):
     train_num_samples, test_num_samples = train_data.shape[0], test_data.shape[0]

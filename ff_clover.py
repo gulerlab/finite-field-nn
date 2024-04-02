@@ -15,7 +15,7 @@ import numpy as np
 ## ff training
 from utils_numpy import to_real_domain, to_finite_field_domain, finite_field_truncation, load_all_data, \
     from_finite_field_to_int_domain, create_batch_data, load_all_data_cifar10, load_all_data_apply_vgg_cifar10, \
-    load_all_data_mnist, load_all_data_mnist_v2
+    load_all_data_mnist, load_all_data_mnist_v2, load_all_data_apply_vgg_cifar10_v2
 
 ## logging
 from utils_numpy import info
@@ -605,10 +605,74 @@ class FiniteFieldClover(AbstractFiniteField):
             if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == len(train_data):
                 if idx == 0:
                     running_loss.append(curr_loss)
-                elif (idx + 1) == len(train_data):
-                    running_loss.append(curr_loss / ((idx + 1) % 10))
-                else:
+                elif (idx + 1) % 10 == 0:
                     running_loss.append((curr_loss / 10))
+                else:
+                    running_loss.append(curr_loss / ((idx + 1) % 10))
+                test_total = 0
+                for test_data, test_label in zip(test_data_all, test_label_all):
+                    test_out = self._forward(test_data, mode='eval')
+                    test_out = from_finite_field_to_int_domain(test_out, self._prime)
+                    pred_label = np.argmax(test_out, axis=1)
+
+                    # accuracy
+                    curr_acc = curr_acc + np.count_nonzero(pred_label == test_label)
+                    test_total = test_total + test_data.shape[0]
+                running_acc.append(curr_acc / (test_total + 1))
+                if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == len(train_data):
+                    print('loss: {}, acc: {}'.format(running_loss[-1], running_acc[-1]))
+                    info('#############avg loss: {}, acc: {}#############'.format(running_loss[-1], running_acc[-1]), verbose=False)
+                curr_loss = 0
+                curr_acc = 0
+        self._elapsed_time = time.time() - start_training
+        info('elapsed time: {} seconds'.format(self._elapsed_time))
+        self.__running_loss = running_loss
+        self.__running_acc = running_acc
+        self.__running_curr_loss = running_curr_loss
+
+        # noinspection DuplicatedCode
+    def train_vgg_cifar10_v2(self, num_of_iterations: int, batch_size: int):
+        """
+            CIFAR10 using VGG as feature extractor experiment implementation
+            :param num_of_epochs: number of epochs
+            :param batch_size: batch size
+        """
+        self._batch_size = batch_size
+        self._batch_size_scaling_factor = int(np.log2(self._batch_size))
+
+        # data loading
+        train_data, train_label, test_data_all, test_label_all = load_all_data_apply_vgg_cifar10_v2(
+            self._scale_input_parameter,
+            self._scale_weight_parameter,
+            self._prime,
+            num_of_iterations, batch_size
+        )
+        info('datasets and loaders are initialized')
+
+        running_loss = []
+        running_acc = []
+        running_curr_loss = []
+        start_training = time.time()
+        curr_loss = 0
+        curr_acc = 0
+        for idx, (data, label) in enumerate(zip(train_data, train_label)):
+            # train
+            out = self._forward(data)
+            loss = self._criterion(label, out)
+            self._backward()
+            self._optimizer()
+            curr_loss += loss
+            info('iter: {}, loss: {}'.format(idx + 1, loss))
+            running_curr_loss.append(loss)
+
+            # eval
+            if idx == 0 or (idx + 1) % 10 == 0 or (idx + 1) == len(train_data):
+                if idx == 0:
+                    running_loss.append(curr_loss)
+                elif (idx + 1) % 10 == 0:
+                    running_loss.append((curr_loss / 10))
+                else:
+                    running_loss.append(curr_loss / ((idx + 1) % 10))
                 test_total = 0
                 for test_data, test_label in zip(test_data_all, test_label_all):
                     test_out = self._forward(test_data, mode='eval')

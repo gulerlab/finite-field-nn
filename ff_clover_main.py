@@ -43,6 +43,8 @@ def save_params(mode, experiment_datetime, model):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--mode', type=str, help='experiment type')
+    parser.add_argument('-p', '--prime', dest='prime', type=int, default=((2**26) - 5))
+    parser.add_argument('-g', '--gamma', dest='gamma', type=int, default=8)
     args = parser.parse_args()
 
     experiment_now = datetime.now()
@@ -54,43 +56,51 @@ if __name__ == '__main__':
                                                             experiment_now.minute, experiment_now.second, args.mode)
     log_file_path = os.path.join('./logs', log_file_name)
     logging.basicConfig(filename=log_file_path, encoding='utf-8', level=logging.DEBUG)
-
+    logging.info('PRIME: {}'.format(args.prime))
+    logging.info('GAMMA: {}'.format(args.gamma))
     net = None
     if args.mode == 'fashion-mnist':
-        scaled_input, scale_weight, learning_rate, prime = 8, 8, 7, 2 ** 26 - 5
+        scaled_input, scale_weight, learning_rate, prime = args.gamma, args.gamma, 7, args.prime
         feature_size, hidden_layer_size, num_class = 784, 128, 10
         num_epoch, batch_size = 1, 256
         net = FiniteFieldClover(scaled_input, scale_weight, learning_rate, prime,
                                 feature_size=feature_size, hidden_layer_size=hidden_layer_size, num_classes=num_class)
         net.train(num_epoch, batch_size)
     elif args.mode == 'mnist':
-        scaled_input, scale_weight, learning_rate, prime = 8, 8, 7, 2 ** 26 - 5
+        scaled_input, scale_weight, learning_rate, prime = args.gamma, args.gamma, 7, args.prime
         feature_size, hidden_layer_size, num_class = 784, 128, 10
         num_epoch, batch_size = 1, 256
         net = FiniteFieldClover(scaled_input, scale_weight, learning_rate, prime,
                                 feature_size=feature_size, hidden_layer_size=hidden_layer_size, num_classes=num_class)
         net.train_mnist(num_epoch, batch_size)
     elif args.mode == 'mnist-v2':
-        scaled_input, scale_weight, learning_rate, prime = 8, 8, 7, 2 ** 26 - 5
+        scaled_input, scale_weight, learning_rate, prime = args.gamma, args.gamma, 7, args.prime
         feature_size, hidden_layer_size, num_class = 784, 128, 10
         num_epoch, batch_size = 300, 256
         net = FiniteFieldClover(scaled_input, scale_weight, learning_rate, prime,
                                 feature_size=feature_size, hidden_layer_size=hidden_layer_size, num_classes=num_class)
         net.train_mnist_v2(num_epoch, batch_size)
     elif args.mode == 'cifar10':
-        scaled_input, scale_weight, learning_rate, prime = 8, 8, 10, 2 ** 26 - 5
+        scaled_input, scale_weight, learning_rate, prime = args.gamma, args.gamma, 10, args.prime
         feature_size, hidden_layer_size, num_class = 3072, 128, 10
         num_epoch, batch_size = 1, 256
         net = FiniteFieldClover(scaled_input, scale_weight, learning_rate, prime,
                                 feature_size=feature_size, hidden_layer_size=hidden_layer_size, num_classes=num_class)
         net.train_cifar10(num_epoch, batch_size)
     elif args.mode == 'cifar10-vgg':
-        scaled_input, scale_weight, learning_rate, prime = 8, 8, 10, 2 ** 26 - 5
+        scaled_input, scale_weight, learning_rate, prime = args.gamma, args.gamma, 10, args.prime
         feature_size, hidden_layer_size, num_class = 25088, 128, 10
         num_epoch, batch_size = 1, 256
         net = FiniteFieldClover(scaled_input, scale_weight, learning_rate, prime,
                                 feature_size=feature_size, hidden_layer_size=hidden_layer_size, num_classes=num_class)
         net.train_vgg_cifar10(num_epoch, batch_size)
+    elif args.mode == 'cifar10-vgg-v2':
+        scaled_input, scale_weight, learning_rate, prime = args.gamma, args.gamma, 10, args.prime
+        feature_size, hidden_layer_size, num_class = 25088, 128, 10
+        num_epoch, batch_size = 300, 256
+        net = FiniteFieldClover(scaled_input, scale_weight, learning_rate, prime,
+                                feature_size=feature_size, hidden_layer_size=hidden_layer_size, num_classes=num_class)
+        net.train_vgg_cifar10_v2(num_epoch, batch_size)
     if net is not None:
         save_params(args.mode, experiment_now, net)
     else:

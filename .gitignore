@@ -239,3 +239,4 @@ fabric.properties
 **/tmp*
 **/params/
 **/DEL*
+**/token.txt
