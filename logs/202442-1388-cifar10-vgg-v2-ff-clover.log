@@ -1,0 +1,336 @@
+INFO:root:PRIME: 67108859
+INFO:root:GAMMA: 10
+INFO:root:weights are initialized
+INFO:root:datasets and loaders are initialized
+INFO:root:iter: 1, loss: 1.0049352683718242
+INFO:root:#############avg loss: 1.0049352683718242, acc: 0.0994900509949005#############
+INFO:root:iter: 2, loss: 1.0022033303976061
+INFO:root:iter: 3, loss: 1.0014267890684065
+INFO:root:iter: 4, loss: 1.0043202266097067
+INFO:root:iter: 5, loss: 1.006021738052368
+INFO:root:iter: 6, loss: 1.0055449252992164
+INFO:root:iter: 7, loss: 1.0015285275876522
+INFO:root:iter: 8, loss: 1.00605513381958
+INFO:root:iter: 9, loss: 1.0039880499243738
+INFO:root:iter: 10, loss: 1.0069775097072122
+INFO:root:#############avg loss: 0.9038066230466123, acc: 0.1055894410558944#############
+INFO:root:iter: 11, loss: 1.00199950687469
+INFO:root:iter: 12, loss: 1.0026155123634943
+INFO:root:iter: 13, loss: 1.0027009633582407
+INFO:root:iter: 14, loss: 1.0053497647482252
+INFO:root:iter: 15, loss: 1.0048261657357216
+INFO:root:iter: 16, loss: 0.995357669889927
+INFO:root:iter: 17, loss: 1.0027448374127585
+INFO:root:iter: 18, loss: 1.0005863308906553
+INFO:root:iter: 19, loss: 1.0031429082155228
+INFO:root:iter: 20, loss: 1.0053999796509743
+INFO:root:#############avg loss: 1.002472363914021, acc: 0.0974902509749025#############
+INFO:root:iter: 21, loss: 1.004955507814884
+INFO:root:iter: 22, loss: 1.0054617337882519
+INFO:root:iter: 23, loss: 1.0051187598516071
+INFO:root:iter: 24, loss: 1.0001171119511127
+INFO:root:iter: 25, loss: 1.0051288150605702
+INFO:root:iter: 26, loss: 0.9972614126820719
+INFO:root:iter: 27, loss: 1.0043504573404787
+INFO:root:iter: 28, loss: 1.0002428144216537
+INFO:root:iter: 29, loss: 1.0009252354502678
+INFO:root:iter: 30, loss: 1.0039990402403334
+INFO:root:#############avg loss: 1.0027560888601232, acc: 0.09979002099790021#############
+INFO:root:iter: 31, loss: 1.002403263031967
+INFO:root:iter: 32, loss: 1.0007344011276489
+INFO:root:iter: 33, loss: 1.004155844449997
+INFO:root:iter: 34, loss: 0.9996801763772964
+INFO:root:iter: 35, loss: 1.0038519129157069
+INFO:root:iter: 36, loss: 1.0065202414989471
+INFO:root:iter: 37, loss: 1.0063230083102273
+INFO:root:iter: 38, loss: 1.0025857388973234
+INFO:root:iter: 39, loss: 1.003740053623915
+INFO:root:iter: 40, loss: 1.002778708934784
+INFO:root:#############avg loss: 1.0032773349167812, acc: 0.10308969103089691#############
+INFO:root:iter: 41, loss: 1.0031705275177956
+INFO:root:iter: 42, loss: 1.006458252195328
+INFO:root:iter: 43, loss: 0.9992341995239258
+INFO:root:iter: 44, loss: 1.001532506197691
+INFO:root:iter: 45, loss: 1.0033145882189272
+INFO:root:iter: 46, loss: 1.003737274557352
+INFO:root:iter: 47, loss: 1.0057071062523548
+INFO:root:iter: 48, loss: 1.0020389482378962
+INFO:root:iter: 49, loss: 1.001044936478138
+INFO:root:iter: 50, loss: 1.0055510215461254
+INFO:root:#############avg loss: 1.0031789360725534, acc: 0.09409059094090591#############
+INFO:root:iter: 51, loss: 1.0030604004859924
+INFO:root:iter: 52, loss: 1.0074092298746111
+INFO:root:iter: 53, loss: 1.0048503391444683
+INFO:root:iter: 54, loss: 1.0021827682372062
+INFO:root:iter: 55, loss: 1.0060804351683585
+INFO:root:iter: 56, loss: 1.0041071384672136
+INFO:root:iter: 57, loss: 1.0041601657867432
+INFO:root:iter: 58, loss: 1.0006905086338518
+INFO:root:iter: 59, loss: 1.0021995306015012
+INFO:root:iter: 60, loss: 1.0028254908900105
+INFO:root:#############avg loss: 1.003756600728996, acc: 0.09409059094090591#############
+INFO:root:iter: 61, loss: 1.0031423009932041
+INFO:root:iter: 62, loss: 1.0045965798199177
+INFO:root:iter: 63, loss: 1.0009110607206824
+INFO:root:iter: 64, loss: 1.002871282398701
+INFO:root:iter: 65, loss: 1.0002610534429552
+INFO:root:iter: 66, loss: 1.0014122516389876
+INFO:root:iter: 67, loss: 1.0030773654580118
+INFO:root:iter: 68, loss: 1.0079117086198595
+INFO:root:iter: 69, loss: 1.0074471272528172
+INFO:root:iter: 70, loss: 1.0004033483564854
+INFO:root:#############avg loss: 1.0032034078701622, acc: 0.09989001099890012#############
+INFO:root:iter: 71, loss: 1.0021630749106407
+INFO:root:iter: 72, loss: 1.0028630569577217
+INFO:root:iter: 73, loss: 1.0061405189335344
+INFO:root:iter: 74, loss: 1.0008307807147503
+INFO:root:iter: 75, loss: 1.0061284489929676
+INFO:root:iter: 76, loss: 1.0047243908047674
+INFO:root:iter: 77, loss: 1.0070820562541485
+INFO:root:iter: 78, loss: 1.0051856450736523
+INFO:root:iter: 79, loss: 1.0045915134251118
+INFO:root:iter: 80, loss: 1.0084127622937398
+INFO:root:#############avg loss: 1.0048122248361033, acc: 0.09779022097790221#############
+INFO:root:iter: 81, loss: 1.003320809453726
+INFO:root:iter: 82, loss: 1.0010899379849434
+INFO:root:iter: 83, loss: 0.9993941709399223
+INFO:root:iter: 84, loss: 0.9991766437888145
+INFO:root:iter: 85, loss: 1.0026639960706232
+INFO:root:iter: 86, loss: 1.0002129636704924
+INFO:root:iter: 87, loss: 1.0064717531204224
+INFO:root:iter: 88, loss: 1.0073916018009188
+INFO:root:iter: 89, loss: 1.0022134035825732
+INFO:root:iter: 90, loss: 1.0039331652224066
+INFO:root:#############avg loss: 1.0025868445634842, acc: 0.10178982101789821#############
+INFO:root:iter: 91, loss: 1.004966452717781
+INFO:root:iter: 92, loss: 1.0078994735838875
+INFO:root:iter: 93, loss: 1.0033861324191096
+INFO:root:iter: 94, loss: 1.0039562582969666
+INFO:root:iter: 95, loss: 1.00376757979393
+INFO:root:iter: 96, loss: 1.0006691652631003
+INFO:root:iter: 97, loss: 1.006496138870716
+INFO:root:iter: 98, loss: 1.0013372711837294
+INFO:root:iter: 99, loss: 1.003628820180893
+INFO:root:iter: 100, loss: 1.0040838085114956
+INFO:root:#############avg loss: 1.004019110082161, acc: 0.1040895910408959#############
+INFO:root:iter: 101, loss: 1.002171605825424
+INFO:root:iter: 102, loss: 1.0034972392022612
+INFO:root:iter: 103, loss: 0.99941286444664
+INFO:root:iter: 104, loss: 1.0000144035097152
+INFO:root:iter: 105, loss: 1.0052375122904775
+INFO:root:iter: 106, loss: 1.0083226785063741
+INFO:root:iter: 107, loss: 1.0082226253691173
+INFO:root:iter: 108, loss: 1.0081468650272913
+INFO:root:iter: 109, loss: 1.004870370030403
+INFO:root:iter: 110, loss: 1.0038790926337242
+INFO:root:#############avg loss: 1.0043775256841427, acc: 0.10038996100389962#############
+INFO:root:iter: 111, loss: 1.0050620692116874
+INFO:root:iter: 112, loss: 1.0044310614466665
+INFO:root:iter: 113, loss: 1.0037669055163858
+INFO:root:iter: 114, loss: 1.0036230199918972
+INFO:root:iter: 115, loss: 1.0017517432570455
+INFO:root:iter: 116, loss: 1.0014267787337303
+INFO:root:iter: 117, loss: 1.0079035535454748
+INFO:root:iter: 118, loss: 1.0003129988908765
+INFO:root:iter: 119, loss: 1.0056362077593803
+INFO:root:iter: 120, loss: 1.0041091926395893
+INFO:root:#############avg loss: 1.0038023530992732, acc: 0.09909009099090091#############
+INFO:root:iter: 121, loss: 1.0001958816770524
+INFO:root:iter: 122, loss: 1.0062863975763323
+INFO:root:iter: 123, loss: 1.0044233649969103
+INFO:root:iter: 124, loss: 1.002172973006964
+INFO:root:iter: 125, loss: 1.004566550254822
+INFO:root:iter: 126, loss: 1.000524502247572
+INFO:root:iter: 127, loss: 1.0037256851792336
+INFO:root:iter: 128, loss: 1.0019861944019794
+INFO:root:iter: 129, loss: 1.0001237727701664
+INFO:root:iter: 130, loss: 1.005140848457813
+INFO:root:#############avg loss: 1.0029146170568846, acc: 0.10028997100289971#############
+INFO:root:iter: 131, loss: 1.003706321120262
+INFO:root:iter: 132, loss: 1.0033314414322376
+INFO:root:iter: 133, loss: 1.0038181841373446
+INFO:root:iter: 134, loss: 1.0041222646832468
+INFO:root:iter: 135, loss: 1.006545309097536
+INFO:root:iter: 136, loss: 1.0003632232546804
+INFO:root:iter: 137, loss: 1.0030489824712279
+INFO:root:iter: 138, loss: 1.0046231150627138
+INFO:root:iter: 139, loss: 1.003446136202131
+INFO:root:iter: 140, loss: 1.0078046657145021
+INFO:root:#############avg loss: 1.004080964317588, acc: 0.10038996100389962#############
+INFO:root:iter: 141, loss: 1.0001117996871471
+INFO:root:iter: 142, loss: 1.0033859685063364
+INFO:root:iter: 143, loss: 1.0015465683407254
+INFO:root:iter: 144, loss: 1.0034563019871712
+INFO:root:iter: 145, loss: 1.0007754676043985
+INFO:root:iter: 146, loss: 1.0039302621568953
+INFO:root:iter: 147, loss: 1.0041281469166279
+INFO:root:iter: 148, loss: 1.0030536875128744
+INFO:root:iter: 149, loss: 0.9996908493340017
+INFO:root:iter: 150, loss: 1.0026550963521004
+INFO:root:#############avg loss: 1.0022734148398278, acc: 0.09929007099290071#############
+INFO:root:iter: 151, loss: 1.000849686563015
+INFO:root:iter: 152, loss: 1.0005755759775639
+INFO:root:iter: 153, loss: 1.0005928128957748
+INFO:root:iter: 154, loss: 1.0024039261043072
+INFO:root:iter: 155, loss: 1.0029712580144403
+INFO:root:iter: 156, loss: 1.0038605406880377
+INFO:root:iter: 157, loss: 1.003413647413254
+INFO:root:iter: 158, loss: 1.0036542529151553
+INFO:root:iter: 159, loss: 1.0032417923212051
+INFO:root:iter: 160, loss: 1.0012296624481678
+INFO:root:#############avg loss: 1.002279315534092, acc: 0.09709029097090291#############
+INFO:root:iter: 161, loss: 1.000726826488972
+INFO:root:iter: 162, loss: 1.0036008283495903
+INFO:root:iter: 163, loss: 1.0050828494131565
+INFO:root:iter: 164, loss: 1.0060208253562448
+INFO:root:iter: 165, loss: 1.0025025662921725
+INFO:root:iter: 166, loss: 1.0049129575490952
+INFO:root:iter: 167, loss: 1.0042689479887486
+INFO:root:iter: 168, loss: 1.0003108751206171
+INFO:root:iter: 169, loss: 1.0026288367807865
+INFO:root:iter: 170, loss: 1.0028343237936495
+INFO:root:#############avg loss: 1.0032889837133032, acc: 0.097990200979902#############
+INFO:root:iter: 171, loss: 1.0002607814967632
+INFO:root:iter: 172, loss: 1.0035269409418104
+INFO:root:iter: 173, loss: 1.00684779509902
+INFO:root:iter: 174, loss: 1.0047632853190105
+INFO:root:iter: 175, loss: 1.005173819405692
+INFO:root:iter: 176, loss: 1.0026665590703485
+INFO:root:iter: 177, loss: 1.0037156753242016
+INFO:root:iter: 178, loss: 1.0064706121172224
+INFO:root:iter: 179, loss: 1.0046738125383854
+INFO:root:iter: 180, loss: 1.0034677868797666
+INFO:root:#############avg loss: 1.0041567068192223, acc: 0.09509049095090491#############
+INFO:root:iter: 181, loss: 0.9996662586927415
+INFO:root:iter: 182, loss: 1.004085477441549
+INFO:root:iter: 183, loss: 1.0016440972685816
+INFO:root:iter: 184, loss: 1.0030961260199547
+INFO:root:iter: 185, loss: 1.0050072409212587
+INFO:root:iter: 186, loss: 1.0038381531125025
+INFO:root:iter: 187, loss: 1.0020151781657385
+INFO:root:iter: 188, loss: 1.0024855881929395
+INFO:root:iter: 189, loss: 0.998866005549355
+INFO:root:iter: 190, loss: 0.9995273016393186
+INFO:root:#############avg loss: 1.0020231427003938, acc: 0.0974902509749025#############
+INFO:root:iter: 191, loss: 1.002403073012829
+INFO:root:iter: 192, loss: 1.0009690746665
+INFO:root:iter: 193, loss: 1.0015011948923909
+INFO:root:iter: 194, loss: 1.0061071789453901
+INFO:root:iter: 195, loss: 1.004300631876067
+INFO:root:iter: 196, loss: 1.002078201621771
+INFO:root:iter: 197, loss: 1.0023170597851276
+INFO:root:iter: 198, loss: 1.0024843811988833
+INFO:root:iter: 199, loss: 1.0065132379531863
+INFO:root:iter: 200, loss: 1.0019537247717378
+INFO:root:#############avg loss: 1.0030627758723882, acc: 0.10008999100089991#############
+INFO:root:iter: 201, loss: 1.0016625598073003
+INFO:root:iter: 202, loss: 1.0040540993213651
+INFO:root:iter: 203, loss: 1.0027219243347645
+INFO:root:iter: 204, loss: 1.0048054233193395
+INFO:root:iter: 205, loss: 1.0059459395706651
+INFO:root:iter: 206, loss: 1.004161760210991
+INFO:root:iter: 207, loss: 1.002512823790312
+INFO:root:iter: 208, loss: 0.9990799725055695
+INFO:root:iter: 209, loss: 1.0040339790284634
+INFO:root:iter: 210, loss: 1.0044941977849084
+INFO:root:#############avg loss: 1.0033472679673678, acc: 0.10008999100089991#############
+INFO:root:iter: 211, loss: 1.0051582881382533
+INFO:root:iter: 212, loss: 1.0079060420393942
+INFO:root:iter: 213, loss: 0.9996935762464999
+INFO:root:iter: 214, loss: 1.0047382712364195
+INFO:root:iter: 215, loss: 1.005416356027126
+INFO:root:iter: 216, loss: 1.0008675522274442
+INFO:root:iter: 217, loss: 1.0040348246693613
+INFO:root:iter: 218, loss: 1.0027382224798205
+INFO:root:iter: 219, loss: 1.0019831359386442
+INFO:root:iter: 220, loss: 1.0011199116706848
+INFO:root:#############avg loss: 1.0033656180673647, acc: 0.10008999100089991#############
+INFO:root:iter: 221, loss: 1.005671433040074
+INFO:root:iter: 222, loss: 1.0039315968751905
+INFO:root:iter: 223, loss: 1.0038834526425315
+INFO:root:iter: 224, loss: 1.006239891052246
+INFO:root:iter: 225, loss: 1.006118789315224
+INFO:root:iter: 226, loss: 1.0027648806571958
+INFO:root:iter: 227, loss: 1.0033922977745533
+INFO:root:iter: 228, loss: 1.004558729746985
+INFO:root:iter: 229, loss: 1.0042330846190455
+INFO:root:iter: 230, loss: 1.004711385816336
+INFO:root:#############avg loss: 1.0045505541539381, acc: 0.102989701029897#############
+INFO:root:iter: 231, loss: 1.0030540700942752
+INFO:root:iter: 232, loss: 1.000245675444603
+INFO:root:iter: 233, loss: 1.0033635563320584
+INFO:root:iter: 234, loss: 1.0031346715986726
+INFO:root:iter: 235, loss: 1.0039230175316336
+INFO:root:iter: 236, loss: 1.0005543194119892
+INFO:root:iter: 237, loss: 1.0011986345052717
+INFO:root:iter: 238, loss: 1.0022589676082132
+INFO:root:iter: 239, loss: 1.0024669878184793
+INFO:root:iter: 240, loss: 1.0045606195926666
+INFO:root:#############avg loss: 1.0024760519937863, acc: 0.10088991100889912#############
+INFO:root:iter: 241, loss: 1.0065627098083498
+INFO:root:iter: 242, loss: 1.0015653632581232
+INFO:root:iter: 243, loss: 1.0041790008544922
+INFO:root:iter: 244, loss: 1.0039957948029041
+INFO:root:iter: 245, loss: 1.003996931016445
+INFO:root:iter: 246, loss: 1.0021167558337016
+INFO:root:iter: 247, loss: 1.0019001810569461
+INFO:root:iter: 248, loss: 1.006449203938246
+INFO:root:iter: 249, loss: 1.0013811476528645
+INFO:root:iter: 250, loss: 1.0002906769514086
+INFO:root:#############avg loss: 1.003243776517348, acc: 0.09809019098090191#############
+INFO:root:iter: 251, loss: 0.9993266756572421
+INFO:root:iter: 252, loss: 1.0040527135133743
+INFO:root:iter: 253, loss: 1.0015457458794117
+INFO:root:iter: 254, loss: 1.005892988294363
+INFO:root:iter: 255, loss: 1.0039297565817833
+INFO:root:iter: 256, loss: 1.0050408206880093
+INFO:root:iter: 257, loss: 1.0020770877599714
+INFO:root:iter: 258, loss: 1.0057174675166607
+INFO:root:iter: 259, loss: 1.0039788200741724
+INFO:root:iter: 260, loss: 1.001581631600857
+INFO:root:#############avg loss: 1.0033143707565846, acc: 0.09969003099690031#############
+INFO:root:iter: 261, loss: 1.002849768847227
+INFO:root:iter: 262, loss: 1.0031137466430662
+INFO:root:iter: 263, loss: 1.0022952444851396
+INFO:root:iter: 264, loss: 1.005329120904207
+INFO:root:iter: 265, loss: 1.0011320991516113
+INFO:root:iter: 266, loss: 1.0027679689228537
+INFO:root:iter: 267, loss: 1.0046860612928865
+INFO:root:iter: 268, loss: 1.0070991328382117
+INFO:root:iter: 269, loss: 1.0052942170037165
+INFO:root:iter: 270, loss: 1.004854619503021
+INFO:root:#############avg loss: 1.0039421979591943, acc: 0.10188981101889812#############
+INFO:root:iter: 271, loss: 1.0036797896027565
+INFO:root:iter: 272, loss: 1.005078874528408
+INFO:root:iter: 273, loss: 1.0016895994063346
+INFO:root:iter: 274, loss: 1.0027703195810318
+INFO:root:iter: 275, loss: 1.0029094105675105
+INFO:root:iter: 276, loss: 1.0014158636331558
+INFO:root:iter: 277, loss: 1.004844032227993
+INFO:root:iter: 278, loss: 1.0052072033286097
+INFO:root:iter: 279, loss: 1.0022343173623087
+INFO:root:iter: 280, loss: 1.0010809368557398
+INFO:root:#############avg loss: 1.0030910347093849, acc: 0.10208979102089791#############
+INFO:root:iter: 281, loss: 1.0016537457704542
+INFO:root:iter: 282, loss: 1.0050093084573746
+INFO:root:iter: 283, loss: 0.9992394560859317
+INFO:root:iter: 284, loss: 1.0039626918733118
+INFO:root:iter: 285, loss: 1.0029525384306908
+INFO:root:iter: 286, loss: 1.0053925665598067
+INFO:root:iter: 287, loss: 1.002554390579462
+INFO:root:iter: 288, loss: 1.0019703441196017
+INFO:root:iter: 289, loss: 1.0032158792018893
+INFO:root:iter: 290, loss: 1.003769859671593
+INFO:root:#############avg loss: 1.0029720780750115, acc: 0.10068993100689931#############
+INFO:root:iter: 291, loss: 1.0024501010775566
+INFO:root:iter: 292, loss: 1.0026330240070818
+INFO:root:iter: 293, loss: 1.0037671215832231
+INFO:root:iter: 294, loss: 0.999275915324688
+INFO:root:iter: 295, loss: 0.9988932572305202
+INFO:root:iter: 296, loss: 1.0036309100687504
+INFO:root:iter: 297, loss: 1.004630032039824
+INFO:root:iter: 298, loss: 1.0032507153007928
+INFO:root:iter: 299, loss: 1.0050765685737135
+INFO:root:iter: 300, loss: 1.0010102353990078
+INFO:root:#############avg loss: 1.0024617880605158, acc: 0.10528947105289471#############
+INFO:root:elapsed time: 53712.36947321892 seconds
