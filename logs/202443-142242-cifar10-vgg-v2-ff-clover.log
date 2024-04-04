@@ -1,0 +1,320 @@
+INFO:root:PRIME: 67108859
+INFO:root:GAMMA: 4
+INFO:root:LEARNING RATE: 5
+INFO:root:weights are initialized
+INFO:root:datasets and loaders are initialized
+INFO:root:iter: 1, loss: 1.0000000000000002
+INFO:root:#############avg loss: 1.0000000000000002, acc: 0.0999900009999#############
+INFO:root:iter: 2, loss: 1.0
+INFO:root:iter: 3, loss: 1.0
+INFO:root:iter: 4, loss: 1.0
+INFO:root:iter: 5, loss: 1.0
+INFO:root:iter: 6, loss: 1.0
+INFO:root:iter: 7, loss: 1.0000000000000002
+INFO:root:iter: 8, loss: 1.0
+INFO:root:iter: 9, loss: 1.0
+INFO:root:iter: 10, loss: 1.0
+INFO:root:#############avg loss: 0.9, acc: 0.0999900009999#############
+INFO:root:iter: 11, loss: 1.0000000000000002
+INFO:root:iter: 12, loss: 1.0
+INFO:root:iter: 13, loss: 1.0
+INFO:root:iter: 14, loss: 1.0000000000000002
+INFO:root:iter: 15, loss: 1.0
+INFO:root:iter: 16, loss: 1.0
+INFO:root:iter: 17, loss: 1.0
+INFO:root:iter: 18, loss: 1.0
+INFO:root:iter: 19, loss: 1.0
+INFO:root:iter: 20, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 21, loss: 1.0
+INFO:root:iter: 22, loss: 1.0
+INFO:root:iter: 23, loss: 1.0
+INFO:root:iter: 24, loss: 1.0
+INFO:root:iter: 25, loss: 1.0
+INFO:root:iter: 26, loss: 1.0000000000000002
+INFO:root:iter: 27, loss: 1.0000000000000002
+INFO:root:iter: 28, loss: 1.0
+INFO:root:iter: 29, loss: 1.0000000000000002
+INFO:root:iter: 30, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 31, loss: 1.0
+INFO:root:iter: 32, loss: 1.0
+INFO:root:iter: 33, loss: 1.0
+INFO:root:iter: 34, loss: 1.0
+INFO:root:iter: 35, loss: 1.0
+INFO:root:iter: 36, loss: 1.0000000000000002
+INFO:root:iter: 37, loss: 1.0
+INFO:root:iter: 38, loss: 1.0
+INFO:root:iter: 39, loss: 1.0
+INFO:root:iter: 40, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 41, loss: 1.0000000000000002
+INFO:root:iter: 42, loss: 1.0
+INFO:root:iter: 43, loss: 1.0000000000000002
+INFO:root:iter: 44, loss: 1.0
+INFO:root:iter: 45, loss: 1.0
+INFO:root:iter: 46, loss: 1.0
+INFO:root:iter: 47, loss: 1.0
+INFO:root:iter: 48, loss: 1.0
+INFO:root:iter: 49, loss: 1.0000000000000002
+INFO:root:iter: 50, loss: 1.0000000000000002
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 51, loss: 1.0
+INFO:root:iter: 52, loss: 1.0
+INFO:root:iter: 53, loss: 1.0
+INFO:root:iter: 54, loss: 1.0
+INFO:root:iter: 55, loss: 1.0
+INFO:root:iter: 56, loss: 1.0
+INFO:root:iter: 57, loss: 1.0
+INFO:root:iter: 58, loss: 1.0
+INFO:root:iter: 59, loss: 1.0
+INFO:root:iter: 60, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 61, loss: 1.0
+INFO:root:iter: 62, loss: 1.0
+INFO:root:iter: 63, loss: 1.0000000000000002
+INFO:root:iter: 64, loss: 1.0
+INFO:root:iter: 65, loss: 1.0000000000000002
+INFO:root:iter: 66, loss: 1.0
+INFO:root:iter: 67, loss: 1.0
+INFO:root:iter: 68, loss: 1.0
+INFO:root:iter: 69, loss: 1.0
+INFO:root:iter: 70, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 71, loss: 1.0000000000000002
+INFO:root:iter: 72, loss: 1.0
+INFO:root:iter: 73, loss: 1.0
+INFO:root:iter: 74, loss: 1.0000000000000002
+INFO:root:iter: 75, loss: 1.0
+INFO:root:iter: 76, loss: 1.0
+INFO:root:iter: 77, loss: 1.0
+INFO:root:iter: 78, loss: 1.0000000000000002
+INFO:root:iter: 79, loss: 1.0000000000000002
+INFO:root:iter: 80, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 81, loss: 1.0
+INFO:root:iter: 82, loss: 1.0
+INFO:root:iter: 83, loss: 1.0
+INFO:root:iter: 84, loss: 1.0
+INFO:root:iter: 85, loss: 1.0
+INFO:root:iter: 86, loss: 1.0
+INFO:root:iter: 87, loss: 1.0
+INFO:root:iter: 88, loss: 1.0
+INFO:root:iter: 89, loss: 1.0000000000000002
+INFO:root:iter: 90, loss: 1.0000000000000002
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 91, loss: 1.0000000000000002
+INFO:root:iter: 92, loss: 1.0
+INFO:root:iter: 93, loss: 1.0
+INFO:root:iter: 94, loss: 1.0
+INFO:root:iter: 95, loss: 1.0
+INFO:root:iter: 96, loss: 1.0
+INFO:root:iter: 97, loss: 1.0
+INFO:root:iter: 98, loss: 1.0
+INFO:root:iter: 99, loss: 1.0
+INFO:root:iter: 100, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 101, loss: 1.0
+INFO:root:iter: 102, loss: 1.0000000000000002
+INFO:root:iter: 103, loss: 1.0000000000000002
+INFO:root:iter: 104, loss: 1.0
+INFO:root:iter: 105, loss: 1.0
+INFO:root:iter: 106, loss: 1.0
+INFO:root:iter: 107, loss: 1.0
+INFO:root:iter: 108, loss: 1.0
+INFO:root:iter: 109, loss: 1.0
+INFO:root:iter: 110, loss: 1.0000000000000002
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 111, loss: 1.0
+INFO:root:iter: 112, loss: 1.0
+INFO:root:iter: 113, loss: 1.0
+INFO:root:iter: 114, loss: 1.0000000000000002
+INFO:root:iter: 115, loss: 1.0000000000000002
+INFO:root:iter: 116, loss: 1.0
+INFO:root:iter: 117, loss: 1.0
+INFO:root:iter: 118, loss: 1.0
+INFO:root:iter: 119, loss: 1.0000000000000002
+INFO:root:iter: 120, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 121, loss: 1.0
+INFO:root:iter: 122, loss: 1.0000000000000002
+INFO:root:iter: 123, loss: 1.0
+INFO:root:iter: 124, loss: 1.0
+INFO:root:iter: 125, loss: 1.0
+INFO:root:iter: 126, loss: 1.0000000000000002
+INFO:root:iter: 127, loss: 1.0
+INFO:root:iter: 128, loss: 1.0000000000000002
+INFO:root:iter: 129, loss: 1.0
+INFO:root:iter: 130, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 131, loss: 1.0
+INFO:root:iter: 132, loss: 1.0
+INFO:root:iter: 133, loss: 1.0
+INFO:root:iter: 134, loss: 1.0
+INFO:root:iter: 135, loss: 1.0
+INFO:root:iter: 136, loss: 1.0
+INFO:root:iter: 137, loss: 1.0
+INFO:root:iter: 138, loss: 1.0000000000000002
+INFO:root:iter: 139, loss: 1.0
+INFO:root:iter: 140, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 141, loss: 1.0
+INFO:root:iter: 142, loss: 1.0
+INFO:root:iter: 143, loss: 1.0
+INFO:root:iter: 144, loss: 1.0
+INFO:root:iter: 145, loss: 1.0
+INFO:root:iter: 146, loss: 1.0000000000000002
+INFO:root:iter: 147, loss: 1.0000000000000002
+INFO:root:iter: 148, loss: 1.0
+INFO:root:iter: 149, loss: 1.0000000000000002
+INFO:root:iter: 150, loss: 1.0000000000000002
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 151, loss: 1.0
+INFO:root:iter: 152, loss: 1.0
+INFO:root:iter: 153, loss: 1.0
+INFO:root:iter: 154, loss: 1.0
+INFO:root:iter: 155, loss: 1.0000000000000002
+INFO:root:iter: 156, loss: 1.0
+INFO:root:iter: 157, loss: 1.0
+INFO:root:iter: 158, loss: 1.0000000000000002
+INFO:root:iter: 159, loss: 1.0000000000000002
+INFO:root:iter: 160, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 161, loss: 1.0
+INFO:root:iter: 162, loss: 1.0
+INFO:root:iter: 163, loss: 1.0
+INFO:root:iter: 164, loss: 1.0
+INFO:root:iter: 165, loss: 1.0000000000000002
+INFO:root:iter: 166, loss: 1.0
+INFO:root:iter: 167, loss: 1.0
+INFO:root:iter: 168, loss: 1.0
+INFO:root:iter: 169, loss: 1.0
+INFO:root:iter: 170, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 171, loss: 1.0
+INFO:root:iter: 172, loss: 1.0000000000000002
+INFO:root:iter: 173, loss: 1.0
+INFO:root:iter: 174, loss: 1.0
+INFO:root:iter: 175, loss: 1.0
+INFO:root:iter: 176, loss: 1.0
+INFO:root:iter: 177, loss: 1.0000000000000002
+INFO:root:iter: 178, loss: 1.0
+INFO:root:iter: 179, loss: 1.0
+INFO:root:iter: 180, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 181, loss: 1.0000000000000002
+INFO:root:iter: 182, loss: 1.0
+INFO:root:iter: 183, loss: 1.0000000000000002
+INFO:root:iter: 184, loss: 1.0
+INFO:root:iter: 185, loss: 1.0
+INFO:root:iter: 186, loss: 1.0
+INFO:root:iter: 187, loss: 1.0
+INFO:root:iter: 188, loss: 1.0
+INFO:root:iter: 189, loss: 1.0000000000000002
+INFO:root:iter: 190, loss: 1.0000000000000002
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 191, loss: 1.0000000000000002
+INFO:root:iter: 192, loss: 1.0
+INFO:root:iter: 193, loss: 1.0
+INFO:root:iter: 194, loss: 1.0000000000000002
+INFO:root:iter: 195, loss: 1.0
+INFO:root:iter: 196, loss: 1.0
+INFO:root:iter: 197, loss: 1.0
+INFO:root:iter: 198, loss: 1.0
+INFO:root:iter: 199, loss: 1.0
+INFO:root:iter: 200, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 201, loss: 1.0
+INFO:root:iter: 202, loss: 1.0
+INFO:root:iter: 203, loss: 1.0000000000000002
+INFO:root:iter: 204, loss: 1.0000000000000002
+INFO:root:iter: 205, loss: 1.0
+INFO:root:iter: 206, loss: 1.0
+INFO:root:iter: 207, loss: 1.0000000000000002
+INFO:root:iter: 208, loss: 1.0
+INFO:root:iter: 209, loss: 1.0
+INFO:root:iter: 210, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 211, loss: 1.0
+INFO:root:iter: 212, loss: 1.0
+INFO:root:iter: 213, loss: 1.0
+INFO:root:iter: 214, loss: 1.0000000000000002
+INFO:root:iter: 215, loss: 1.0
+INFO:root:iter: 216, loss: 1.0000000000000002
+INFO:root:iter: 217, loss: 1.0000000000000002
+INFO:root:iter: 218, loss: 1.0
+INFO:root:iter: 219, loss: 1.0
+INFO:root:iter: 220, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 221, loss: 1.0
+INFO:root:iter: 222, loss: 1.0
+INFO:root:iter: 223, loss: 1.0
+INFO:root:iter: 224, loss: 1.0
+INFO:root:iter: 225, loss: 1.0
+INFO:root:iter: 226, loss: 1.0000000000000002
+INFO:root:iter: 227, loss: 1.0
+INFO:root:iter: 228, loss: 1.0
+INFO:root:iter: 229, loss: 1.0
+INFO:root:iter: 230, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 231, loss: 1.0
+INFO:root:iter: 232, loss: 1.0
+INFO:root:iter: 233, loss: 1.0
+INFO:root:iter: 234, loss: 1.0
+INFO:root:iter: 235, loss: 1.0
+INFO:root:iter: 236, loss: 1.0
+INFO:root:iter: 237, loss: 1.0
+INFO:root:iter: 238, loss: 1.0000000000000002
+INFO:root:iter: 239, loss: 1.0
+INFO:root:iter: 240, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 241, loss: 1.0
+INFO:root:iter: 242, loss: 1.0
+INFO:root:iter: 243, loss: 1.0
+INFO:root:iter: 244, loss: 1.0
+INFO:root:iter: 245, loss: 1.0000000000000002
+INFO:root:iter: 246, loss: 1.0
+INFO:root:iter: 247, loss: 1.0
+INFO:root:iter: 248, loss: 1.0
+INFO:root:iter: 249, loss: 1.0
+INFO:root:iter: 250, loss: 1.0000000000000002
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 251, loss: 1.0
+INFO:root:iter: 252, loss: 1.0000000000000002
+INFO:root:iter: 253, loss: 1.0
+INFO:root:iter: 254, loss: 1.0000000000000002
+INFO:root:iter: 255, loss: 1.0000000000000002
+INFO:root:iter: 256, loss: 1.0000000000000002
+INFO:root:iter: 257, loss: 1.0
+INFO:root:iter: 258, loss: 0.9999999999999999
+INFO:root:iter: 259, loss: 1.0
+INFO:root:iter: 260, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 261, loss: 1.0
+INFO:root:iter: 262, loss: 1.0
+INFO:root:iter: 263, loss: 1.0
+INFO:root:iter: 264, loss: 1.0000000000000002
+INFO:root:iter: 265, loss: 1.0
+INFO:root:iter: 266, loss: 1.0
+INFO:root:iter: 267, loss: 1.0
+INFO:root:iter: 268, loss: 1.0
+INFO:root:iter: 269, loss: 1.0
+INFO:root:iter: 270, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 271, loss: 1.0
+INFO:root:iter: 272, loss: 1.0
+INFO:root:iter: 273, loss: 1.0
+INFO:root:iter: 274, loss: 1.0
+INFO:root:iter: 275, loss: 1.0
+INFO:root:iter: 276, loss: 1.0
+INFO:root:iter: 277, loss: 1.0
+INFO:root:iter: 278, loss: 1.0000000000000002
+INFO:root:iter: 279, loss: 1.0
+INFO:root:iter: 280, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 281, loss: 1.0
+INFO:root:iter: 282, loss: 1.0
+INFO:root:iter: 283, loss: 1.0
+INFO:root:iter: 284, loss: 1.0
+INFO:root:iter: 285, loss: 1.0
+INFO:root:iter: 286, loss: 1.0

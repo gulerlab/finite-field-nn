@@ -104,7 +104,7 @@ if __name__ == '__main__':
         net.train_vgg_cifar10(num_epoch, batch_size)
     elif args.mode == 'cifar10-vgg-v2':
         scaled_input, scale_weight, learning_rate, prime = args.gamma, second_gamma, args.learning_rate, args.prime
-        feature_size, hidden_layer_size, num_class = 25088, 128, args.learning_rate
+        feature_size, hidden_layer_size, num_class = 25088, 128, 10
         num_epoch, batch_size = 300, 256
         net = FiniteFieldClover(scaled_input, scale_weight, learning_rate, prime,
                                 feature_size=feature_size, hidden_layer_size=hidden_layer_size, num_classes=num_class)
