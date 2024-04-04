@@ -310,3 +310,28 @@ INFO:root:iter: 276, loss: 1.0000000000000002
 INFO:root:iter: 277, loss: 1.0
 INFO:root:iter: 278, loss: 1.0
 INFO:root:iter: 279, loss: 1.0
+INFO:root:iter: 280, loss: 1.0000000000000002
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 281, loss: 1.0000000000000002
+INFO:root:iter: 282, loss: 1.0000000000000002
+INFO:root:iter: 283, loss: 1.0
+INFO:root:iter: 284, loss: 1.0
+INFO:root:iter: 285, loss: 1.0
+INFO:root:iter: 286, loss: 1.0
+INFO:root:iter: 287, loss: 1.0
+INFO:root:iter: 288, loss: 1.0
+INFO:root:iter: 289, loss: 1.0
+INFO:root:iter: 290, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:iter: 291, loss: 1.0
+INFO:root:iter: 292, loss: 1.0000000000000002
+INFO:root:iter: 293, loss: 1.0
+INFO:root:iter: 294, loss: 1.0000000000000002
+INFO:root:iter: 295, loss: 1.0
+INFO:root:iter: 296, loss: 1.0
+INFO:root:iter: 297, loss: 1.0000000000000002
+INFO:root:iter: 298, loss: 1.0
+INFO:root:iter: 299, loss: 1.0
+INFO:root:iter: 300, loss: 1.0
+INFO:root:#############avg loss: 1.0, acc: 0.0999900009999#############
+INFO:root:elapsed time: 49369.716232061386 seconds
